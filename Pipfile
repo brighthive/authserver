@@ -10,6 +10,7 @@ docker = "*"
 pytest = "*"
 pytest-cov = "*"
 expects = "*"
+sphinx = "*"
 
 [packages]
 flask = "*"

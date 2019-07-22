@@ -8,3 +8,5 @@
 # pytest artifacts
 **/.pytest_cache/
 
+# sphinx artifacts
+**/docs/build
