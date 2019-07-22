@@ -5,3 +5,6 @@
 **/*.py[abc]
 **/__pycache__
 
+# pytest artifacts
+**/.pytest_cache/
+
