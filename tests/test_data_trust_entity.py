@@ -1,7 +1,6 @@
 """Data Trust Entity Unit Tests."""
 
 from expects import expect, be
-from authservice import create_app
 
 
 class TestDataTrustEntity:

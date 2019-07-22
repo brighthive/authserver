@@ -6,7 +6,7 @@ A simple API for returning health check information to clients.
 
 from flask import Blueprint
 from flask_restful import Resource, Api
-from authservice.config import Configuration
+from authserver.config import Configuration
 
 
 class HealthCheck(Resource):

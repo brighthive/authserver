@@ -1,9 +1,9 @@
-.. BrightHive AuthService documentation master file, created by
-   sphinx-quickstart on Mon Jul 22 11:45:16 2019.
+.. BrightHive Auth Server documentation master file, created by
+   sphinx-quickstart on Mon Jul 22 19:06:12 2019.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to BrightHive AuthService's documentation!
+Welcome to BrightHive Auth Server's documentation!
 ==================================================
 
 .. toctree::

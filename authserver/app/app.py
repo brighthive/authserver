@@ -3,7 +3,7 @@
 from flask import Flask
 from flask_restful import Api
 
-from authservice.api import health_api_bp
+from authserver.api import health_api_bp
 
 
 def create_app(config=None):

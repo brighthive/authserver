@@ -1,7 +1,7 @@
 """Test Fixtures"""
 
 import pytest
-from authservice import create_app
+from authserver import create_app
 
 
 @pytest.fixture
