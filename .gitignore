@@ -7,6 +7,7 @@
 
 # pytest artifacts
 **/.pytest_cache/
+**/.coverage
 
 # sphinx artifacts
 **/docs/build
