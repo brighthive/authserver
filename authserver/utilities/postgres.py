@@ -14,7 +14,7 @@ class PostgreSQLContainer(object):
 
     This class is responsible for managing the creation and destruction of a PostgreSQL Docker container.
 
-    Class Attributes:
+    Attributes:
         docker_client (obj): Reference to the Docker client running on the local system.
         container (obj): Pointer to the Docker container created by the class.
         configuration_type (str): The environment type that the configuration is reqeusted for from ConfigurationFactory
@@ -30,16 +30,24 @@ class PostgreSQLContainer(object):
         self.configuration_type = configuration.upper()
         self.configuration = ConfigurationFactory.get_config(self.configuration_type)
         self.db_environment = [
-            'POSTGRES_USER={}'.format(self.configuration.POSTGRES_USER),
-            'POSTGRES_PASSWORD={}'.format(self.configuration.POSTGRES_PASSWORD),
-            'POSTGRES_DB={}'.format(self.configuration.POSTGRES_DATABASE)
+            'POSTGRES_USER={}'.format(self.configuration.postgres_user),
+            'POSTGRES_PASSWORD={}'.format(self.configuration.postgres_password),
+            'POSTGRES_DB={}'.format(self.configuration.postgres_database)
         ]
-        self.db_ports = {'5432/tcp': self.configuration.POSTGRES_PORT}
+        self.db_ports = {'5432/tcp': self.configuration.postgres_port}
 
     def start_container(self):
         """Start the application container."""
-        pass
+        self.container = self.docker_client.containers.run(
+            self.configuration.get_postgresql_image(),
+            detach=True, auto_remove=True, name=self.configuration.container_name, environment=self.db_environment, ports=self.db_ports)
 
     def stop_container(self):
         """Stop the PostgreSQL container."""
-        pass
+        try:
+            if self.container is None:
+                self.container = self.docker_client.containers.get(
+                    self.configuration.container_name)
+            self.container.stop()
+        except Exception:
+            pass

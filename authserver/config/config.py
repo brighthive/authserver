@@ -21,14 +21,19 @@ class Configuration(object):
     This is the base configuration class. It should be extended by other configuration classes on a per
     environment basis.
 
+    Class Attributes:
+        RELATIVE_PATH (str): The relative path of the current file.
+        ABSOLUTE_PATH (str): The absolute path of the current file.
+        ROOT_PATH (str): The root path of the application (subtracting the relative path from the absolute path).
+        SETTINGS_FILE (obj): The path of the settings file that contains information about the API.
+
     """
+    RELATIVE_PATH = os.path.dirname(os.path.relpath(__file__))
+    ABSOLUTE_PATH = os.path.dirname(os.path.abspath(__file__))
+    ROOT_PATH = ABSOLUTE_PATH.split(RELATIVE_PATH)[0]
+    SETTINGS_FILE = os.path.join(ABSOLUTE_PATH, 'settings.json')
 
     def __init__(self):
-        RELATIVE_PATH = os.path.dirname(os.path.relpath(__file__))
-        ABSOLUTE_PATH = os.path.dirname(os.path.abspath(__file__))
-        ROOT_PATH = ABSOLUTE_PATH.split(RELATIVE_PATH)[0]
-        SETTINGS_FILE = os.path.join(ABSOLUTE_PATH, 'settings.json')
-
         self.configuration_name = 'BASE'
 
     @staticmethod
@@ -60,7 +65,26 @@ class TestingConfiguration(Configuration):
 
     def __init__(self):
         super().__init__()
+        os.environ['FLASK_ENV'] = 'testing'
         self.configuration_name = 'TESTING'
+        self.postgres_user = 'test_user'
+        self.postgres_password = 'test_password'
+        self.postgres_hostname = 'localhost'
+        self.container_name = 'postgres-test'
+        self.image_name = 'postgres'
+        self.image_version = '11.1'
+        self.postgres_database = 'authservice_test'
+        self.postgres_port = 5433
+        self.sqlalchemy_database_uri = 'postgresql://{}:{}@{}:{}/{}'.format(
+            self.postgres_user,
+            self.postgres_password,
+            self.postgres_hostname,
+            self.postgres_port,
+            self.postgres_database
+        )
+
+    def get_postgresql_image(self):
+        return '{}:{}'.format(self.image_name, self.image_version)
 
 
 class StagingConfiguration(Configuration):

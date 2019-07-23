@@ -11,10 +11,12 @@ def client():
     return client
 
 
-# @pytest.fixture
-# def postgres():
-#     postgres = PostgreSQLContainer()
-#     return postgres
+@pytest.fixture
+def postgres():
+    postgres = PostgreSQLContainer()
+    postgres.start_container()
+    yield postgres
+    postgres.stop_container()
 
 
 @pytest.fixture

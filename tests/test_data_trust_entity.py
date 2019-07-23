@@ -4,7 +4,7 @@ from expects import expect, be
 
 
 class TestDataTrustEntity:
-    def test_create_new_datatrust(self):
+    def test_create_new_datatrust(self, postgres):
         expect(1).to(be(1))
 
     def test_edit_datatrust(self):
