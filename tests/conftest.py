@@ -2,7 +2,7 @@
 
 import pytest
 from authserver import create_app
-from authserver.utilities import PostgreSQL
+from authserver.utilities import PostgreSQLContainer
 
 
 @pytest.fixture

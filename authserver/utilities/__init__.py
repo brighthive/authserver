@@ -1,1 +1,1 @@
-from authserver.utilities.postgres import PostgreSQL
+from authserver.utilities.postgres import PostgreSQLContainer

@@ -8,7 +8,7 @@ Docker container for application testing.
 import docker
 
 
-class PostgreSQL(object):
+class PostgreSQLContainer(object):
     """
     """
     pass
