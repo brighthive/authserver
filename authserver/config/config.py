@@ -38,3 +38,11 @@ class Configuration(object):
         settings['api_status'] = 'OK'
         settings['timestamp'] = str(datetime.utcnow())
         return settings
+
+
+class ConfigurationFactory(object):
+    """Application configuration factory."""
+
+    @staticmethod
+    def from_env():
+        return Configuration()
