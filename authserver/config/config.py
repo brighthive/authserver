@@ -11,6 +11,10 @@ import json
 from datetime import datetime
 
 
+class ConfigurationEnvironmentNotFoundError(Exception):
+    pass
+
+
 class Configuration(object):
     """Base configuration class.
 
@@ -19,10 +23,13 @@ class Configuration(object):
 
     """
 
-    RELATIVE_PATH = os.path.dirname(os.path.relpath(__file__))
-    ABSOLUTE_PATH = os.path.dirname(os.path.abspath(__file__))
-    ROOT_PATH = ABSOLUTE_PATH.split(RELATIVE_PATH)[0]
-    SETTINGS_FILE = os.path.join(ABSOLUTE_PATH, 'settings.json')
+    def __init__(self):
+        RELATIVE_PATH = os.path.dirname(os.path.relpath(__file__))
+        ABSOLUTE_PATH = os.path.dirname(os.path.abspath(__file__))
+        ROOT_PATH = ABSOLUTE_PATH.split(RELATIVE_PATH)[0]
+        SETTINGS_FILE = os.path.join(ABSOLUTE_PATH, 'settings.json')
+
+        self.configuration_name = 'BASE'
 
     @staticmethod
     def get_app_status():
@@ -40,9 +47,79 @@ class Configuration(object):
         return settings
 
 
+class DevelopmentConfiguration(Configuration):
+    """Development environment configuration."""
+
+    def __init__(self):
+        super().__init__()
+        self.configuration_name = 'DEVELOPMENT'
+
+
+class TestingConfiguration(Configuration):
+    """Testing environment configuration."""
+
+    def __init__(self):
+        super().__init__()
+        self.configuration_name = 'TESTING'
+
+
+class StagingConfiguration(Configuration):
+    """Staging environment configuration."""
+
+    def __init__(self):
+        super().__init__()
+        self.configuration_name = 'STAGING'
+
+
+class SandboxConfiguration(Configuration):
+    """Sandbox environment configuration."""
+
+    def __init__(self):
+        super().__init__()
+        self.configuration_name = 'SANDBOX'
+
+
+class ProductionConfiguration(Configuration):
+    """Production environment configuration."""
+
+    def __init__(self):
+        super().__init__()
+        self.configuration_name = 'PRODUCTION'
+
+
 class ConfigurationFactory(object):
     """Application configuration factory."""
 
     @staticmethod
     def from_env():
-        return Configuration()
+        environment = os.getenv('APP_ENV', 'DEVELOPMENT').upper()
+        return ConfigurationFactory.get_config(environment)
+
+    @staticmethod
+    def get_config(environment: str):
+        """Retrieves a configuration object based on its environment type.
+
+        Args:
+            environment (str): The name of the environment to return configuration object for.
+                May be: DEVELOPMENT, TESTING, STAGING, SANDBOX, PRODUCTION
+
+        Returns:
+            obj: A configuration object that encapsulates the settings for the specified environment.
+
+        Raises:
+            ConfigurationEnvironmentNotFoundError: If an unknown configuration type is passed.
+
+        """
+        environment = environment.upper()
+        if environment == 'DEVELOPMENT':
+            return DevelopmentConfiguration()
+        elif environment == 'TESTING':
+            return TestingConfiguration()
+        elif environment == 'STAGING':
+            return StagingConfiguration()
+        elif environment == 'SANDBOX':
+            return SandboxConfiguration()
+        elif environment == 'PRODUCTION':
+            return ProductionConfiguration()
+        else:
+            raise ConfigurationEnvironmentNotFoundError('Cannot find configuration of type {}'.format(environment))
