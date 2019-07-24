@@ -3,11 +3,12 @@
 import pytest
 from authserver import create_app
 from authserver.utilities import PostgreSQLContainer
+from authserver.config import ConfigurationFactory
 
 
 @pytest.fixture
 def client():
-    client = create_app().test_client()
+    client = create_app('TESTING').test_client()
     return client
 
 

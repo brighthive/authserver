@@ -5,6 +5,7 @@ Docker container for application testing.
 
 """
 
+import os
 import docker
 from authserver.config import ConfigurationFactory
 

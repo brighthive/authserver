@@ -55,13 +55,36 @@ class Configuration(object):
 class DevelopmentConfiguration(Configuration):
     """Development environment configuration."""
 
+    SQLALCHEMY_TRACK_MODIFICATIONS = True
+    ENV = 'development'
+    DEBUG = True
+    TESTING = False
+
     def __init__(self):
         super().__init__()
         self.configuration_name = 'DEVELOPMENT'
+        self.postgres_user = 'dev_user'
+        self.postgres_password = 'dev_password'
+        self.postgres_hostname = 'localhost'
+        self.container_name = 'postgres-dev'
+        self.postgres_database = 'authservice_dev'
+        self.postgres_port = 5432
+        self.sqlalchemy_database_uri = 'postgresql://{}:{}@{}:{}/{}'.format(
+            self.postgres_user,
+            self.postgres_password,
+            self.postgres_hostname,
+            self.postgres_port,
+            self.postgres_database
+        )
 
 
 class TestingConfiguration(Configuration):
     """Testing environment configuration."""
+
+    SQLALCHEMY_TRACK_MODIFICATIONS = True
+    ENV = 'testing'
+    DEBUG = False
+    TESTING = True
 
     def __init__(self):
         super().__init__()
@@ -134,7 +157,10 @@ class ConfigurationFactory(object):
             ConfigurationEnvironmentNotFoundError: If an unknown configuration type is passed.
 
         """
-        environment = environment.upper()
+        if environment is None:
+            environment = 'DEVELOPMENT'
+        else:
+            environment = environment.upper()
         if environment == 'DEVELOPMENT':
             return DevelopmentConfiguration()
         elif environment == 'TESTING':
