@@ -6,6 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 
 
+from authserver.db import db
 from authserver.api import health_api_bp
 from authserver.config import ConfigurationFactory
 
@@ -26,7 +27,7 @@ def create_app(environment: str = None):
     app.config.update(
         SQLALCHEMY_DATABASE_URI=ConfigurationFactory.get_config(environment).sqlalchemy_database_uri
     )
-    db = SQLAlchemy(app)
+    db.init_app(app)
     migrate = Migrate(app, db)
     app.register_blueprint(health_api_bp)
 

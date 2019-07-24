@@ -1,20 +1,37 @@
 """Data Trust Entity Unit Tests."""
 
-from expects import expect, be
+from expects import expect, be, equal, raise_error
+from authserver.db import db, DataTrust
 
 
 class TestDataTrustEntity:
-    def test_create_new_datatrust(self, postgres):
-        expect(1).to(be(1))
+    def test_create_new_datatrust(self, app):
+        with app.app_context():
+            # Create a new data trust
+            trust_name = 'Sample Data Trust'
+            new_trust = DataTrust(trust_name)
+            uuid = new_trust.id
+            db.session.add(new_trust)
+            db.session.commit()
+            found_trust = DataTrust.query.filter_by(id=uuid).first()
+            expect(found_trust.id).to(equal(uuid))
+            expect(found_trust.data_trust_name).to(equal(trust_name))
 
-    def test_edit_datatrust(self):
-        expect(1).to(be(1))
+            # Do not allow creation of trusts with the same name
+            duplicate_trust = DataTrust(trust_name)
+            db.session.add(duplicate_trust)
+            expect(lambda: db.session.commit()).to(raise_error)
+            db.session.rollback()
 
-    def test_get_all_datatrusts(self):
-        expect(1).to(be(1))
+            # Update the data trust name
+            new_name = str(reversed(trust_name))
+            found_trust.data_trust_name = new_name
+            db.session.commit()
+            found_trust = DataTrust.query.filter_by(id=uuid).first()
+            expect(found_trust.id).to(equal(uuid))
+            expect(found_trust.data_trust_name).to(equal(new_name))
 
-    def test_delete_datatrust(self):
-        expect(1).to(be(1))
-
-    def test_view_datatrust_details(self):
-        expect(1).to(be(1))
+            # Delete the data trusts
+            expect(DataTrust.query.count()).to(equal(1))
+            db.session.delete(found_trust)
+            expect(DataTrust.query.count()).to(equal(0))
