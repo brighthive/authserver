@@ -9,12 +9,8 @@ from flask_restful import Resource, Api
 from authserver.config import Configuration
 
 
-class HealthCheck(Resource):
-    """
-    """
-
-    def __init__(self):
-        pass
+class HealthCheckResource(Resource):
+    """A simple health check resource."""
 
     def get(self):
         return Configuration.get_app_status(), 200
@@ -22,4 +18,4 @@ class HealthCheck(Resource):
 
 health_api_bp = Blueprint('health_ep', __name__)
 health_api = Api(health_api_bp)
-health_api.add_resource(HealthCheck, '/health')
+health_api.add_resource(HealthCheckResource, '/health')

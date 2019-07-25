@@ -20,6 +20,9 @@ flask-sqlalchemy = "*"
 gunicorn = "*"
 authlib = "*"
 psycopg2-binary = "*"
+marshmallow = "*"
+flask-marshmallow = "*"
+marshmallow-sqlalchemy = "*"
 
 [requires]
 python_version = "3.7"
