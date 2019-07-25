@@ -11,6 +11,7 @@ pytest = "*"
 pytest-cov = "*"
 expects = "*"
 sphinx = "*"
+pytest-ordering = "*"
 
 [packages]
 flask = "*"

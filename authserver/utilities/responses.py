@@ -181,7 +181,7 @@ class ResponseBody(object):
 
         """
         response = self.base_response.copy()
-        response['code'] = 200
+        response['code'] = 201
         response['messages'].append('Successfully created new {} record.'.format(resource_name))
         if len(request) > 0:
             response['request'].append(request)
