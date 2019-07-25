@@ -8,14 +8,6 @@ from authserver.utilities import PostgreSQLContainer
 from authserver.config import ConfigurationFactory
 
 
-def setup_function():
-    print('Setting up')
-
-
-def teardown_function():
-    print('Tearing down')
-
-
 @pytest.fixture(scope='session')
 def client():
     """Setup the Flask application and return an instance of its test client.
