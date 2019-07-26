@@ -69,7 +69,7 @@ class User(db.Model):
     date_created = db.Column(db.TIMESTAMP)
     date_last_updated = db.Column(db.TIMESTAMP)
 
-    def __init__(self, username, firstname, lastname, organization, email_address, telephone=None):
+    def __init__(self, username, firstname, lastname, organization, email_address, data_trust_id, telephone=None):
         self.id = str(uuid4()).replace('-', '')
         self.username = username
         self.firstname = firstname
@@ -77,6 +77,7 @@ class User(db.Model):
         self.organization = organization
         self.email_address = email_address
         self.telephone = telephone
+        self.data_trust_id = data_trust_id
         self.date_created = datetime.utcnow()
         self.date_last_updated = datetime.utcnow()
 
@@ -90,11 +91,14 @@ class UserSchema(ma.Schema):
     A marshmallow schema for validating the User model.
     """
 
+    class Meta:
+        ordered = True
+
     id = fields.String()
     username = fields.String(required=True)
     firstname = fields.String(required=True)
     lastname = fields.String(required=True)
-    organization = fields.String()
+    organization = fields.String(required=True)
     email_address = fields.Email(required=True)
     telephone = fields.String()
     data_trust_id = fields.String(required=True)

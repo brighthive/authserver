@@ -102,4 +102,4 @@ class DataTrustResource(Resource):
 
 data_trust_bp = Blueprint('data_trust_ep', __name__)
 data_trust_api = Api(data_trust_bp)
-data_trust_api.add_resource(DataTrustResource, '/datatrusts', '/datatrusts/<string:id>')
+data_trust_api.add_resource(DataTrustResource, '/data_trusts', '/data_trusts/<string:id>')
