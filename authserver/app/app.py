@@ -9,6 +9,7 @@ from flask_migrate import Migrate
 from authserver.db import db
 from authserver.api import health_api_bp, data_trust_bp, user_bp
 from authserver.config import ConfigurationFactory
+from authserver.utilities import config_oauth
 
 
 def create_app(environment: str = None):
@@ -28,6 +29,7 @@ def create_app(environment: str = None):
         SQLALCHEMY_DATABASE_URI=ConfigurationFactory.get_config(environment).sqlalchemy_database_uri
     )
     db.init_app(app)
+    config_oauth(app)
     migrate = Migrate(app, db)
     app.register_blueprint(health_api_bp)
     app.register_blueprint(data_trust_bp)
