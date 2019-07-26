@@ -1,5 +1,6 @@
 """Auth Server Database Models."""
 
+from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import text as sa_text
 from marshmallow import Schema, fields, pre_load, validate
@@ -23,10 +24,14 @@ class DataTrust(db.Model):
     __table_args__ = (db.UniqueConstraint('data_trust_name'), )
     id = db.Column(db.String, primary_key=True)
     data_trust_name = db.Column(db.String)
+    date_created = db.Column(db.TIMESTAMP)
+    date_last_updated = db.Column(db.TIMESTAMP)
 
     def __init__(self, data_trust_name):
         self.id = str(uuid4()).replace('-', '')
         self.data_trust_name = data_trust_name
+        self.date_created = datetime.utcnow()
+        self.date_last_updated = self.date_created
 
     def __str__(self):
         return self.data_trust_name
@@ -43,12 +48,12 @@ class DataTrustSchema(ma.Schema):
 
     id = fields.String()
     data_trust_name = fields.String(required=True)
+    date_created = fields.DateTime()
+    date_last_updated = fields.DateTime()
 
 
 class User(db.Model):
-    """A Data Trust User.
-
-    """
+    """Data Trust User."""
     __tablename__ = 'users'
     __table_args__ = (db.UniqueConstraint('username'), )
 
@@ -72,3 +77,12 @@ class User(db.Model):
 
     def __str__(self):
         return '{} {} {}'.format(self.id, self.firstname, self.lastname)
+
+
+class UserSchema(ma.Schema):
+    """User Schema
+
+    A marshmallow schema for validating the User model.
+    """
+
+    id = fields.String()

@@ -8,6 +8,7 @@ from flask import Blueprint
 from flask_restful import Resource, Api, request
 from authserver.db import db, DataTrust, DataTrustSchema
 from authserver.utilities import ResponseBody
+from datetime import datetime
 
 
 class DataTrustResource(Resource):
@@ -90,6 +91,7 @@ class DataTrustResource(Resource):
             if hasattr(data_trust, k):
                 setattr(data_trust, k, v)
         try:
+            data_trust.date_last_updated = datetime.utcnow()
             db.session.commit()
             return self.response_handler.successful_update_response('Data Trust', id, request_data)
         except Exception as e:
