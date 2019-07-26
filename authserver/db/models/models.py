@@ -6,6 +6,7 @@ from sqlalchemy import text as sa_text
 from marshmallow import Schema, fields, pre_load, validate
 from flask_marshmallow import Marshmallow
 from uuid import uuid4
+from authlib.flask.oauth2.sqla import OAuth2ClientMixin, OIDCAuthorizationCodeMixin, OAuth2TokenMixin
 
 db = SQLAlchemy()
 ma = Marshmallow()
@@ -99,3 +100,14 @@ class UserSchema(ma.Schema):
     data_trust_id = fields.String(required=True)
     date_created = fields.DateTime()
     date_last_updated = fields.DateTime()
+
+
+class OAuth2Client(db.Model, OAuth2ClientMixin):
+    """OAuth 2.0 Client"""
+
+    __tablename__ = 'oauth2_client'
+
+    id = db.Column(db.String, primary_key=True)
+    user_id = db.Column(
+        db.String, db.ForeignKey('users.id', ondelete='CASCADE'))
+    user = db.relationship('User')
