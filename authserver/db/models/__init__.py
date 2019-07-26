@@ -1,1 +1,1 @@
-from authserver.db.models.models import db, DataTrust, DataTrustSchema
+from authserver.db.models.models import db, DataTrust, DataTrustSchema, User, UserSchema

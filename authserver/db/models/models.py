@@ -65,6 +65,8 @@ class User(db.Model):
     email_address = db.Column(db.String(40), nullable=False)
     telephone = db.Column(db.String(20), nullable=True)
     data_trust_id = db.Column(db.String, db.ForeignKey('data_trusts.id', ondelete='CASCADE'), nullable=False)
+    date_created = db.Column(db.TIMESTAMP)
+    date_last_updated = db.Column(db.TIMESTAMP)
 
     def __init__(self, username, firstname, lastname, organization, email_address, telephone=None):
         self.id = str(uuid4()).replace('-', '')
@@ -74,6 +76,8 @@ class User(db.Model):
         self.organization = organization
         self.email_address = email_address
         self.telephone = telephone
+        self.date_created = datetime.utcnow()
+        self.date_last_updated = datetime.utcnow()
 
     def __str__(self):
         return '{} {} {}'.format(self.id, self.firstname, self.lastname)
@@ -86,3 +90,12 @@ class UserSchema(ma.Schema):
     """
 
     id = fields.String()
+    username = fields.String(required=True)
+    firstname = fields.String(required=True)
+    lastname = fields.String(required=True)
+    organization = fields.String()
+    email_address = fields.Email(required=True)
+    telephone = fields.String()
+    data_trust_id = fields.String(required=True)
+    date_created = fields.DateTime()
+    date_last_updated = fields.DateTime()
