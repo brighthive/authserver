@@ -48,10 +48,10 @@ class DataTrustSchema(ma.Schema):
     class Meta:
         ordered = True
 
-    id = fields.String()
+    id = fields.String(dump_only=True)
     data_trust_name = fields.String(required=True)
-    date_created = fields.DateTime()
-    date_last_updated = fields.DateTime()
+    date_created = fields.DateTime(dump_only=True)
+    date_last_updated = fields.DateTime(dump_only=True)
 
 
 class User(db.Model):
@@ -95,7 +95,7 @@ class UserSchema(ma.Schema):
     class Meta:
         ordered = True
 
-    id = fields.String()
+    id = fields.String(dump_only=True)
     username = fields.String(required=True)
     firstname = fields.String(required=True)
     lastname = fields.String(required=True)
@@ -103,8 +103,8 @@ class UserSchema(ma.Schema):
     email_address = fields.Email(required=True)
     telephone = fields.String()
     data_trust_id = fields.String(required=True)
-    date_created = fields.DateTime()
-    date_last_updated = fields.DateTime()
+    date_created = fields.DateTime(dump_only=True)
+    date_last_updated = fields.DateTime(dump_only=True)
 
 
 class OAuth2Client(db.Model, OAuth2ClientMixin):
@@ -116,6 +116,35 @@ class OAuth2Client(db.Model, OAuth2ClientMixin):
     user_id = db.Column(
         db.String, db.ForeignKey('users.id', ondelete='CASCADE'))
     user = db.relationship('User')
+
+
+class OAuth2ClientSchema(ma.Schema):
+    """Schema for OAuth 2.0 Client."""
+
+    class Meta:
+        ordered = True
+
+    id = fields.String(dump_only=True)
+    user_id = fields.String(required=True)
+    client_id = fields.String(dump_only=True)
+    client_secret = fields.String(dump_only=True)
+    issued_at = fields.Integer(dump_only=True)
+    expires_at = fields.Integer(dump_only=True)
+    redirect_uri = fields.String()
+    token_endpoint_auth_method = fields.String()
+    grant_type = fields.String()
+    response_type = fields.String()
+    scope = fields.String()
+    client_name = fields.String(required=True)
+    client_uri = fields.String()
+    logo_uri = fields.String()
+    contact = fields.String()
+    tos_uri = fields.String()
+    policy_uri = fields.String()
+    jwks_uri = fields.String()
+    i18n_metadata = fields.String()
+    software_id = fields.String()
+    software_version = fields.String()
 
 
 class OAuth2AuthorizationCode(db.Model, OAuth2AuthorizationCodeMixin):
