@@ -7,7 +7,7 @@ from flask_migrate import Migrate
 
 
 from authserver.db import db
-from authserver.api import health_api_bp, data_trust_bp, user_bp
+from authserver.api import health_api_bp, data_trust_bp, user_bp, oauth2_bp
 from authserver.config import ConfigurationFactory
 from authserver.utilities import config_oauth
 
@@ -34,5 +34,6 @@ def create_app(environment: str = None):
     app.register_blueprint(health_api_bp)
     app.register_blueprint(data_trust_bp)
     app.register_blueprint(user_bp)
+    app.register_blueprint(oauth2_bp)
 
     return app
