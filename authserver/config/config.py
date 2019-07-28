@@ -62,6 +62,7 @@ class DevelopmentConfiguration(Configuration):
 
     def __init__(self):
         super().__init__()
+        os.environ['AUTHLIB_INSECURE_TRANSPORT'] = '1'
         self.configuration_name = 'DEVELOPMENT'
         self.postgres_user = 'dev_user'
         self.postgres_password = 'dev_password'
@@ -89,6 +90,7 @@ class TestingConfiguration(Configuration):
     def __init__(self):
         super().__init__()
         os.environ['FLASK_ENV'] = 'testing'
+        os.environ['AUTHLIB_INSECURE_TRANSPORT'] = '1'
         self.configuration_name = 'TESTING'
         self.postgres_user = 'test_user'
         self.postgres_password = 'test_password'

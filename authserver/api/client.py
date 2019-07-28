@@ -73,7 +73,7 @@ class ClientResource(Resource):
     def patch(self, id: str):
         return self.update(id)
 
-    def delete(self):
+    def delete(self, id: str):
         try:
             client = OAuth2Client.query.filter_by(id=id).first()
             if client:

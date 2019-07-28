@@ -61,6 +61,12 @@ class RefreshTokenGrant(grants.RefreshTokenGrant):
         return User.query.get(credential.user_id)
 
 
+# class ClientCredentialsGrant(grants.ClientCredentialsGrant):
+#     def validate_token_request(self):
+#         print('validating')
+#         return super().validate_token_request()
+
+
 query_client = create_query_client_func(db.session, OAuth2Client)
 save_token = create_save_token_func(db.session, OAuth2Token)
 authorization = AuthorizationServer(

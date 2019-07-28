@@ -10,7 +10,7 @@ from flask import Blueprint
 from flask_restful import Resource, Api, request
 from werkzeug.security import gen_salt
 from authlib.flask.oauth2 import current_token
-from authlib.oauth2 import OAuth2Error
+from authlib.oauth2 import OAuth2Error, OAuth2Request
 from authserver.utilities import ResponseBody
 from authserver.db import db, User, OAuth2Client
 from authserver.utilities.oauth2 import authorization, require_oauth
@@ -45,7 +45,7 @@ class CreateOAuth2AuthorizationResource(Resource):
     """
 
     def get(self):
-        pass
+        return authorization.create_authorization_response(grant_user=None)
 
     def post(self):
         return authorization.create_authorization_response(grant_user=None)
