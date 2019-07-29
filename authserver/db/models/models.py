@@ -4,6 +4,7 @@ import time
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import text as sa_text
+from sqlalchemy.dialects.postgresql.json import JSONB
 from marshmallow import Schema, fields, pre_load, validate
 from flask_marshmallow import Marshmallow
 from uuid import uuid4
@@ -11,6 +12,11 @@ from authlib.flask.oauth2.sqla import OAuth2ClientMixin, OAuth2AuthorizationCode
 
 db = SQLAlchemy()
 ma = Marshmallow()
+
+
+roles = db.Table('roles',
+                 db.Column('client_id', db.String, db.ForeignKey('oauth2_clients.id'), primary_key=True),
+                 db.Column('role_id', db.Integer, db.ForeignKey('oauth2_roles.id'), primary_key=True))
 
 
 class DataTrust(db.Model):
@@ -116,6 +122,8 @@ class OAuth2Client(db.Model, OAuth2ClientMixin):
     user_id = db.Column(
         db.String, db.ForeignKey('users.id', ondelete='CASCADE'))
     user = db.relationship('User')
+    roles = db.relationship('Role', secondary=roles, lazy='subquery',
+                            backref=db.backref('clients', lazy=True))
 
 
 class OAuth2ClientSchema(ma.Schema):
@@ -171,3 +179,15 @@ class OAuth2Token(db.Model, OAuth2TokenMixin):
     def is_refresh_token_expired(self):
         expires_at = self.issued_at + self.expires_in * 2
         return expires_at < time.time()
+
+
+class Role(db.Model):
+    """OAuth 2.0 Role."""
+
+    __tablename__ = 'oauth2_roles'
+    __table_args__ = (db.UniqueConstraint('role'), )
+
+    id = db.Column(db.Integer, primary_key=True)
+    role = db.Column(db.String, unique=True, nullable=False)
+    description = db.Column(db.String)
+    rules = db.Column(JSONB)

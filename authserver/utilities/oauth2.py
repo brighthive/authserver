@@ -61,10 +61,11 @@ class RefreshTokenGrant(grants.RefreshTokenGrant):
         return User.query.get(credential.user_id)
 
 
-# class ClientCredentialsGrant(grants.ClientCredentialsGrant):
-#     def validate_token_request(self):
-#         print('validating')
-#         return super().validate_token_request()
+class ClientCredentialsGrant(grants.ClientCredentialsGrant):
+    TOKEN_ENDPOINT_AUTH_METHODS = [
+        'client_secret_basic',
+        'client_secret_post'
+    ]
 
 
 query_client = create_query_client_func(db.session, OAuth2Client)
@@ -76,15 +77,24 @@ authorization = AuthorizationServer(
 require_oauth = ResourceProtector()
 
 
+# def foo(query_client, request):
+#     print(request.headers)
+#     print(request.data)
+#     print('authing')
+#     return query_client('')
+
+
 def config_oauth(app):
     authorization.init_app(app)
 
+    # authorization.register_client_auth_method(method='client_secret_post', func=foo)
+
     # support all grants
-    authorization.register_grant(grants.ImplicitGrant)
-    authorization.register_grant(grants.ClientCredentialsGrant)
-    authorization.register_grant(AuthorizationCodeGrant)
-    authorization.register_grant(PasswordGrant)
-    authorization.register_grant(RefreshTokenGrant)
+    # authorization.register_grant(grants.ImplicitGrant)
+    authorization.register_grant(ClientCredentialsGrant)
+    # authorization.register_grant(AuthorizationCodeGrant)
+    # authorization.register_grant(PasswordGrant)
+    # authorization.register_grant(RefreshTokenGrant)
 
     # support revocation
     revocation_cls = create_revocation_endpoint(db.session, OAuth2Token)
