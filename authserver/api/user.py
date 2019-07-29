@@ -43,7 +43,10 @@ class UserResource(Resource):
     def post(self, id: str = None):
         if id is not None:
             return self.response_handler.method_not_allowed_response()
-        request_data = request.get_json(force=True)
+        try:
+            request_data = request.get_json(force=True)
+        except Exception as e:
+            return self.response_handler.empty_request_body_response()
         if not request_data:
             return self.response_handler.empty_request_body_response()
         data, errors = self.user_schema.load(request_data)
@@ -65,13 +68,20 @@ class UserResource(Resource):
             return self.response_handler.exception_response(exception_name, request=request_data)
         return self.response_handler.successful_creation_response('User', user.id, request_data)
 
-    def patch(self, id: str):
-        return self.update(id)
+    def put(self, id: str = None):
+        if id is None:
+            return self.response_handler.method_not_allowed_response()
 
-    def put(self, id: str):
         return self.update(id, False)
 
-    def delete(self, id: str):
+    def patch(self, id: str = None):
+        if id is None:
+            return self.response_handler.method_not_allowed_response()
+        return self.update(id)
+
+    def delete(self, id: str = None):
+        if id is None:
+            return self.response_handler.method_not_allowed_response()
         try:
             user = User.query.filter_by(id=id).first()
             if user:
@@ -91,7 +101,10 @@ class UserResource(Resource):
         and allows for switching the Marshmallow validation to partial for PATCH and complete for PUT.
 
         """
-        request_data = request.get_json(force=True)
+        try:
+            request_data = request.get_json(force=True)
+        except Exception as e:
+            return self.response_handler.empty_request_body_response()
         user = User.query.filter_by(id=id).first()
         if not user:
             return self.response_handler.not_found_response(id)

@@ -1,38 +1,46 @@
-"""Data Trust API
+"""Role API
 
-A simple API for returning health check information to clients.
+An API for registering roles with Auth Server.
 
 """
 
+import json
+from uuid import uuid4
+from datetime import datetime
 from flask import Blueprint
 from flask_restful import Resource, Api, request
-from authserver.db import db, DataTrust, DataTrustSchema
+from werkzeug.security import gen_salt
+from authserver.db import db, DataTrust, DataTrustSchema, User, UserSchema, OAuth2Client,\
+    OAuth2ClientSchema, Role, RoleSchema
 from authserver.utilities import ResponseBody
-from datetime import datetime
 
 
-class DataTrustResource(Resource):
-    """A Data Trust Resource."""
+class RoleResource(Resource):
+    """Role Resource
+
+    This resource represents a role associated with a client.
+
+    """
 
     def __init__(self):
-        self.data_trust_schema = DataTrustSchema()
-        self.data_trusts_schema = DataTrustSchema(many=True)
+        self.role_schema = RoleSchema()
+        self.roles_schema = RoleSchema(many=True)
         self.response_handler = ResponseBody()
 
     def get(self, id: str = None):
         if not id:
-            data_trusts = DataTrust.query.all()
-            data_trusts_obj = self.data_trusts_schema.dump(data_trusts).data
-            return self.response_handler.get_all_response(data_trusts_obj)
+            roles = Role.query.all()
+            roles_obj = self.roles_schema.dump(roles).data
+            return self.response_handler.get_all_response(roles_obj)
         else:
-            data_trust = DataTrust.query.filter_by(id=id).first()
-            if data_trust:
-                data_trusts_obj = self.data_trust_schema.dump(data_trust).data
-                return self.response_handler.get_one_response(data_trusts_obj, request={'id': id})
+            role = Role.query.filter_by(id=id).first()
+            if role:
+                role_obj = self.role_schema.dump(role).data
+                return self.response_handler.get_one_response(role_obj, request={'id': id})
             else:
                 return self.response_handler.not_found_response(id)
 
-    def post(self, id=None):
+    def post(self, id: str = None):
         if id is not None:
             return self.response_handler.method_not_allowed_response()
         try:
@@ -41,18 +49,21 @@ class DataTrustResource(Resource):
             return self.response_handler.empty_request_body_response()
         if not request_data:
             return self.response_handler.empty_request_body_response()
-        data, errors = self.data_trust_schema.load(request_data)
+        data, errors = self.role_schema.load(request_data)
         if errors:
             return self.response_handler.custom_response(code=422, messages=errors)
+
         try:
-            data_trust = DataTrust(request_data['data_trust_name'])
-            db.session.add(data_trust)
+            role = Role(role=request_data['role'], description=request_data['description'])
+            if 'rules' in request_data.keys():
+                role.rules = request_data['rules']
+            db.session.add(role)
             db.session.commit()
         except Exception as e:
             db.session.rollback()
             exception_name = type(e).__name__
             return self.response_handler.exception_response(exception_name, request=request_data)
-        return self.response_handler.successful_creation_response('Data Trust', data_trust.id, request_data)
+        return self.response_handler.successful_creation_response('Role', role.id, request_data)
 
     def put(self, id: str = None):
         if id is None:
@@ -69,12 +80,12 @@ class DataTrustResource(Resource):
         if id is None:
             return self.response_handler.method_not_allowed_response()
         try:
-            data_trust = DataTrust.query.filter_by(id=id).first()
-            if data_trust:
-                data_trust_obj = self.data_trust_schema.dump(data_trust).data
-                db.session.delete(data_trust)
+            role = Role.query.filter_by(id=id).first()
+            if role:
+                role_obj = self.role_schema.dump(role).data
+                db.session.delete(role)
                 db.session.commit()
-                return self.response_handler.successful_delete_response('Data Trust', id, data_trust_obj)
+                return self.response_handler.successful_delete_response('Role', id, role_obj)
             else:
                 return self.response_handler.not_found_response(id)
         except Exception:
@@ -91,28 +102,27 @@ class DataTrustResource(Resource):
             request_data = request.get_json(force=True)
         except Exception as e:
             return self.response_handler.empty_request_body_response()
-        data_trust = DataTrust.query.filter_by(id=id).first()
-        if not data_trust:
+        role = Role.query.filter_by(id=id).first()
+        if not role:
             return self.response_handler.not_found_response(id)
         if not request_data:
             return self.response_handler.empty_request_body_response()
-        data, errors = self.data_trust_schema.load(request_data, partial=partial)
+        data, errors = self.role_schema.load(request_data, partial=partial)
         if errors:
             return self.response_handler.custom_response(code=422, messages=errors)
 
         for k, v in request_data.items():
-            if hasattr(data_trust, k):
-                setattr(data_trust, k, v)
+            if hasattr(role, k):
+                setattr(role, k, v)
         try:
-            data_trust.date_last_updated = datetime.utcnow()
             db.session.commit()
-            return self.response_handler.successful_update_response('Data Trust', id, request_data)
+            return self.response_handler.successful_update_response('Role', id, request_data)
         except Exception as e:
             db.session.rollback()
             exception_name = type(e).__name__
             return self.response_handler.exception_response(exception_name, request=request_data)
 
 
-data_trust_bp = Blueprint('data_trust_ep', __name__)
-data_trust_api = Api(data_trust_bp)
-data_trust_api.add_resource(DataTrustResource, '/data_trusts', '/data_trusts/<string:id>')
+role_bp = Blueprint('role_ep', __name__)
+role_api = Api(role_bp)
+role_api.add_resource(RoleResource, '/roles', '/roles/<int:id>')

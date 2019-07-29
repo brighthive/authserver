@@ -43,7 +43,11 @@ class ClientResource(Resource):
     def post(self, id: str = None):
         if id is not None:
             return self.response_handler.method_not_allowed_response()
-        request_data = request.get_json(force=True)
+        try:
+            request_data = request.get_json(force=True)
+        except Exception as e:
+            return self.response_handler.empty_request_body_response()
+
         if not request_data:
             return self.response_handler.empty_request_body_response()
         data, errors = self.client_schema.load(request_data)
@@ -67,13 +71,20 @@ class ClientResource(Resource):
             return self.response_handler.exception_response(exception_name, request=request_data)
         return self.response_handler.successful_creation_response('Client', client.id, request_data)
 
-    def put(self, id: str):
+    def put(self, id: str = None):
+        if id is None:
+            return self.response_handler.method_not_allowed_response()
+
         return self.update(id, False)
 
-    def patch(self, id: str):
+    def patch(self, id: str = None):
+        if id is None:
+            return self.response_handler.method_not_allowed_response()
         return self.update(id)
 
-    def delete(self, id: str):
+    def delete(self, id: str = None):
+        if id is None:
+            return self.response_handler.method_not_allowed_response()
         try:
             client = OAuth2Client.query.filter_by(id=id).first()
             if client:
@@ -93,7 +104,10 @@ class ClientResource(Resource):
         and allows for switching the Marshmallow validation to partial for PATCH and complete for PUT.
 
         """
-        request_data = request.get_json(force=True)
+        try:
+            request_data = request.get_json(force=True)
+        except Exception as e:
+            return self.response_handler.empty_request_body_response()
         client = OAuth2Client.query.filter_by(id=id).first()
         if not client:
             return self.response_handler.not_found_response(id)
