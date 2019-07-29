@@ -143,14 +143,16 @@ class Role(db.Model):
     role = db.Column(db.String, unique=True, nullable=False)
     description = db.Column(db.String)
     rules = db.Column(JSONB)
+    active = db.Column(db.Boolean)
     date_created = db.Column(db.TIMESTAMP)
     date_last_updated = db.Column(db.TIMESTAMP)
 
-    def __init__(self, role, description, rules=None):
+    def __init__(self, role, description, rules=None, active=True):
         self.id = str(uuid4()).replace('-', '')
         self.role = role
         self.description = description
         self.rules = rules
+        self.active = active
         self.date_created = datetime.utcnow()
         self.date_last_updated = datetime.utcnow()
 
@@ -171,6 +173,7 @@ class RoleSchema(ma.Schema):
     role = fields.String(required=True)
     description = fields.String(required=True)
     rules = JSONField()
+    active = fields.Boolean()
     date_created = fields.DateTime(dump_only=True)
     date_last_updated = fields.DateTime(dump_only=True)
 
