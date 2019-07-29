@@ -125,4 +125,4 @@ class RoleResource(Resource):
 
 role_bp = Blueprint('role_ep', __name__)
 role_api = Api(role_bp)
-role_api.add_resource(RoleResource, '/roles', '/roles/<int:id>')
+role_api.add_resource(RoleResource, '/roles', '/roles/<string:id>')

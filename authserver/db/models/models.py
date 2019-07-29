@@ -17,7 +17,7 @@ ma = Marshmallow()
 
 roles = db.Table('roles',
                  db.Column('client_id', db.String, db.ForeignKey('oauth2_clients.id'), primary_key=True),
-                 db.Column('role_id', db.Integer, db.ForeignKey('oauth2_roles.id'), primary_key=True))
+                 db.Column('role_id', db.String, db.ForeignKey('oauth2_roles.id'), primary_key=True))
 
 
 class DataTrust(db.Model):
@@ -114,6 +114,67 @@ class UserSchema(ma.Schema):
     date_last_updated = fields.DateTime(dump_only=True)
 
 
+class JSONField(fields.Field):
+    """A custom JSON field.
+
+    """
+
+    default_error_messages = {"invalid": "Not a valid JSON document."}
+
+    def _serialize(self, value, attr, obj, **kwargs):
+        if value is None:
+            return []
+        return json.loads(json.dumps(value))
+
+    def _deserialize(self, value, attr, data, **kwargs):
+        try:
+            return json.dumps(value, ensure_ascii=True)
+        except Exception:
+            return []
+
+
+class Role(db.Model):
+    """OAuth 2.0 Role."""
+
+    __tablename__ = 'oauth2_roles'
+    __table_args__ = (db.UniqueConstraint('role'), )
+
+    id = db.Column(db.String, primary_key=True)
+    role = db.Column(db.String, unique=True, nullable=False)
+    description = db.Column(db.String)
+    rules = db.Column(JSONB)
+    date_created = db.Column(db.TIMESTAMP)
+    date_last_updated = db.Column(db.TIMESTAMP)
+
+    def __init__(self, role, description, rules=None):
+        self.id = str(uuid4()).replace('-', '')
+        self.role = role
+        self.description = description
+        self.rules = rules
+        self.date_created = datetime.utcnow()
+        self.date_last_updated = datetime.utcnow()
+
+    def __str__(self):
+        return self.id
+
+
+class RoleSchema(ma.Schema):
+    """User Schema
+
+    A marshmallow schema for validating the Role model.
+    """
+
+    class Meta:
+        ordered = True
+
+    id = fields.String(dump_only=True)
+    role = fields.String(required=True)
+    description = fields.String(required=True)
+    rules = JSONField()
+    date_created = fields.DateTime(dump_only=True)
+    date_last_updated = fields.DateTime(dump_only=True)
+
+
 class OAuth2Client(db.Model, OAuth2ClientMixin):
     """OAuth 2.0 Client"""
 
@@ -144,6 +205,7 @@ class OAuth2ClientSchema(ma.Schema):
     grant_type = fields.String()
     response_type = fields.String()
     scope = fields.String()
+    roles = fields.List(fields.String)
     client_name = fields.String(required=True)
     client_uri = fields.String()
     logo_uri = fields.String()
@@ -180,60 +242,3 @@ class OAuth2Token(db.Model, OAuth2TokenMixin):
     def is_refresh_token_expired(self):
         expires_at = self.issued_at + self.expires_in * 2
         return expires_at < time.time()
-
-
-class JSONField(fields.Field):
-    """A custom JSON field.
-
-    """
-
-    default_error_messages = {"invalid": "Not a valid JSON document."}
-
-    def _serialize(self, value, attr, obj, **kwargs):
-        if value is None:
-            return []
-        return json.loads(json.dumps(value))
-
-    def _deserialize(self, value, attr, data, **kwargs):
-        try:
-            return json.dumps(value, ensure_ascii=True)
-        except Exception:
-            return []
-
-
-class Role(db.Model):
-    """OAuth 2.0 Role."""
-
-    __tablename__ = 'oauth2_roles'
-    __table_args__ = (db.UniqueConstraint('role'), )
-
-    id = db.Column(db.Integer, primary_key=True)
-    role = db.Column(db.String, unique=True, nullable=False)
-    description = db.Column(db.String)
-    rules = db.Column(JSONB)
-    date_created = db.Column(db.TIMESTAMP)
-    date_last_updated = db.Column(db.TIMESTAMP)
-
-    def __init__(self, role, description, rules=None):
-        self.role = role
-        self.description = description
-        self.rules = rules
-        self.date_created = datetime.utcnow()
-        self.date_last_updated = datetime.utcnow()
-
-
-class RoleSchema(ma.Schema):
-    """User Schema
-
-    A marshmallow schema for validating the Role model.
-    """
-
-    class Meta:
-        ordered = True
-
-    id = fields.Integer(dump_only=True)
-    role = fields.String(required=True)
-    description = fields.String(required=True)
-    rules = JSONField()
-    date_created = fields.DateTime(dump_only=True)
-    date_last_updated = fields.DateTime(dump_only=True)

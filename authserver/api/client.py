@@ -11,7 +11,7 @@ from flask import Blueprint
 from flask_restful import Resource, Api, request
 from werkzeug.security import gen_salt
 from authserver.db import db, DataTrust, DataTrustSchema, User, UserSchema, OAuth2Client,\
-    OAuth2ClientSchema
+    OAuth2ClientSchema, Role
 from authserver.utilities import ResponseBody
 
 
@@ -62,7 +62,18 @@ class ClientResource(Resource):
             client.client_secret = gen_salt(48)
             for k, v in request_data.items():
                 if hasattr(client, k):
-                    setattr(client, k, v)
+                    if k == 'roles':
+                        try:
+                            for role_id in request_data[k]:
+                                role = Role.query.filter_by(id=role_id).first()
+                                if role:
+                                    client.roles.append(role)
+                                else:
+                                    return self.response_handler.custom_response(code=400, messages={'roles': ['Error assigning role to client.']})
+                        except Exception as e:
+                            return self.response_handler.custom_response(code=400, messages={'roles': ['Error assigning role to client.']})
+                    else:
+                        setattr(client, k, v)
             db.session.add(client)
             db.session.commit()
         except Exception as e:
@@ -119,7 +130,28 @@ class ClientResource(Resource):
 
         for k, v in request_data.items():
             if hasattr(client, k):
-                setattr(client, k, v)
+                if k == 'roles':
+                    try:
+                        if len(request_data[k]) == 0:  # allow removal of all roles
+                            client.roles = []
+                        else:
+                            current_roles = client.roles.copy()
+                            new_roles = []
+                            for role_id in request_data[k]:
+                                role = Role.query.filter_by(id=role_id).first()
+                                if role:
+                                    new_roles.append(role)
+                                    if role not in client.roles:  # only append roles that aren't already there
+                                        client.roles.append(role)
+                                else:
+                                    return self.response_handler.custom_response(code=400, messages={'roles': ['Error assigning role to client.']})
+                            for role in current_roles:
+                                if role not in new_roles:
+                                    client.roles.remove(role)
+                    except Exception as e:
+                        return self.response_handler.custom_response(code=400, messages={'roles': ['Error assigning role to client.']})
+                else:
+                    setattr(client, k, v)
         try:
             db.session.commit()
             return self.response_handler.successful_update_response('Client', id, request_data)
