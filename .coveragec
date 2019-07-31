@@ -1,2 +1,2 @@
 [run]
-omit = */.local/*, migrations/*
+omit = */.local/*, migrations/*, */tests/*, */__init__.py
