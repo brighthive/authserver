@@ -1,4 +1,4 @@
-# BrightHive Authorization and Authentication Server
+# BrightHive Authorization and Authentication Server [![Documentation Status](https://readthedocs.org/projects/brighthive-authserver/badge/?version=latest)](https://brighthive-authserver.readthedocs.io/en/latest/?badge=latest)
 
 An OAuth 2.0 server with added services for providing fine-grain access control to Data Trust assets.
 
