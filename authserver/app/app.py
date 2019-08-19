@@ -7,7 +7,7 @@ from flask_migrate import Migrate
 from flask_cors import CORS
 
 from authserver.db import db
-from authserver.api import health_api_bp, data_trust_bp, user_bp, oauth2_bp, client_bp, role_bp
+from authserver.api import health_api_bp, data_trust_bp, user_bp, oauth2_bp, client_bp, secret_delete_bp, role_bp
 from authserver.config import ConfigurationFactory
 from authserver.utilities import config_oauth
 
@@ -36,6 +36,7 @@ def create_app(environment: str = None):
     app.register_blueprint(data_trust_bp)
     app.register_blueprint(user_bp)
     app.register_blueprint(client_bp)
+    app.register_blueprint(secret_delete_bp)
     app.register_blueprint(oauth2_bp)
     app.register_blueprint(role_bp)
 

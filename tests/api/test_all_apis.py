@@ -190,7 +190,7 @@ class TestAllAPIs(object):
         
         self._cleanup(client, data_trust_id, user_ids=user_ids, role_ids=role_ids)
     
-    def test_client_secret_patch(self, client):
+    def test_client_secret_delete(self, client):
         # Test that PATCHing the client_secret only returns None or a 48-character salt.
         headers = {'content-type': 'application/json'}
         data_trust_id = self._post_data_trust(client)
@@ -199,15 +199,15 @@ class TestAllAPIs(object):
 
         client_to_patch = client_ids[0]
 
-        response = client.patch('/clients/{}'.format(client_to_patch), data=json.dumps({"client_secret": None}), headers=headers)
+        response = client.post('/clients/secret-delete', data=json.dumps({"client_id": client_to_patch}), headers=headers)
         expect(response.status_code).to(equal(200))
         response = client.get('/clients/{}'.format(client_to_patch))
         expect(response.json['response']['client_secret']).to(equal(None))
 
-        response = client.patch('/clients/{}'.format(client_to_patch), data=json.dumps({"client_secret": "rotate please!"}), headers=headers)
-        expect(response.status_code).to(equal(200))
-        response = client.get('/clients/{}'.format(client_to_patch))
-        expect(len(response.json['response']['client_secret'])).to(equal(48))
+        # response = client.patch('/clients/{}'.format(client_to_patch), data=json.dumps({"client_secret": "rotate please!"}), headers=headers)
+        # expect(response.status_code).to(equal(200))
+        # response = client.get('/clients/{}'.format(client_to_patch))
+        # expect(len(response.json['response']['client_secret'])).to(equal(48))
 
         self._cleanup(client, data_trust_id, user_ids=user_ids)
     
