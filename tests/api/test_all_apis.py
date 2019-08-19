@@ -159,20 +159,10 @@ class TestAllAPIs(object):
     def test_all_apis(self, client):
         # Common headers go in this dict
         headers = {'content-type': 'application/json'}
-
-        # Create an overarching data trust
-        response: Response = client.post('/data_trusts', data=json.dumps(DATA_TRUST), headers=headers)
-        expect(response.status_code).to(equal(201))
-
-        data_trust_id = response.json['response'][0]['id']
-
-        # Create users
-        user_ids = []
-        for user in USERS:
-            user['data_trust_id'] = data_trust_id
-            response = client.post('/users', data=json.dumps(user), headers=headers)
-            expect(response.status_code).to(equal(201))
-            user_ids.append(response.json['response'][0]['id'])
+        
+        data_trust_id = self._post_data_trust(client)
+        user_ids = self._post_users(client, data_trust_id)
+        client_ids = self._post_clients(client, user_ids)
 
         # Create roles
         role_ids = []
@@ -180,16 +170,6 @@ class TestAllAPIs(object):
             response = client.post('/roles', data=json.dumps(role), headers=headers)
             expect(response.status_code).to(equal(201))
             role_ids.append(response.json['response'][0]['id'])
-
-        expect(len(user_ids)).to(equal(8))
-
-        # Create clients
-        client_ids = []
-        for i, api_client in enumerate(CLIENTS):
-            api_client['user_id'] = user_ids[i]
-            response = client.post('/clients', data=json.dumps(api_client))
-            expect(response.status_code).to(equal(201))
-            client_ids.append(response.json['response'][0]['id'])
 
         # Assign clients to users and roles to client
         for i, client_id in enumerate(client_ids):
@@ -207,8 +187,76 @@ class TestAllAPIs(object):
             expect(result['id']).to(equal(client_id))
             expect(user_ids).to(contain(result['user_id']))
             expect(len(result['roles'])).to(equal(len(role_ids)))
+        
+        self._cleanup(client, data_trust_id, user_ids=user_ids, role_ids=role_ids)
+    
+    def test_client_secret_patch(self, client):
+        # Test that PATCHing the client_secret only returns None or a 48-character salt.
+        headers = {'content-type': 'application/json'}
+        data_trust_id = self._post_data_trust(client)
+        user_ids = self._post_users(client, data_trust_id)
+        client_ids = self._post_clients(client, user_ids)
 
-        # Data Cleanup
+        client_to_patch = client_ids[0]
+
+        response = client.patch('/clients/{}'.format(client_to_patch), data=json.dumps({"client_secret": None}), headers=headers)
+        expect(response.status_code).to(equal(200))
+        response = client.get('/clients/{}'.format(client_to_patch))
+        expect(response.json['response']['client_secret']).to(equal(None))
+
+        response = client.patch('/clients/{}'.format(client_to_patch), data=json.dumps({"client_secret": "rotate please!"}), headers=headers)
+        expect(response.status_code).to(equal(200))
+        response = client.get('/clients/{}'.format(client_to_patch))
+        expect(len(response.json['response']['client_secret'])).to(equal(48))
+
+        self._cleanup(client, data_trust_id, user_ids=user_ids)
+    
+    def _post_data_trust(self, client):
+        '''
+        Helper function that creates (and tests creating) a Data Trust entity.
+        '''
+        headers = {'content-type': 'application/json'}
+        response: Response = client.post('/data_trusts', data=json.dumps(DATA_TRUST), headers=headers)
+        expect(response.status_code).to(equal(201))
+
+        data_trust_id = response.json['response'][0]['id']
+
+        return data_trust_id
+    
+    def _post_users(self, client, data_trust_id):
+        '''
+        Helper function that creates (and tests creating) a collection of Users.
+        '''
+        headers = {'content-type': 'application/json'}
+        user_ids = []
+        for user in USERS:
+            user['data_trust_id'] = data_trust_id
+            response = client.post('/users', data=json.dumps(user), headers=headers)
+            expect(response.status_code).to(equal(201))
+            user_ids.append(response.json['response'][0]['id'])
+        
+        expect(len(user_ids)).to(equal(8))
+
+        return user_ids
+    
+    def _post_clients(self, client, user_ids):
+        '''
+        Helper function that creates (and tests creating) a collection of Clients.
+        '''
+        headers = {'content-type': 'application/json'}
+        client_ids = []
+        for i, api_client in enumerate(CLIENTS):
+            api_client['user_id'] = user_ids[i]
+            response = client.post('/clients', data=json.dumps(api_client))
+            expect(response.status_code).to(equal(201))
+            client_ids.append(response.json['response'][0]['id'])
+        
+        expect(len(client_ids)).to(equal(8))
+
+        return client_ids
+    
+    def _cleanup(self, client, data_trust_id, role_ids=[], user_ids=[]):
+        headers = {'content-type': 'application/json'}
         for role_id in role_ids:
             response = client.delete('/roles/{}'.format(role_id), headers=headers)
             expect(response.status_code).to(equal(200))

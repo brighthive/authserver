@@ -114,6 +114,10 @@ class ClientResource(Resource):
         Using Marshmallow, the logic for PUT and PATCH differ by a single parameter. This method abstracts that logic
         and allows for switching the Marshmallow validation to partial for PATCH and complete for PUT.
 
+        The `client_secret` needs special attention, since it should NOT be changed arbitrarily. 
+        Allow only two PATCH options: (1) delete the secret (i.e., disable the client), 
+        or (2) rotate the secret – any other data PATCH'd as the client_secret should be ignored, and new secret generated. 
+        This protects the Authserver from insecure secrets. 
         """
         try:
             request_data = request.get_json(force=True)
@@ -150,6 +154,11 @@ class ClientResource(Resource):
                                     client.roles.remove(role)
                     except Exception as e:
                         return self.response_handler.custom_response(code=400, messages={'roles': ['Error assigning role to client.']})
+                elif k == 'client_secret':
+                    if v is None:
+                        client.client_secret = None
+                    else:
+                        client.client_secret = gen_salt(48)
                 else:
                     setattr(client, k, v)
         try:
