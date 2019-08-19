@@ -5,13 +5,15 @@ An API for registering clients with Auth Server.
 """
 
 import json
-from uuid import uuid4
 from datetime import datetime
+from uuid import uuid4
+
 from flask import Blueprint
-from flask_restful import Resource, Api, request
+from flask_restful import Api, Resource, request
 from werkzeug.security import gen_salt
-from authserver.db import db, DataTrust, DataTrustSchema, User, UserSchema, OAuth2Client,\
-    OAuth2ClientSchema, Role
+
+from authserver.db import (DataTrust, DataTrustSchema, OAuth2Client,
+                           OAuth2ClientSchema, Role, User, UserSchema, db)
 from authserver.utilities import ResponseBody
 
 
