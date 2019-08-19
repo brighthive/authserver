@@ -115,11 +115,6 @@ class ClientResource(Resource):
 
         Using Marshmallow, the logic for PUT and PATCH differ by a single parameter. This method abstracts that logic
         and allows for switching the Marshmallow validation to partial for PATCH and complete for PUT.
-
-        The `client_secret` needs special attention, since it should NOT be changed arbitrarily. 
-        Allow only two PATCH options: (1) delete the secret (i.e., disable the client), 
-        or (2) rotate the secret – any other data PATCH'd as the client_secret should be ignored and a new secret generated. 
-        This protects the Authserver from insecure secrets. 
         """
         try:
             request_data = request.get_json(force=True)
