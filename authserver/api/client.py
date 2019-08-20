@@ -11,8 +11,6 @@ from uuid import uuid4
 from flask import Blueprint
 from flask_restful import Api, Resource, request
 from werkzeug.security import gen_salt
-# from webargs import fields, validate
-# from webargs.flaskparser import use_args, use_kwargs
 
 from authserver.db import (DataTrust, DataTrustSchema, OAuth2Client,
                            OAuth2ClientSchema, Role, User, UserSchema, db)
