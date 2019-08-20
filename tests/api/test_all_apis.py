@@ -198,12 +198,12 @@ class TestAllAPIs(object):
 
         client_to_patch = client_ids[0]
 
-        response = client.post('/clients/secret-delete', data=json.dumps({"id": client_to_patch}), headers=headers)
+        response = client.post('/clients?action=delete_secret', data=json.dumps({"id": client_to_patch}), headers=headers)
         expect(response.status_code).to(equal(200))
         response = client.get('/clients/{}'.format(client_to_patch))
         expect(response.json['response']['client_secret']).to(equal(None))
 
-        response = client.post('/clients/secret-rotate', data=json.dumps({"id": client_to_patch}), headers=headers)
+        response = client.post('/clients?action=rotate_secret', data=json.dumps({"id": client_to_patch}), headers=headers)
         expect(response.status_code).to(equal(200))
         response = client.get('/clients/{}'.format(client_to_patch))
         expect(len(response.json['response']['client_secret'])).to(equal(48))

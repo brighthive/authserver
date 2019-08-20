@@ -20,11 +20,12 @@ flask-sqlalchemy = "*"
 gunicorn = "*"
 authlib = "*"
 psycopg2-binary = "*"
-marshmallow = "*"
+marshmallow = "==2.19.5"
 flask-marshmallow = "*"
 marshmallow-sqlalchemy = "*"
 bcrypt = "*"
 flask-cors = "*"
+webargs = "*"
 
 [requires]
 python_version = "3.7"
