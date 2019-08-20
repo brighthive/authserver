@@ -11,11 +11,19 @@ from uuid import uuid4
 from flask import Blueprint
 from flask_restful import Api, Resource, request
 from werkzeug.security import gen_salt
+# from webargs import fields, validate
+# from webargs.flaskparser import use_args, use_kwargs
 
 from authserver.db import (DataTrust, DataTrustSchema, OAuth2Client,
                            OAuth2ClientSchema, Role, User, UserSchema, db)
 from authserver.utilities import ResponseBody
 
+# POST_ARGS = {
+#     'action': fields.Str(
+#         required=False,
+#         validate=validate.OneOf(['delete_secret', 'rotate_secret']),
+#     ),
+# }
 
 class ClientResource(Resource):
     """Client Resource
@@ -42,16 +50,32 @@ class ClientResource(Resource):
             else:
                 return self.response_handler.not_found_response(id)
 
+    # @use_args(POST_ARGS)
+    # def post(self, action, id: str = None):
     def post(self, id: str = None):
-        if id is not None:
-            return self.response_handler.method_not_allowed_response()
+        # All POSTs should have data. Check for this.
         try:
             request_data = request.get_json(force=True)
         except Exception as e:
             return self.response_handler.empty_request_body_response()
-
         if not request_data:
             return self.response_handler.empty_request_body_response()
+
+        # Some POSTs have query params.
+        # if action:
+        #     try:
+        #         client_id = request_data['id']
+        #     except KeyError as e:
+        #         return self.response_handler.custom_response(code=422, messages='Please provide the ID of the client.')
+
+        #     if action['action'] == 'delete_secret':
+        #         return self._delete_secret(client_id)
+        #     elif action['action'] == 'rotate_secret':
+        #         return self._rotate_secret(client_id)
+
+        if id is not None:
+            return self.response_handler.method_not_allowed_response()
+        
         data, errors = self.client_schema.load(request_data)
         if errors:
             return self.response_handler.custom_response(code=422, messages=errors)
@@ -163,6 +187,33 @@ class ClientResource(Resource):
             exception_name = type(e).__name__
             return self.response_handler.exception_response(exception_name, request=request_data)
 
+    def _update_secret(self, client_id: str, new_secret):
+        """Helper function for updating the client_secret.
+
+        This function serves the delete and rotate actions, available in the POST method. 
+        """
+        client = OAuth2Client.query.filter_by(id=client_id).first()
+        if not client:
+            return self.response_handler.not_found_response(client_id)
+        
+        client.client_secret = new_secret
+
+        try:
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            exception_name = type(e).__name__
+            return self.response_handler.exception_response(exception_name)
+        return self.response_handler.successful_update_response('Client', client_id)
+
+    def _delete_secret(self, client_id):
+        new_secret = None
+        return self._update_secret(client_id, new_secret)
+    
+    def _rotate_secret(self, client_id):
+        new_secret = gen_salt(48)
+        return self._update_secret(client_id, new_secret)
+    
 
 client_bp = Blueprint('client_ep', __name__)
 client_api = Api(client_bp)
