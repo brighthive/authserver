@@ -1,14 +1,15 @@
 """Flask Application."""
 
 from flask import Flask
+from flask_cors import CORS
+from flask_migrate import Migrate
 from flask_restful import Api
 from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
 
-
-from authserver.db import db
-from authserver.api import health_api_bp, data_trust_bp, user_bp, oauth2_bp, client_bp, role_bp
+from authserver.api import (client_bp, data_trust_bp, health_api_bp, oauth2_bp,
+                            role_bp, user_bp)
 from authserver.config import ConfigurationFactory
+from authserver.db import db
 from authserver.utilities import config_oauth
 
 
@@ -30,6 +31,7 @@ def create_app(environment: str = None):
     )
     db.init_app(app)
     config_oauth(app)
+    CORS(app)
     migrate = Migrate(app, db)
     app.register_blueprint(health_api_bp)
     app.register_blueprint(data_trust_bp)

@@ -5,15 +5,25 @@ An API for registering clients with Auth Server.
 """
 
 import json
-from uuid import uuid4
 from datetime import datetime
+from uuid import uuid4
+
 from flask import Blueprint
-from flask_restful import Resource, Api, request
+from flask_restful import Api, Resource, request
 from werkzeug.security import gen_salt
-from authserver.db import db, DataTrust, DataTrustSchema, User, UserSchema, OAuth2Client,\
-    OAuth2ClientSchema, Role
+from webargs import fields, validate
+from webargs.flaskparser import use_args, use_kwargs
+
+from authserver.db import (DataTrust, DataTrustSchema, OAuth2Client,
+                           OAuth2ClientSchema, Role, User, UserSchema, db)
 from authserver.utilities import ResponseBody
 
+POST_ARGS = {
+    'action': fields.Str(
+        required=False,
+        validate=validate.OneOf(['delete_secret', 'rotate_secret']),
+    )
+}
 
 class ClientResource(Resource):
     """Client Resource
@@ -40,16 +50,38 @@ class ClientResource(Resource):
             else:
                 return self.response_handler.not_found_response(id)
 
-    def post(self, id: str = None):
-        if id is not None:
-            return self.response_handler.method_not_allowed_response()
+    @use_args(POST_ARGS)
+    def post(self, action, id: str = None):
+        '''
+        The POST method mainly enables the following:
+        (1) creation of a new Client.
+        (2) deletion or rotatation of the secret of an existing client – accomplished by POSTing with 
+        query params (?action=delete_secret, or ?action=rotate_secret).
+        '''
+        # Check for data, since all POST requests need it.
         try:
             request_data = request.get_json(force=True)
         except Exception as e:
             return self.response_handler.empty_request_body_response()
-
         if not request_data:
             return self.response_handler.empty_request_body_response()
+
+        # Check for query params/webargs (i.e., action).
+        if action:
+            try:
+                client_id = request_data['id']
+            except KeyError as e:
+                return self.response_handler.custom_response(code=422, messages='Please provide the ID of the client.')
+
+            if action['action'] == 'delete_secret':
+                return self._delete_secret(client_id)
+            elif action['action'] == 'rotate_secret':
+                return self._rotate_secret(client_id)
+
+        # Assume that the request intends to create a new user: an ID should not be in the request data.
+        if id is not None:
+            return self.response_handler.method_not_allowed_response()
+        
         data, errors = self.client_schema.load(request_data)
         if errors:
             return self.response_handler.custom_response(code=422, messages=errors)
@@ -113,7 +145,6 @@ class ClientResource(Resource):
 
         Using Marshmallow, the logic for PUT and PATCH differ by a single parameter. This method abstracts that logic
         and allows for switching the Marshmallow validation to partial for PATCH and complete for PUT.
-
         """
         try:
             request_data = request.get_json(force=True)
@@ -150,6 +181,8 @@ class ClientResource(Resource):
                                     client.roles.remove(role)
                     except Exception as e:
                         return self.response_handler.custom_response(code=400, messages={'roles': ['Error assigning role to client.']})
+                elif k == 'client_secret':
+                    return self.response_handler.custom_response(code=422, messages={'client_secret': ['The client_secret cannot be updated.']})
                 else:
                     setattr(client, k, v)
         try:
@@ -160,6 +193,33 @@ class ClientResource(Resource):
             exception_name = type(e).__name__
             return self.response_handler.exception_response(exception_name, request=request_data)
 
+    def _update_secret(self, client_id: str, new_secret):
+        """Helper function for updating the client_secret.
+
+        This function serves the delete and rotate actions, available in the POST method. 
+        """
+        client = OAuth2Client.query.filter_by(id=client_id).first()
+        if not client:
+            return self.response_handler.not_found_response(client_id)
+        
+        client.client_secret = new_secret
+
+        try:
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            exception_name = type(e).__name__
+            return self.response_handler.exception_response(exception_name)
+        return self.response_handler.successful_update_response('Client', client_id)
+
+    def _delete_secret(self, client_id):
+        new_secret = None
+        return self._update_secret(client_id, new_secret)
+    
+    def _rotate_secret(self, client_id):
+        new_secret = gen_salt(48)
+        return self._update_secret(client_id, new_secret)
+    
 
 client_bp = Blueprint('client_ep', __name__)
 client_api = Api(client_bp)
