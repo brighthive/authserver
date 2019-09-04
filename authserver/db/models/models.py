@@ -110,7 +110,7 @@ class UserSchema(ma.Schema):
     organization = fields.String(required=True)
     email_address = fields.Email(required=True)
     telephone = fields.String()
-    active = fields.Boolean(required=True)
+    active = fields.Boolean()
     data_trust_id = fields.String(required=True)
     date_created = fields.DateTime(dump_only=True)
     date_last_updated = fields.DateTime(dump_only=True)
