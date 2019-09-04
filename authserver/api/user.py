@@ -12,7 +12,7 @@ from flask_restful import Api, Resource, request
 from webargs import fields, validate
 from webargs.flaskparser import use_args, use_kwargs
 
-from authserver.db import DataTrust, DataTrustSchema, User, UserSchema, db
+from authserver.db import DataTrust, DataTrustSchema, User, UserSchema, db, OAuth2Client
 from authserver.utilities import ResponseBody
 
 POST_ARGS = {
@@ -155,7 +155,11 @@ class UserResource(Resource):
             return self.response_handler.not_found_response(user_id)
         
         user.active = False
-        
+
+        clients = OAuth2Client.query.filter_by(user_id=user_id).all()
+
+        print(clients, "!!!!")
+
         try:
             db.session.commit()
         except Exception as e:
