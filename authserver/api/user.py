@@ -51,15 +51,27 @@ class UserResource(Resource):
                 return self.response_handler.not_found_response(id)
     
     @use_args(POST_ARGS)
-    def post(self, id: str = None):
-        if id is not None:
-            return self.response_handler.method_not_allowed_response()
+    def post(self, action, id: str = None):
+        # Check for data, since all POST requests need it.
         try:
             request_data = request.get_json(force=True)
         except Exception as e:
             return self.response_handler.empty_request_body_response()
         if not request_data:
             return self.response_handler.empty_request_body_response()
+
+        if id is not None:
+            return self.response_handler.method_not_allowed_response()
+        
+        # Check for query params/webargs (i.e., action).
+        if action:
+            try:
+                user_id = request_data['id']
+            except KeyError as e:
+                return self.response_handler.custom_response(code=422, messages='Please provide the ID of the user.')
+            else:
+                return self._deactivate(user_id)
+
         data, errors = self.user_schema.load(request_data)
         if errors:
             return self.response_handler.custom_response(code=422, messages=errors)
@@ -83,12 +95,12 @@ class UserResource(Resource):
         if id is None:
             return self.response_handler.method_not_allowed_response()
 
-        return self.update(id, False)
+        return self._update(id, False)
 
     def patch(self, id: str = None):
         if id is None:
             return self.response_handler.method_not_allowed_response()
-        return self.update(id)
+        return self._update(id)
 
     def delete(self, id: str = None):
         if id is None:
@@ -105,7 +117,7 @@ class UserResource(Resource):
         except Exception:
             return self.response_handler.not_found_response(id)
 
-    def update(self, id: str, partial=True):
+    def _update(self, id: str, partial=True):
         """General update function for PUT and PATCH.
 
         Using Marshmallow, the logic for PUT and PATCH differ by a single parameter. This method abstracts that logic
@@ -136,6 +148,22 @@ class UserResource(Resource):
             db.session.rollback()
             exception_name = type(e).__name__
             return self.response_handler.exception_response(exception_name, request=request_data)
+    
+    def _deactivate(self, user_id: str):
+        user = User.query.filter_by(id=user_id).first()
+        if not user:
+            return self.response_handler.not_found_response(user_id)
+        
+        user.active = False
+        
+        try:
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            exception_name = type(e).__name__
+            return self.response_handler.exception_response(exception_name)
+
+        return self.response_handler.successful_update_response('User', user_id)
 
 
 user_bp = Blueprint('user_ep', __name__)
