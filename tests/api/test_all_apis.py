@@ -230,6 +230,7 @@ class TestAllAPIs(object):
         user_ids = []
         for user in USERS:
             user['data_trust_id'] = data_trust_id
+            user['active'] = True
             response = client.post('/users', data=json.dumps(user), headers=headers)
             expect(response.status_code).to(equal(201))
             user_ids.append(response.json['response'][0]['id'])
