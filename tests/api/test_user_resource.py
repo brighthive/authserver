@@ -117,15 +117,16 @@ class TestUserResource:
         # Finally, POST with a valid user_id
         response = client.post('/users?action=deactivate', data=json.dumps(user_to_deactivate), headers=headers)
         expect(response.status_code).to(equal(200))
+        
         response = client.get('/users/{}'.format(a_user_id))
         expect(response.json['response']['active']).to(be(False))
+        
+        response = client.get('/clients/{}'.format(associated_client_id), headers=headers)
+        expect(response.json['response']['client_secret']).to(be(None))
 
-        # DELETE the data trusts and by extension delete the users
+        # DELETE the data trusts and by extension delete the users and associated client
         response = client.delete('/data_trusts/{}'.format(data_trust_id), headers=headers)
         expect(response.status_code).to(be(200))
-
-        response = client.get('/clients', headers=headers)
-        print(response.json, "!!!!!")
 
     def _post_data_trust(self, client):
         '''

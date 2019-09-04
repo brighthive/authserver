@@ -155,19 +155,22 @@ class UserResource(Resource):
             return self.response_handler.not_found_response(user_id)
         
         user.active = False
+        self._db_commit()
 
         clients = OAuth2Client.query.filter_by(user_id=user_id).all()
+        for client in clients:
+            client.client_secret = None
+            self._db_commit()
 
-        print(clients, "!!!!")
-
+        return self.response_handler.successful_update_response('User', user_id)
+    
+    def _db_commit(self):
         try:
             db.session.commit()
         except Exception as e:
             db.session.rollback()
             exception_name = type(e).__name__
             return self.response_handler.exception_response(exception_name)
-
-        return self.response_handler.successful_update_response('User', user_id)
 
 
 user_bp = Blueprint('user_ep', __name__)
