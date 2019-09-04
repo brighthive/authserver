@@ -82,21 +82,29 @@ class TestUserResource:
             expect(response.status_code).to(be(200))
 
         # Rename a user with a PATCH
+        user_id = added_users[0]['id']
         new_name = str(reversed(added_users[0]['firstname']))
         single_field_update = {
             'firstname': new_name
         }
-        response = client.patch('/users/{}'.format(added_users[0]['id']), data=json.dumps(single_field_update), headers=headers)
+        response = client.patch('/users/{}'.format(user_id), data=json.dumps(single_field_update), headers=headers)
         expect(response.status_code).to(equal(200))
 
         # Rename a user with a PUT, expect to fail because not all fields specified
-        response = client.put('/users/{}'.format(added_users[0]['id']), data=json.dumps(single_field_update), headers=headers)
+        response = client.put('/users/{}'.format(user_id), data=json.dumps(single_field_update), headers=headers)
         expect(response.status_code).to(equal(422))
 
         # Rename a user with a PUT, providing the entire object
         added_users[0]['firstname'] = new_name
-        response = client.put('/users/{}'.format(added_users[0]['id']), data=json.dumps(added_users[0]), headers=headers)
+        response = client.put('/users/{}'.format(user_id), data=json.dumps(added_users[0]), headers=headers)
         expect(response.status_code).to(equal(200))
+
+        # Deactivate a user with a parametrized POST
+        user_to_deactivate = {
+            'id': user_id
+        }
+        response = client.post('/users?action=deactivate'.format(user_id), data=json.dumps(user_to_deactivate), headers=headers)
+        print(response.json, "!!!")
 
         # DELETE the data trusts and by extension delete the users
         response = client.delete('/data_trusts/{}'.format(data_trust_id), headers=headers)

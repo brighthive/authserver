@@ -5,12 +5,22 @@ An API for registering users with Auth Server.
 """
 
 import json
-from flask import Blueprint
-from flask_restful import Resource, Api, request
-from authserver.db import db, DataTrust, DataTrustSchema, User, UserSchema
-from authserver.utilities import ResponseBody
 from datetime import datetime
 
+from flask import Blueprint
+from flask_restful import Api, Resource, request
+from webargs import fields, validate
+from webargs.flaskparser import use_args, use_kwargs
+
+from authserver.db import DataTrust, DataTrustSchema, User, UserSchema, db
+from authserver.utilities import ResponseBody
+
+POST_ARGS = {
+    'action': fields.Str(
+        required=False,
+        validate=validate.OneOf(['deactivate']),
+    )
+}
 
 class UserResource(Resource):
     """A User Resource.
@@ -39,7 +49,8 @@ class UserResource(Resource):
                 return self.response_handler.get_one_response(user_obj, request={'id': id})
             else:
                 return self.response_handler.not_found_response(id)
-
+    
+    @use_args(POST_ARGS)
     def post(self, id: str = None):
         if id is not None:
             return self.response_handler.method_not_allowed_response()
