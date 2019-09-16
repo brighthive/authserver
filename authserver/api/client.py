@@ -210,7 +210,11 @@ class ClientResource(Resource):
             db.session.rollback()
             exception_name = type(e).__name__
             return self.response_handler.exception_response(exception_name)
-        return self.response_handler.successful_update_response('Client', client_id)
+        return self.response_handler.custom_response(
+            code=200,
+            status='OK',
+            messages={'client_secret': new_secret}
+        )
 
     def _delete_secret(self, client_id):
         new_secret = None
