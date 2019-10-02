@@ -11,6 +11,8 @@ from flask_restful import Resource, Api, request
 from werkzeug.security import gen_salt
 from authlib.flask.oauth2 import current_token
 from authlib.oauth2 import OAuth2Error, OAuth2Request
+from authlib.oauth2.rfc6749 import InvalidGrantError
+
 from authserver.utilities import ResponseBody
 from authserver.db import db, User, OAuth2Client
 from authserver.utilities.oauth2 import authorization, require_oauth

@@ -27,7 +27,14 @@ def create_app(environment: str = None):
     else:
         app.config.from_object(ConfigurationFactory.get_config(environment))
     app.config.update(
-        SQLALCHEMY_DATABASE_URI=ConfigurationFactory.get_config(environment).sqlalchemy_database_uri
+        SQLALCHEMY_DATABASE_URI=ConfigurationFactory.get_config(
+            environment).sqlalchemy_database_uri,
+        OAUTH2_TOKEN_EXPIRES_IN={
+            'authorization_code': 864000,
+            'implicit': 3600,
+            'password': 864000,
+            'client_credentials': 60 * 5
+        }
     )
     db.init_app(app)
     config_oauth(app)

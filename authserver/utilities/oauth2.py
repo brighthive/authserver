@@ -4,14 +4,17 @@ This module makes use of Authlib to implement core services of AuthServer.
 
 """
 
-from authlib.flask.oauth2 import AuthorizationServer, ResourceProtector
+from authlib.flask.oauth2 import ResourceProtector
 from authlib.flask.oauth2.sqla import (
     create_query_client_func,
     create_save_token_func,
     create_revocation_endpoint,
     create_bearer_token_validator
 )
+
 from authlib.oauth2.rfc6749 import grants
+
+from authserver.oauth2 import BrightHiveAuthorizationServer, authenticate_client_secret_json
 from werkzeug.security import gen_salt
 from authserver.db import db, User, OAuth2Client, OAuth2AuthorizationCode, OAuth2Token
 
@@ -53,7 +56,8 @@ class PasswordGrant(grants.ResourceOwnerPasswordCredentialsGrant):
 
 class RefreshTokenGrant(grants.RefreshTokenGrant):
     def authenticate_refresh_token(self, refresh_token):
-        token = OAuth2Token.query.filter_by(refresh_token=refresh_token).first()
+        token = OAuth2Token.query.filter_by(
+            refresh_token=refresh_token).first()
         if token and not token.revoked and not token.is_refresh_token_expired():
             return token
 
@@ -63,38 +67,26 @@ class RefreshTokenGrant(grants.RefreshTokenGrant):
 
 class ClientCredentialsGrant(grants.ClientCredentialsGrant):
     TOKEN_ENDPOINT_AUTH_METHODS = [
-        'client_secret_basic',
-        'client_secret_post'
+        'client_secret_json'
     ]
 
 
 query_client = create_query_client_func(db.session, OAuth2Client)
 save_token = create_save_token_func(db.session, OAuth2Token)
-authorization = AuthorizationServer(
+authorization = BrightHiveAuthorizationServer(
     query_client=query_client,
     save_token=save_token,
 )
 require_oauth = ResourceProtector()
 
 
-# def foo(query_client, request):
-#     print(request.headers)
-#     print(request.data)
-#     print('authing')
-#     return query_client('')
-
-
 def config_oauth(app):
     authorization.init_app(app)
+    authorization.register_client_auth_method(
+        'client_secret_json', authenticate_client_secret_json)
 
-    # authorization.register_client_auth_method(method='client_secret_post', func=foo)
-
-    # support all grants
-    # authorization.register_grant(grants.ImplicitGrant)
+    # supported grant types
     authorization.register_grant(ClientCredentialsGrant)
-    # authorization.register_grant(AuthorizationCodeGrant)
-    # authorization.register_grant(PasswordGrant)
-    # authorization.register_grant(RefreshTokenGrant)
 
     # support revocation
     revocation_cls = create_revocation_endpoint(db.session, OAuth2Token)
