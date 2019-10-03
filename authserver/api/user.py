@@ -13,7 +13,7 @@ from webargs import fields, validate
 from webargs.flaskparser import use_args, use_kwargs
 
 from authserver.db import DataTrust, DataTrustSchema, User, UserSchema, db, OAuth2Client
-from authserver.utilities import ResponseBody
+from authserver.utilities import ResponseBody, require_oauth
 
 POST_ARGS = {
     'action': fields.Str(
@@ -21,6 +21,7 @@ POST_ARGS = {
         validate=validate.OneOf(['deactivate']),
     )
 }
+
 
 class UserResource(Resource):
     """A User Resource.
@@ -49,7 +50,7 @@ class UserResource(Resource):
                 return self.response_handler.get_one_response(user_obj, request={'id': id})
             else:
                 return self.response_handler.not_found_response(id)
-    
+
     @use_args(POST_ARGS)
     def post(self, action, id: str = None):
         # Check for data, since all POST requests need it.
@@ -62,7 +63,7 @@ class UserResource(Resource):
 
         if id is not None:
             return self.response_handler.method_not_allowed_response()
-        
+
         # Check for query params/webargs (i.e., action).
         if action:
             try:
@@ -76,7 +77,7 @@ class UserResource(Resource):
         if errors:
             return self.response_handler.custom_response(code=422, messages=errors)
         try:
-            user = User(request_data['username'], firstname=request_data['firstname'], lastname=request_data['lastname'],
+            user = User(request_data['username'], request_data['password'], firstname=request_data['firstname'], lastname=request_data['lastname'],
                         organization=request_data['organization'], email_address=request_data['email_address'],
                         data_trust_id=request_data['data_trust_id'])
             if 'telephone' in request_data.keys():
@@ -148,12 +149,12 @@ class UserResource(Resource):
             db.session.rollback()
             exception_name = type(e).__name__
             return self.response_handler.exception_response(exception_name, request=request_data)
-    
+
     def _deactivate(self, user_id: str):
         user = User.query.filter_by(id=user_id).first()
         if not user:
             return self.response_handler.not_found_response(user_id)
-        
+
         user.active = False
         self._db_commit()
 
@@ -163,7 +164,7 @@ class UserResource(Resource):
             self._db_commit()
 
         return self.response_handler.successful_update_response('User', user_id)
-    
+
     def _db_commit(self):
         try:
             db.session.commit()

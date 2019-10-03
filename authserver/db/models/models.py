@@ -2,6 +2,7 @@
 
 import time
 import json
+import bcrypt
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import text as sa_text
@@ -16,7 +17,8 @@ ma = Marshmallow()
 
 
 roles = db.Table('roles',
-                 db.Column('client_id', db.String, db.ForeignKey('oauth2_clients.id'), primary_key=True),
+                 db.Column('client_id', db.String, db.ForeignKey(
+                     'oauth2_clients.id'), primary_key=True),
                  db.Column('role_id', db.String, db.ForeignKey('oauth2_roles.id'), primary_key=True))
 
 
@@ -74,13 +76,28 @@ class User(db.Model):
     email_address = db.Column(db.String(40), nullable=False)
     telephone = db.Column(db.String(20), nullable=True)
     active = db.Column(db.Boolean, nullable=False, default=True)
-    data_trust_id = db.Column(db.String, db.ForeignKey('data_trusts.id', ondelete='CASCADE'), nullable=False)
+    data_trust_id = db.Column(db.String, db.ForeignKey(
+        'data_trusts.id', ondelete='CASCADE'), nullable=False)
+    password_hash = db.Column(db.String(128))
     date_created = db.Column(db.TIMESTAMP)
     date_last_updated = db.Column(db.TIMESTAMP)
 
-    def __init__(self, username, firstname, lastname, organization, email_address, data_trust_id, telephone=None):
+    @property
+    def password(self):
+        raise AttributeError('Password cannot be read')
+
+    @password.setter
+    def password(self, password):
+        salt = bcrypt.gensalt()
+        self.password_hash = bcrypt.hashpw(password, salt)
+
+    def verify_password(self, password):
+        return bcrypt.checkpw(password, self.password_hash)
+
+    def __init__(self, username, password, firstname, lastname, organization, email_address, data_trust_id, telephone=None):
         self.id = str(uuid4()).replace('-', '')
         self.username = username
+        self.password = password
         self.firstname = firstname
         self.lastname = lastname
         self.organization = organization
@@ -105,6 +122,7 @@ class UserSchema(ma.Schema):
 
     id = fields.String(dump_only=True)
     username = fields.String(required=True)
+    password = fields.String(required=True)
     firstname = fields.String(required=True)
     lastname = fields.String(required=True)
     organization = fields.String(required=True)

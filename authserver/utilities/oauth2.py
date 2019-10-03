@@ -17,6 +17,7 @@ from authlib.oauth2.rfc6749 import grants
 from authserver.oauth2 import BrightHiveAuthorizationServer, authenticate_client_secret_json
 from werkzeug.security import gen_salt
 from authserver.db import db, User, OAuth2Client, OAuth2AuthorizationCode, OAuth2Token
+from authlib.flask.oauth2 import AuthorizationServer
 
 
 class AuthorizationCodeGrant(grants.AuthorizationCodeGrant):
@@ -87,6 +88,7 @@ def config_oauth(app):
 
     # supported grant types
     authorization.register_grant(ClientCredentialsGrant)
+    authorization.register_grant(AuthorizationCodeGrant)
 
     # support revocation
     revocation_cls = create_revocation_endpoint(db.session, OAuth2Token)

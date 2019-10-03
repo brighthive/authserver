@@ -16,7 +16,7 @@ from webargs.flaskparser import use_args, use_kwargs
 
 from authserver.db import (DataTrust, DataTrustSchema, OAuth2Client,
                            OAuth2ClientSchema, Role, User, UserSchema, db)
-from authserver.utilities import ResponseBody
+from authserver.utilities import ResponseBody, require_oauth
 
 POST_ARGS = {
     'action': fields.Str(
@@ -37,6 +37,7 @@ class ClientResource(Resource):
         self.clients_schema = OAuth2ClientSchema(many=True)
         self.response_handler = ResponseBody()
 
+    @require_oauth('admin:fullaccess')
     def get(self, id: str = None):
         if not id:
             clients = OAuth2Client.query.all()

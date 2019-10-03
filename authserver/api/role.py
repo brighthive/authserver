@@ -12,7 +12,7 @@ from flask_restful import Resource, Api, request
 from werkzeug.security import gen_salt
 from authserver.db import db, DataTrust, DataTrustSchema, User, UserSchema, OAuth2Client,\
     OAuth2ClientSchema, Role, RoleSchema
-from authserver.utilities import ResponseBody
+from authserver.utilities import ResponseBody, require_oauth
 
 
 class RoleResource(Resource):

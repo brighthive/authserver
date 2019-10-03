@@ -4,9 +4,10 @@ A simple API for returning health check information to clients.
 
 """
 
-from flask import Blueprint
+from flask import Blueprint, request
 from flask_restful import Resource, Api
 from authserver.config import Configuration
+
 from authserver.utilities import require_oauth
 
 

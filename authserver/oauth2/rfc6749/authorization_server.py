@@ -28,6 +28,7 @@ class BrightHiveAuthorizationServer(AuthorizationServer):
             (obj): The OAuth2Request object.
 
         """
+
         request_cls = OAuth2Request
 
         if isinstance(request, request_cls):

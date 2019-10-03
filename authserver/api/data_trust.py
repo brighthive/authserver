@@ -6,9 +6,10 @@ A simple API for returning health check information to clients.
 
 from flask import Blueprint
 from flask_restful import Resource, Api, request
-from authserver.db import db, DataTrust, DataTrustSchema
-from authserver.utilities import ResponseBody
 from datetime import datetime
+
+from authserver.db import db, DataTrust, DataTrustSchema
+from authserver.utilities import ResponseBody, require_oauth
 
 
 class DataTrustResource(Resource):
@@ -96,7 +97,8 @@ class DataTrustResource(Resource):
             return self.response_handler.not_found_response(id)
         if not request_data:
             return self.response_handler.empty_request_body_response()
-        data, errors = self.data_trust_schema.load(request_data, partial=partial)
+        data, errors = self.data_trust_schema.load(
+            request_data, partial=partial)
         if errors:
             return self.response_handler.custom_response(code=422, messages=errors)
 
@@ -115,4 +117,5 @@ class DataTrustResource(Resource):
 
 data_trust_bp = Blueprint('data_trust_ep', __name__)
 data_trust_api = Api(data_trust_bp)
-data_trust_api.add_resource(DataTrustResource, '/data_trusts', '/data_trusts/<string:id>')
+data_trust_api.add_resource(
+    DataTrustResource, '/data_trusts', '/data_trusts/<string:id>')
