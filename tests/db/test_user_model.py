@@ -16,7 +16,7 @@ class TestUserModel:
             db.session.commit()
 
             # Create a new user
-            new_user = User(username='demo', firstname='Demonstration', lastname='User',
+            new_user = User(username='demo', password='password', firstname='Demonstration', lastname='User',
                             organization='Sample Organization', email_address='demo@me.com',
                             data_trust_id=trust_id, telephone='304-555-1234')
             db.session.add(new_user)
@@ -26,7 +26,7 @@ class TestUserModel:
             expect(found_user.id).to(equal(user_id))
 
             # Do not allow creation of users with the same username
-            duplicate_user = User(username='demo', firstname='Demonstration', lastname='User',
+            duplicate_user = User(username='demo', password='password', firstname='Demonstration', lastname='User',
                                   organization='Sample Organization', email_address='demo@me.com',
                                   data_trust_id=trust_id, telephone='304-555-1234')
             duplicate_user_id = duplicate_user.id

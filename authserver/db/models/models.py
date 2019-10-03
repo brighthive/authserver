@@ -87,9 +87,9 @@ class User(db.Model):
         raise AttributeError('Password cannot be read')
 
     @password.setter
-    def password(self, password):
+    def password(self, password: str):
         salt = bcrypt.gensalt()
-        self.password_hash = bcrypt.hashpw(password, salt)
+        self.password_hash = bcrypt.hashpw(password.encode(), salt)
 
     def verify_password(self, password):
         return bcrypt.checkpw(password, self.password_hash)

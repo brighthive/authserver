@@ -37,7 +37,6 @@ class ClientResource(Resource):
         self.clients_schema = OAuth2ClientSchema(many=True)
         self.response_handler = ResponseBody()
 
-    @require_oauth('admin:fullaccess')
     def get(self, id: str = None):
         if not id:
             clients = OAuth2Client.query.all()

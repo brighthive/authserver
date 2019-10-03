@@ -14,7 +14,6 @@ from authserver.utilities import require_oauth
 class HealthCheckResource(Resource):
     """A simple health check resource."""
 
-    @require_oauth()
     def get(self):
         return Configuration.get_app_status(), 200
 

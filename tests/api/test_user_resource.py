@@ -8,6 +8,7 @@ USERS = [
     {
         'username': 'test-user-1',
         'email_address': 'demo@me.com',
+        'password': 'password',
         'firstname': 'David',
         'lastname': 'Michaels',
         'organization': 'BrightHive',
@@ -16,6 +17,7 @@ USERS = [
     {
         'username': 'test-user-2',
         'email_address': 'demo2@me.com',
+        'password': 'password',
         'firstname': 'Janet',
         'lastname': 'Ferguson',
         'organization': 'Second Organization'
@@ -23,6 +25,7 @@ USERS = [
     {
         'username': 'test-user-3',
         'email_address': 'demo3@me.com',
+        'password': 'password',
         'firstname': 'James',
         'lastname': 'Piper',
         'organization': 'Second Organization'
@@ -80,6 +83,7 @@ class TestUserResource:
 
         # Rename a user with a PUT, providing the entire object
         added_users[0]['firstname'] = new_name
+        added_users[0]['password'] = 'password'
         response = client.put('/users/{}'.format(user_id), data=json.dumps(added_users[0]), headers=headers)
         expect(response.status_code).to(equal(200))
 
