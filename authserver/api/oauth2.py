@@ -39,19 +39,34 @@ def authorize():
         return render_template('authorize.html', user=user, grant=grant)
     if not user and 'username' in request.form:
         username = request.form.get('username')
-        password = request.form.get('password')
         user = User.query.filter_by(username=username).first()
-        if user:
-            if password == 'password':
-                if request.form['confirm']:
-                    grant_user = user
-                else:
-                    grant_user = None
-                return authorization.create_authorization_response(grant_user=grant_user)
-            else:
-                return render_template('authorize.html', user=user, grant=grant)
+    if request.form['confirm']:
+        grant_user = user
     else:
-        return render_template('authorize.html')
+        grant_user = None
+    return authorization.create_authorization_response(grant_user=grant_user)
+    # user = current_user()
+    # if request.method == 'GET':
+    #     try:
+    #         grant = authorization.validate_consent_request(end_user=user)
+    #     except OAuth2Error as error:
+    #         return error.error
+    #     return render_template('authorize.html', user=user, grant=grant)
+    # if not user and 'username' in request.form:
+    #     username = request.form.get('username')
+    #     password = request.form.get('password')
+    #     user = User.query.filter_by(username=username).first()
+    #     if user:
+    #         if password == 'password':
+    #             if request.form['confirm']:
+    #                 grant_user = user
+    #             else:
+    #                 grant_user = None
+    #             return authorization.create_authorization_response(grant_user=grant_user)
+    #         else:
+    #             return render_template('authorize.html', user=user, grant=grant)
+    # else:
+    #     return render_template('authorize.html')
 
 
 class CreateOAuth2TokenResource(Resource):
@@ -92,8 +107,8 @@ class RedirectResource(Resource):
         except Exception:
             code = None
         if code:
-            foo = requests.get(request.base_url + 'http://localhost:8000/oauth/token')
-            print(foo.status_code)
+            # foo = requests.get('http://localhost:8000/oauth/token')
+            # print(foo.status_code)
             return {'message': 'ok'}, 200
 
 

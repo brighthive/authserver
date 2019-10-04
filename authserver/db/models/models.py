@@ -94,6 +94,9 @@ class User(db.Model):
     def verify_password(self, password):
         return bcrypt.checkpw(password, self.password_hash)
 
+    def get_user_id(self):
+        return self.id
+
     def __init__(self, username, password, firstname, lastname, organization, email_address, data_trust_id, telephone=None):
         self.id = str(uuid4()).replace('-', '')
         self.username = username

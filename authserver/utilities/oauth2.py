@@ -12,23 +12,31 @@ from authlib.flask.oauth2.sqla import (
     create_bearer_token_validator
 )
 
-from authlib.oauth2.rfc6749 import grants
+from authlib.oauth2.rfc6749.errors import (
+    UnauthorizedClientError,
+    InvalidClientError,
+    InvalidRequestError,
+    AccessDeniedError,
+)
 
-from authserver.oauth2 import BrightHiveAuthorizationServer, authenticate_client_secret_json
-from werkzeug.security import gen_salt
-from authserver.db import db, User, OAuth2Client, OAuth2AuthorizationCode, OAuth2Token
+from authlib.oauth2.rfc6749 import grants
 from authlib.flask.oauth2 import AuthorizationServer
+from werkzeug.security import gen_salt
+from authserver.oauth2 import BrightHiveAuthorizationServer, authenticate_client_secret_json
+from authserver.db import db, User, OAuth2Client, OAuth2AuthorizationCode, OAuth2Token
 
 
 class AuthorizationCodeGrant(grants.AuthorizationCodeGrant):
-    def create_authorization_code(self, client, user, request):
+    TOKEN_ENDPOINT_AUTH_METHODS = ['client_secret_basic', 'client_secret_post']
+
+    def create_authorization_code(self, client, grant_user, request):
         code = gen_salt(48)
         item = OAuth2AuthorizationCode(
             code=code,
             client_id=client.client_id,
             redirect_uri=request.redirect_uri,
             scope=request.scope,
-            user_id=user.id,
+            user_id=grant_user.id
         )
         db.session.add(item)
         db.session.commit()
@@ -78,6 +86,10 @@ authorization = BrightHiveAuthorizationServer(
     query_client=query_client,
     save_token=save_token,
 )
+# authorization = AuthorizationServer(
+#     query_client=query_client,
+#     save_token=save_token
+# )
 require_oauth = ResourceProtector()
 
 

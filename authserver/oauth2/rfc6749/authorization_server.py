@@ -37,6 +37,13 @@ class BrightHiveAuthorizationServer(AuthorizationServer):
         if not request:
             request = flask_req
 
+        # in case we cannot determine if the header is json, we hand the workload off to the base method.
+        try:
+            if request.headers['Content-Type'] != 'application/json':
+                return self.create_authorization_request(request)
+        except Exception:
+            return self.create_oauth2_request(request)
+
         if request.method == 'POST':
             body = request.json
         else:
@@ -57,6 +64,7 @@ class BrightHiveAuthorizationServer(AuthorizationServer):
             (func): An error handler in the event of an InvalidGrantError or OAuth2Error.
         """
         request = self.create_oauth2_request_from_json(request)
+
         try:
             grant = self.get_token_grant(request)
         except InvalidGrantError as error:
