@@ -34,7 +34,8 @@ def create_app(environment: str = None):
             'implicit': 3600,
             'password': 864000,
             'client_credentials': 60 * 5
-        }
+        },
+        SECRET_KEY=b'iamasupersecretsecretkey'
     )
     db.init_app(app)
     config_oauth(app)

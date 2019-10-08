@@ -7,7 +7,7 @@ An API for handling OAuth 2.0 interactions.
 import json
 import requests
 from datetime import datetime
-from flask import Blueprint, request, session, render_template
+from flask import Blueprint, request, session, render_template, redirect, url_for
 from flask_restful import Resource, Api, request
 from werkzeug.security import gen_salt
 from authlib.flask.oauth2 import current_token
@@ -18,7 +18,8 @@ from authserver.utilities import ResponseBody
 from authserver.db import db, User, OAuth2Client
 from authserver.utilities.oauth2 import authorization, require_oauth
 
-oauth2_bp = Blueprint('oauth2_ep', __name__, template_folder='templates')
+oauth2_bp = Blueprint('oauth2_ep', __name__,
+                      static_folder='static', template_folder='templates', url_prefix='/oauth')
 
 
 def current_user():
@@ -28,9 +29,28 @@ def current_user():
     return None
 
 
-@oauth2_bp.route('/oauth/authorize', methods=['GET', 'POST'])
+@oauth2_bp.route('/login', methods=['GET', 'POST'])
+def login():
+    client_id = request.args.get('client_id')
+    return_to = request.args.get('return_to')
+    if request.method == 'GET':
+        return render_template('login.html', client_id=client_id, return_to=return_to)
+    username = request.form.get('username')
+    password = request.form.get('password')
+    user = User.query.filter_by(username=username).first()
+    if user and user.verify_password(password):
+        session['id'] = user.id
+        return redirect(return_to)
+    else:
+        return redirect(url_for('oauth2_ep.login', client_id=client_id, return_to=return_to))
+
+
+@oauth2_bp.route('/authorize', methods=['GET', 'POST'])
 def authorize():
     user = current_user()
+    if not user:
+        client_id = request.args.get('client_id')
+        return redirect(url_for('oauth2_ep.login', client_id=client_id, return_to=request.url))
     if request.method == 'GET':
         try:
             grant = authorization.validate_consent_request(end_user=user)
@@ -45,28 +65,6 @@ def authorize():
     else:
         grant_user = None
     return authorization.create_authorization_response(grant_user=grant_user)
-    # user = current_user()
-    # if request.method == 'GET':
-    #     try:
-    #         grant = authorization.validate_consent_request(end_user=user)
-    #     except OAuth2Error as error:
-    #         return error.error
-    #     return render_template('authorize.html', user=user, grant=grant)
-    # if not user and 'username' in request.form:
-    #     username = request.form.get('username')
-    #     password = request.form.get('password')
-    #     user = User.query.filter_by(username=username).first()
-    #     if user:
-    #         if password == 'password':
-    #             if request.form['confirm']:
-    #                 grant_user = user
-    #             else:
-    #                 grant_user = None
-    #             return authorization.create_authorization_response(grant_user=grant_user)
-    #         else:
-    #             return render_template('authorize.html', user=user, grant=grant)
-    # else:
-    #     return render_template('authorize.html')
 
 
 class CreateOAuth2TokenResource(Resource):
@@ -113,6 +111,6 @@ class RedirectResource(Resource):
 
 
 oauth2_api = Api(oauth2_bp)
-oauth2_api.add_resource(CreateOAuth2TokenResource, '/oauth/token')
-oauth2_api.add_resource(RevokeOAuth2TokenResource, '/oauth/revoke')
+oauth2_api.add_resource(CreateOAuth2TokenResource, '/token')
+oauth2_api.add_resource(RevokeOAuth2TokenResource, '/revoke')
 oauth2_api.add_resource(RedirectResource, '/redirect')

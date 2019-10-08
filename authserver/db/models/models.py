@@ -78,7 +78,7 @@ class User(db.Model):
     active = db.Column(db.Boolean, nullable=False, default=True)
     data_trust_id = db.Column(db.String, db.ForeignKey(
         'data_trusts.id', ondelete='CASCADE'), nullable=False)
-    password_hash = db.Column(db.String(128))
+    password_hash = db.Column(db.String(128), nullable=False)
     date_created = db.Column(db.TIMESTAMP)
     date_last_updated = db.Column(db.TIMESTAMP)
 
@@ -88,11 +88,16 @@ class User(db.Model):
 
     @password.setter
     def password(self, password: str):
-        salt = bcrypt.gensalt()
-        self.password_hash = bcrypt.hashpw(password.encode(), salt)
+        self.password_hash = bcrypt.hashpw(password.encode(
+            'utf-8'), bcrypt.gensalt()).decode('utf-8')
 
-    def verify_password(self, password):
-        return bcrypt.checkpw(password, self.password_hash)
+    def verify_password(self, password: str):
+        try:
+            print(self.password_hash.encode())
+            return bcrypt.checkpw(password.encode('utf-8'), self.password_hash.encode('utf-8'))
+        except Exception as e:
+            print(e)
+            return False
 
     def get_user_id(self):
         return self.id
