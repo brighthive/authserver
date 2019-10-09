@@ -73,6 +73,7 @@ class UserResource(Resource):
         self.users_schema = UserSchema(many=True)
         self.response_handler = ResponseBody()
 
+    @require_oauth()
     def get(self, id: str = None):
         if not id:
             users = User.query.all()
@@ -86,6 +87,7 @@ class UserResource(Resource):
             else:
                 return self.response_handler.not_found_response(id)
 
+    @require_oauth()
     @use_args(POST_ARGS)
     def post(self, action, id: str = None):
         # Check for data, since all POST requests need it.
@@ -127,17 +129,20 @@ class UserResource(Resource):
             return self.response_handler.exception_response(exception_name, request=request_data)
         return self.response_handler.successful_creation_response('User', user.id, request_data)
 
+    @require_oauth()
     def put(self, id: str = None):
         if id is None:
             return self.response_handler.method_not_allowed_response()
 
         return self._update(id, False)
 
+    @require_oauth()
     def patch(self, id: str = None):
         if id is None:
             return self.response_handler.method_not_allowed_response()
         return self._update(id)
 
+    @require_oauth()
     def delete(self, id: str = None):
         if id is None:
             return self.response_handler.method_not_allowed_response()
