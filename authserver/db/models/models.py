@@ -257,6 +257,8 @@ class OAuth2AuthorizationCode(db.Model, OAuth2AuthorizationCodeMixin):
     user_id = db.Column(
         db.String, db.ForeignKey('users.id', ondelete='CASCADE'))
     user = db.relationship('User')
+    code_challenge = db.Column(db.VARCHAR())
+    code_challenge_method = db.Column(db.VARCHAR())
 
 
 class OAuth2Token(db.Model, OAuth2TokenMixin):
