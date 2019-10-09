@@ -174,8 +174,10 @@ class UserResource(Resource):
             return self.response_handler.custom_response(code=422, messages=errors)
 
         for k, v in request_data.items():
-            if hasattr(user, k):
+            if hasattr(user, k) and k != 'password_hash':
                 setattr(user, k, v)
+            if k == 'password':
+                user.password = v
         try:
             user.date_last_updated = datetime.utcnow()
             db.session.commit()
