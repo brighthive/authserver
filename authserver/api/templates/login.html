@@ -1,13 +1,12 @@
 {% extends 'base.html' %}
 {% block content %}
-<form action="" method="post">
+{% from "_formhelpers.html" import render_field %}
+<form method="post">
     <div>
-        <label for="username">Username</label>
-        <input type="text" name="username" id="username">
+        {{ render_field(form.username) }}
     </div>
     <div>
-        <label for="password">Password</label>
-        <input type="password" name="password" id="password">
+        {{ render_field(form.password) }}
     </div>
     <br>
     <button>Sign In</button>

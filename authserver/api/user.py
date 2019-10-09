@@ -12,7 +12,7 @@ from flask_restful import Api, Resource, request
 from webargs import fields, validate
 from webargs.flaskparser import use_args, use_kwargs
 
-from authserver.db import DataTrust, DataTrustSchema, User, UserSchema, db, OAuth2Client
+from authserver.db import DataTrust, DataTrustSchema, User, UserSchema, db, OAuth2Client, OAuth2Token
 from authserver.utilities import ResponseBody, require_oauth
 
 POST_ARGS = {
@@ -21,6 +21,41 @@ POST_ARGS = {
         validate=validate.OneOf(['deactivate']),
     )
 }
+
+
+class UserDetailResource(Resource):
+    """Details of the currently logged in user."""
+
+    @require_oauth()
+    def get(self):
+        try:
+            token = request.headers.get('authorization').split(' ')[1]
+        except Exception:
+            token = None
+
+        if token:
+            token_details = OAuth2Token.query.filter_by(access_token=token).first()
+            if token_details:
+                user_id = token_details.user_id
+                user = User.query.filter_by(id=user_id).first()
+                return {
+                    'id': user.id,
+                    'username': user.username,
+                    'firstname': user.firstname,
+                    'lastname': user.lastname,
+                    'organization': user.organization,
+                    'email_address': user.email_address,
+                    'telephone': user.telephone,
+                    'active': user.active,
+                    'data_trust_id': user.data_trust_id,
+                    'date_created': str(user.date_created),
+                    'date_last_updated': str(user.date_last_updated)
+                }
+
+        return {
+            'firstname': 'Unknown',
+            'lastname': 'Unknown'
+        }
 
 
 class UserResource(Resource):
@@ -177,3 +212,4 @@ class UserResource(Resource):
 user_bp = Blueprint('user_ep', __name__)
 user_api = Api(user_bp)
 user_api.add_resource(UserResource, '/users', '/users/<string:id>')
+user_api.add_resource(UserDetailResource, '/user')

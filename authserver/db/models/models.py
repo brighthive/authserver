@@ -93,7 +93,6 @@ class User(db.Model):
 
     def verify_password(self, password: str):
         try:
-            print(self.password_hash.encode())
             return bcrypt.checkpw(password.encode('utf-8'), self.password_hash.encode('utf-8'))
         except Exception as e:
             print(e)

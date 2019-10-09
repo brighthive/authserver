@@ -29,28 +29,12 @@ def current_user():
     return None
 
 
-@oauth2_bp.route('/login', methods=['GET', 'POST'])
-def login():
-    client_id = request.args.get('client_id')
-    return_to = request.args.get('return_to')
-    if request.method == 'GET':
-        return render_template('login.html', client_id=client_id, return_to=return_to)
-    username = request.form.get('username')
-    password = request.form.get('password')
-    user = User.query.filter_by(username=username).first()
-    if user and user.verify_password(password):
-        session['id'] = user.id
-        return redirect(return_to)
-    else:
-        return redirect(url_for('oauth2_ep.login', client_id=client_id, return_to=return_to))
-
-
 @oauth2_bp.route('/authorize', methods=['GET', 'POST'])
 def authorize():
     user = current_user()
     if not user:
         client_id = request.args.get('client_id')
-        return redirect(url_for('oauth2_ep.login', client_id=client_id, return_to=request.url))
+        return redirect(url_for('home_ep.login', client_id=client_id, return_to=request.url))
     if request.method == 'GET':
         try:
             grant = authorization.validate_consent_request(end_user=user)
@@ -91,26 +75,6 @@ class RevokeOAuth2TokenResource(Resource):
         return authorization.create_endpoint_response('revocation')
 
 
-class RedirectResource(Resource):
-    """A User Resource.
-
-    This resource defines an Auth Service user who may have zero or more OAuth 2.0 clients
-    associated with their accounts.
-
-    """
-
-    def get(self):
-        try:
-            code = request.args.get('code')
-        except Exception:
-            code = None
-        if code:
-            # foo = requests.get('http://localhost:8000/oauth/token')
-            # print(foo.status_code)
-            return {'message': 'ok'}, 200
-
-
 oauth2_api = Api(oauth2_bp)
 oauth2_api.add_resource(CreateOAuth2TokenResource, '/token')
 oauth2_api.add_resource(RevokeOAuth2TokenResource, '/revoke')
-oauth2_api.add_resource(RedirectResource, '/redirect')
