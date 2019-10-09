@@ -105,7 +105,7 @@ def config_oauth(app):
 
     # supported grant types
     authorization.register_grant(ClientCredentialsGrant)
-    authorization.register_grant(AuthorizationCodeGrant, [CodeChallenge(required=True)])
+    authorization.register_grant(AuthorizationCodeGrant, [CodeChallenge(required=False)])
 
     # support revocation
     revocation_cls = create_revocation_endpoint(db.session, OAuth2Token)
