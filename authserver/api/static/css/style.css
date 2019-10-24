@@ -20,6 +20,12 @@ label {
   font-size: larger;
 }
 
+label.form-check-label {
+  padding-top: 0;
+  color: inherit;
+  font-size: large;
+}
+
 .form-signin {
   width: 50%;
   /* max-width: 330px; */
