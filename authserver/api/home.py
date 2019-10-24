@@ -15,9 +15,11 @@ class LoginForm(Form):
 
 @home_bp.route('/', methods=['GET', 'POST'])
 def login():
+    errors = None
     form = LoginForm(request.form)
     client_id = request.args.get('client_id')
     return_to = request.args.get('return_to')
+
     if request.method == 'GET':
         if not client_id or not return_to:
             return render_template('login.html', form=form)
@@ -27,11 +29,16 @@ def login():
         username = form.username.data
         password = form.password.data
         user = User.query.filter_by(username=username).first()
-        if user and user.verify_password(password):
+
+        if user and user.active and user.verify_password(password):
             session['id'] = user.id
             return redirect(return_to)
+        elif user and not user.active:
+            errors = "You do not have an active user account."
+            return render_template('login.html', client_id=client_id, return_to=return_to, form=form, errors=errors)
         else:
+            errors = "You did not enter valid login credentials."
             if not client_id or not return_to:
                 return redirect(url_for('home_ep.login'))
             else:
-                return redirect(url_for('home_ep.login', client_id=client_id, return_to=return_to))
+                return render_template('login.html', client_id=client_id, return_to=return_to, form=form, errors=errors)
