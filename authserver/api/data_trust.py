@@ -20,6 +20,7 @@ class DataTrustResource(Resource):
         self.data_trusts_schema = DataTrustSchema(many=True)
         self.response_handler = ResponseBody()
 
+    @require_oauth()
     def get(self, id: str = None):
         if not id:
             data_trusts = DataTrust.query.all()
@@ -33,6 +34,7 @@ class DataTrustResource(Resource):
             else:
                 return self.response_handler.not_found_response(id)
 
+    @require_oauth()
     def post(self, id=None):
         if id is not None:
             return self.response_handler.method_not_allowed_response()
@@ -55,17 +57,20 @@ class DataTrustResource(Resource):
             return self.response_handler.exception_response(exception_name, request=request_data)
         return self.response_handler.successful_creation_response('Data Trust', data_trust.id, request_data)
 
+    @require_oauth()
     def put(self, id: str = None):
         if id is None:
             return self.response_handler.method_not_allowed_response()
 
         return self.update(id, False)
 
+    @require_oauth()
     def patch(self, id: str = None):
         if id is None:
             return self.response_handler.method_not_allowed_response()
         return self.update(id)
 
+    @require_oauth()
     def delete(self, id: str = None):
         if id is None:
             return self.response_handler.method_not_allowed_response()

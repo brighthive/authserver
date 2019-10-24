@@ -1,26 +1,24 @@
 {% extends 'base.html' %}
 {% block content %}
-<p>{{grant.client.client_name}} is requesting:
-    <strong>{{ grant.request.scope }}</strong>
-</p>
-
-<form action="" method="post">
-    <label>
-        <input type="checkbox" name="confirm">
-        <span>Consent?</span>
-    </label>
-    {% if not user %}
-    <p>You haven't logged in. Log in with:</p>
-    <div>
-        <label for="username">Username</label>
-        <input type="text" name="username" id="username">
-    </div>
-    <div>
-        <label for="password">Password</label>
-        <input type="password" name="password" id="password">
-    </div>
-    {% endif %}
-    <br>
-    <button>Sign In</button>
-</form>
+<div class="container text-center">
+    <form class="form-consent" method="post">
+        <p><strong>{{ grant.client.client_name }}</strong> is requesting to access your BrightHive account.
+        </p>
+        <p>
+            The following scopes have been requested:
+        </p>
+        <ul class="list-group">
+            <li class="list-group-item"><p class="mb-0">Access your user profile information.</p></li>
+        </ul>
+        <div class="row mt-4 mb-4">
+            <div class="col">
+                <div class="form-check form-check-inline">
+                    <input type="checkbox" class="form-check-input" id="exampleCheck1" name="confirm">
+                    <label class="form-check-label" for="exampleCheck1">Do you consent?</label>
+                </div>
+            </div>
+        </div>
+        <button class="btn btn-lg btn-primary btn-block btn-signin" type="submit">Continue</button>
+    </form>
+</div>
 {% endblock %}

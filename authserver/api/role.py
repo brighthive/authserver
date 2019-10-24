@@ -27,6 +27,7 @@ class RoleResource(Resource):
         self.roles_schema = RoleSchema(many=True)
         self.response_handler = ResponseBody()
 
+    @require_oauth()
     def get(self, id: str = None):
         if not id:
             roles = Role.query.all()
@@ -40,6 +41,7 @@ class RoleResource(Resource):
             else:
                 return self.response_handler.not_found_response(id)
 
+    @require_oauth()
     def post(self, id: str = None):
         if id is not None:
             return self.response_handler.method_not_allowed_response()
@@ -65,17 +67,20 @@ class RoleResource(Resource):
             return self.response_handler.exception_response(exception_name, request=request_data)
         return self.response_handler.successful_creation_response('Role', role.id, request_data)
 
+    @require_oauth()
     def put(self, id: str = None):
         if id is None:
             return self.response_handler.method_not_allowed_response()
 
         return self.update(id, False)
 
+    @require_oauth()
     def patch(self, id: str = None):
         if id is None:
             return self.response_handler.method_not_allowed_response()
         return self.update(id)
 
+    @require_oauth()
     def delete(self, id: str = None):
         if id is None:
             return self.response_handler.method_not_allowed_response()

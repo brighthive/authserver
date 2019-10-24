@@ -25,6 +25,7 @@ POST_ARGS = {
     )
 }
 
+
 class ClientResource(Resource):
     """Client Resource
 
@@ -37,6 +38,7 @@ class ClientResource(Resource):
         self.clients_schema = OAuth2ClientSchema(many=True)
         self.response_handler = ResponseBody()
 
+    @require_oauth()
     def get(self, id: str = None):
         if not id:
             clients = OAuth2Client.query.all()
@@ -50,6 +52,7 @@ class ClientResource(Resource):
             else:
                 return self.response_handler.not_found_response(id)
 
+    @require_oauth()
     @use_args(POST_ARGS)
     def post(self, action, id: str = None):
         '''
@@ -81,7 +84,7 @@ class ClientResource(Resource):
         # Assume that the request intends to create a new user: an ID should not be in the request data.
         if id is not None:
             return self.response_handler.method_not_allowed_response()
-        
+
         data, errors = self.client_schema.load(request_data)
         if errors:
             return self.response_handler.custom_response(code=422, messages=errors)
@@ -114,17 +117,20 @@ class ClientResource(Resource):
             return self.response_handler.exception_response(exception_name, request=request_data)
         return self.response_handler.successful_creation_response('Client', client.id, request_data)
 
+    @require_oauth()
     def put(self, id: str = None):
         if id is None:
             return self.response_handler.method_not_allowed_response()
 
         return self.update(id, False)
 
+    @require_oauth()
     def patch(self, id: str = None):
         if id is None:
             return self.response_handler.method_not_allowed_response()
         return self.update(id)
 
+    @require_oauth()
     def delete(self, id: str = None):
         if id is None:
             return self.response_handler.method_not_allowed_response()
@@ -196,12 +202,13 @@ class ClientResource(Resource):
     def _update_secret(self, client_id: str, new_secret):
         """Helper function for updating the client_secret.
 
-        This function serves the delete and rotate actions, available in the POST method. 
+        This function serves the delete and rotate actions, available in the POST method.
+
         """
         client = OAuth2Client.query.filter_by(id=client_id).first()
         if not client:
             return self.response_handler.not_found_response(client_id)
-        
+
         client.client_secret = new_secret
 
         try:
@@ -219,11 +226,11 @@ class ClientResource(Resource):
     def _delete_secret(self, client_id):
         new_secret = None
         return self._update_secret(client_id, new_secret)
-    
+
     def _rotate_secret(self, client_id):
         new_secret = gen_salt(48)
         return self._update_secret(client_id, new_secret)
-    
+
 
 client_bp = Blueprint('client_ep', __name__)
 client_api = Api(client_bp)

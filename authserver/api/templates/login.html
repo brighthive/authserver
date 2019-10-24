@@ -1,14 +1,17 @@
 {% extends 'base.html' %}
 {% block content %}
-{% from "_formhelpers.html" import render_field %}
-<form method="post">
-    <div>
-        {{ render_field(form.username) }}
+<form class="form-signin" method="post">
+    <div class="text-right">
+        <img class="mb-4" src="{{ url_for('oauth2_ep.static', filename='images/brighthive_facet_logo.png')}}"
+            alt="BrightHive Logo">
     </div>
-    <div>
-        {{ render_field(form.password) }}
+    {% from '_formhelpers.html' import render_field %}
+    {{ render_field(form.username, class='form-control', autofocus='true') }}
+    {{ render_field(form.password, class='form-control') }}
+    <div class="row btn-offset">
+        <div class="col-md-3 offset-9">
+            <button class="btn btn-lg btn-primary btn-block btn-signin" type="submit">Sign in</button>
+        </div>
     </div>
-    <br>
-    <button>Sign In</button>
 </form>
 {% endblock %}
