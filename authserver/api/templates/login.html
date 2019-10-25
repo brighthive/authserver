@@ -6,7 +6,7 @@
             alt="BrightHive Logo">
     </div>
     {% if errors %}
-        <div class="alert alert-danger">{{errors}}</div>
+        <div class="alert alert-danger mt-4">{{errors}}</div>
     {% endif %}
     {% from '_formhelpers.html' import render_field %}
     {{ render_field(form.username, class='form-control', autofocus='true') }}
