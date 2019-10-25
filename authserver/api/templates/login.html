@@ -5,6 +5,9 @@
         <img class="mb-4" src="{{ url_for('oauth2_ep.static', filename='images/brighthive_facet_logo.png')}}"
             alt="BrightHive Logo">
     </div>
+    {% if errors %}
+        <div class="alert alert-danger mt-4">{{errors}}</div>
+    {% endif %}
     {% from '_formhelpers.html' import render_field %}
     {{ render_field(form.username, class='form-control', autofocus='true') }}
     {{ render_field(form.password, class='form-control') }}
