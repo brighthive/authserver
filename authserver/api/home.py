@@ -31,19 +31,15 @@ def login():
         password = form.password.data
         user = User.query.filter_by(username=username).first()
 
-        if user:
+        try:
             if not user.active:
                 errors = "You do not have an active user account."
-                return render_template('login.html', client_id=client_id, return_to=return_to, form=form, errors=errors)
             elif not user.verify_password(password):
                 errors = "You did not enter a valid password."
-                return render_template('login.html', client_id=client_id, return_to=return_to, form=form, errors=errors)
-            elif user.active and user.verify_password(password):
+            else: 
                 session['id'] = user.id
                 return redirect(return_to)
-        else:
+        except AttributeError:
             errors = "You did not enter valid login credentials."
-            if not client_id or not return_to:
-                return redirect(url_for('home_ep.login'))
-            else:
-                return render_template('login.html', client_id=client_id, return_to=return_to, form=form, errors=errors)
+
+        return render_template('login.html', client_id=client_id, return_to=return_to, form=form, errors=errors)
