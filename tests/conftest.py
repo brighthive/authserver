@@ -23,7 +23,6 @@ def data_trust(app):
 @pytest.fixture(scope='session')
 def user(app, data_trust):
     with app.app_context():
-        # dt = DataTrust.query.filter_by(data_trust_name="trusty trust").first()
         user_data = {
             'username': 'test-user-1',
             'email_address': 'demo@me.com',
