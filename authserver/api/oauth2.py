@@ -28,6 +28,14 @@ def current_user():
         return User.query.get(uid)
     return None
 
+def clear_user_session():
+    '''
+    This function clears the Authserver user session.
+    The `authorize` endpoint calls it, immediately before the redirect, since
+    the authorized user no longer needs the Authserver UI.
+    '''
+    if 'id' in session:
+        session.pop('id')
 
 @oauth2_bp.route('/authorize', methods=['GET', 'POST'])
 def authorize():
@@ -48,6 +56,9 @@ def authorize():
         grant_user = user
     else:
         grant_user = None
+
+    clear_user_session()
+
     return authorization.create_authorization_response(grant_user=grant_user)
 
 
