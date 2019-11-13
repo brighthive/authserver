@@ -7,7 +7,6 @@ body {
   display: -ms-flexbox;
   display: -webkit-box;
   display: flex;
-  padding-top: 40px;
   padding-bottom: 40px;
   background-color: #333333;
   font-family: 'Raleway', sans-serif;
@@ -26,21 +25,9 @@ label.form-check-label {
   font-size: large;
 }
 
-.form-signin {
-  width: 50%;
-  /* max-width: 330px; */
-  padding: 15px;
-  margin: 0 auto;
-}
-.form-signin .checkbox {
-  font-weight: 500;
-}
-.form-signin .form-control {
-  position: relative;
-  box-sizing: border-box;
-  height: auto;
-  padding: 10px;
-  font-size: 16px;
+.form-control {
+  border-radius: 0;
+  border: 0;
 }
 .form-signin .form-control:focus {
   z-index: 2;
@@ -57,18 +44,7 @@ label.form-check-label {
 }
 
 .form-consent {
-  background-color:  #f5f5f5;
-  width: 50%;
-  margin: 0px auto;
-  height: 100%;
-  max-height: 350px;
-  padding: 25px;
-  border-style: solid;
-  border-width: 1px;
-  border-color: #d3d3d3;
-}
-
-.form-consent p {
+  color: #fff;
   font-size: large;
 }
 
@@ -121,6 +97,20 @@ label.form-check-label {
   text-decoration: none;
 }
 
-.btn-offset {
-  margin-top: 75px;
+/* Bootstrap/Atomic Classes */
+.pr-6 {
+  padding-right: 4.25rem;
+}
+
+.mt-6 {
+  margin-top: 4.25rem;
+}
+
+.mb-6 {
+  margin-bottom: 4.25rem;
+}
+
+.navbar {
+  display: block;
+  color: #fff;
 }

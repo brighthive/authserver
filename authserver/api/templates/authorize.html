@@ -1,24 +1,20 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="container text-center">
-    <form class="form-consent" method="post">
-        <p><strong>{{ grant.client.client_name }}</strong> is requesting to access your BrightHive account.
-        </p>
-        <p>
-            The following scopes have been requested:
-        </p>
-        <ul class="list-group">
-            <li class="list-group-item"><p class="mb-0">Access your user profile information.</p></li>
-        </ul>
-        <div class="row mt-4 mb-4">
-            <div class="col">
-                <div class="form-check form-check-inline">
-                    <input type="checkbox" class="form-check-input" id="exampleCheck1" name="confirm">
-                    <label class="form-check-label" for="exampleCheck1">Do you consent?</label>
+<div class="row">
+    <div class="col-md-6 offset-md-3 col-sm-8 offset-sm-2 mt-6">
+        <form class="form-consent" method="post">
+            <p><strong>{{ grant.client.client_name }}</strong> is requesting to access your BrightHive account.
+            </p>
+            <div class="row mt-4 mb-4">
+                <div class="col">
+                    <div class="form-check form-check-inline">
+                        <input type="checkbox" class="form-check-input" id="exampleCheck1" name="confirm">
+                        <label class="form-check-label" for="exampleCheck1">I understand. I consent to submit my user profile information to {{ grant.client.client_name }}.</label>
+                    </div>
                 </div>
             </div>
-        </div>
-        <button class="btn btn-lg btn-primary btn-block btn-signin" type="submit">Continue</button>
-    </form>
+            <button class="btn btn-lg btn-primary float-right mt-5 pr-5 pl-5" type="submit">Continue</button>
+        </form>
+    </div>
 </div>
 {% endblock %}
