@@ -48,6 +48,10 @@ label.form-check-label {
   font-size: large;
 }
 
+.alert {
+  border-radius: 0;
+}
+
 .alert-danger {
   color: #f00000;
   background-color: #ffb3b3;
