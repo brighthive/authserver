@@ -13,8 +13,23 @@
 </head>
 
 <body>
-    {% block content %}
-    {% endblock %}
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col mt-6 mb-5 pr-6">
+                <img class="float-right img-fluid img-max" 
+                    src="{{ url_for('oauth2_ep.static', filename='images/brighthive-2019-interim-logo-horizonal-white.png')}}"
+                    alt="BrightHive Logo">
+            </div>
+        </div>
+        {% block content %}
+        {% endblock %}
+        <div class="navbar fixed-bottom mb-4 ml-3">
+            <img class="img-fluid img-xs-max float-left" 
+                src="{{ url_for('oauth2_ep.static', filename='images/brighthive-2019-interim-logo-honeycomb.png')}}"
+                alt="BrightHive Logo">
+            <p class="float-left ml-2 mb-0 mt-3">powered by authserver</p>
+        </div>
+    </div>
 </body>
 
 </html>
