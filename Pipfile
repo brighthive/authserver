@@ -28,6 +28,7 @@ bcrypt = "*"
 flask-cors = "*"
 webargs = "*"
 flask-wtf = "*"
+gevent = "*"
 
 [requires]
 python_version = "3.7"
