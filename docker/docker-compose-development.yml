@@ -1,11 +1,22 @@
 
 version: '3'
 services:
-  postgres:
+  postgres_authserver:
     image: postgres:11.2
     ports:
       - 5432:5432
     environment:
       - POSTGRES_USER=dev_user
       - POSTGRES_PASSWORD=dev_password
-      - POSTGRES_DB=authservice_dev
+      - POSTGRES_DB=authserver
+  authserver:
+    image: brighthive/authserver:latest
+    environment:
+      - APP_ENV=DEVELOPMENT
+      - PG_USER=dev_user
+      - PG_PASSWORD=dev_password
+      - PG_DB=authserver
+    ports:
+      - 8000:8000
+    depends_on:
+      - postgres_authserver
