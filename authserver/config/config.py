@@ -59,17 +59,16 @@ class DevelopmentConfiguration(Configuration):
     ENV = 'development'
     DEBUG = True
     TESTING = False
-
+    
     def __init__(self):
         super().__init__()
         os.environ['AUTHLIB_INSECURE_TRANSPORT'] = '1'
         self.configuration_name = 'DEVELOPMENT'
-        self.postgres_user = 'dev_user'
-        self.postgres_password = 'dev_password'
-        self.postgres_hostname = 'localhost'
-        self.container_name = 'postgres-dev'
-        self.postgres_database = 'authservice_dev'
-        self.postgres_port = 5432
+        self.postgres_user = os.getenv('PG_USER')
+        self.postgres_password = os.getenv('PG_PASSWORD')
+        self.postgres_hostname = os.getenv('PG_HOSTNAME')
+        self.postgres_database = os.getenv('PG_DB')
+        self.postgres_port = os.getenv('PG_PORT', 5432)
         self.sqlalchemy_database_uri = 'postgresql://{}:{}@{}:{}/{}'.format(
             self.postgres_user,
             self.postgres_password,
@@ -77,7 +76,6 @@ class DevelopmentConfiguration(Configuration):
             self.postgres_port,
             self.postgres_database
         )
-
 
 class TestingConfiguration(Configuration):
     """Testing environment configuration."""
