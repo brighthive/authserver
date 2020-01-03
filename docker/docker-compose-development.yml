@@ -8,7 +8,7 @@ services:
       environment:
         - APP_ENV=DEVELOPMENT
         - PG_USER=brighthive_admin
-        - PG_PASSWORD='password'
+        - PG_PASSWORD=password
         - PG_HOSTNAME=postgres
         - PG_DB=authserver
       ports:
@@ -19,5 +19,7 @@ services:
       image: postgres:11.2
       environment:
         - POSTGRES_USER=brighthive_admin
-        - POSTGRES_PASSWORD='password'
+        - POSTGRES_PASSWORD=password
         - POSTGRES_DB=authserver
+      ports:
+        - "5432:5432"
