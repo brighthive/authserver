@@ -7,7 +7,9 @@
                 <div class="col">
                     <div class="form-check">
                         <input type="checkbox" class="form-check-input" id="consentCheckbox" name="consent">
-                        <label class="form-check-label ml-2" for="consentCheckbox">I agree to give <strong>{{ grant.client.client_name }}</strong> access to my BrightHive Authserver user profile.</label>
+                        <label class="form-check-label ml-2" for="consentCheckbox">
+                            I agree that <strong>{{ grant.client.client_name }}</strong> can use information from my BrightHive Authserver account to create custom views visible only to me (such as a {{ grant.client.client_name }} user profile).
+                        </label>
                     </div>
                 </div>
             </div>
