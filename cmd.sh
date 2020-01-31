@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ "$APP_ENV" == "DEVELOPMENT" ] || [ -z "$APP_ENV" ]; then
-    gunicorn -w 4 -b 0.0.0.0:8000 wsgi:app --reload --worker-class gevent
+    gunicorn -w 4 -b 0.0.0.0:8000 wsgi:app --reload --worker-class gevent --timeout 600
 else
     MAX_RETRIES=5
     WORKERS=4
