@@ -39,27 +39,34 @@ def clear_user_session():
 
 @oauth2_bp.route('/authorize', methods=['GET', 'POST'])
 def authorize():
+    errors = None
     user = current_user()
+
     if not user:
         client_id = request.args.get('client_id')
         return redirect(url_for('home_ep.login', client_id=client_id, return_to=request.url))
+    
     if request.method == 'GET':
         try:
             grant = authorization.validate_consent_request(end_user=user)
         except OAuth2Error as error:
             return error.error
-        return render_template('authorize.html', user=user, grant=grant)
+        return render_template('authorize.html', user=user, grant=grant, errors=errors)
+    
+    try:
+        request.form['consent']
+    except KeyError:
+        grant = authorization.validate_consent_request(end_user=user)
+        errors = "Please read and agree to the below statement to continue."
+        return render_template('authorize.html', user=user, grant=grant, errors=errors)
+
     if not user and 'username' in request.form:
         username = request.form.get('username')
         user = User.query.filter_by(username=username).first()
-    if request.form['consent']:
-        grant_user = user
-    else:
-        grant_user = None
 
     clear_user_session()
 
-    return authorization.create_authorization_response(grant_user=grant_user)
+    return authorization.create_authorization_response(grant_user=user)
 
 
 class CreateOAuth2TokenResource(Resource):
