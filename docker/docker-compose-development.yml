@@ -13,6 +13,8 @@ services:
         - PG_DB=authserver
       ports:
         - "8000:8000"
+      volumes:
+        - ../:/authserver
       stdin_open: true
       tty: true
     postgres:
