@@ -11,10 +11,10 @@ Most BrightHive engineers use [Visual Studio Code](https://code.visualstudio.com
 ```json
 {
     "python.pythonPath": "/path/to/python",
-    "python.linting.pep8Enabled": true,
-    "python.linting.pep8Path": "pycodestyle",
+    "python.linting.pycodestyleEnabled": true,
+    "python.linting.pycodestylePath": "pycodestyle",
     "python.formatting.autopep8Path": "autopep8",
-    "python.linting.pep8Args": [
+    "python.linting.pycodestyleArgs": [
         "--ignore=E501,E0239"
     ],
     "python.formatting.autopep8Args": [
@@ -22,6 +22,8 @@ Most BrightHive engineers use [Visual Studio Code](https://code.visualstudio.com
     ],
     "python.linting.pylintEnabled": false,
     "python.linting.enabled": true,
-    "python.analysis.disabled": ["inherit-non-class"]
+    "python.analysis.disabled": [
+        "inherit-non-class"
+    ]
 }
 ```
