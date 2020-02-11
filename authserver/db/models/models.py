@@ -274,3 +274,17 @@ class OAuth2Token(db.Model, OAuth2TokenMixin):
     def is_refresh_token_expired(self):
         expires_at = self.issued_at + self.expires_in * 2
         return expires_at < time.time()
+
+
+class AuthorizedClients(db.Model):
+    """Clients authorized by a user.
+
+    This class maintains a list of clients that a user has authorized to act on their behalf.
+
+    """
+
+    __tablename__ = 'authorized_clients'
+
+    user_id = db.Column(db.String, db.ForeignKey('users.id'), primary_key=True)
+    client_id = db.Column(db.String, db.ForeignKey('oauth2_clients.id'), primary_key=True)
+    authorized = db.Column(db.Boolean, required=True)
