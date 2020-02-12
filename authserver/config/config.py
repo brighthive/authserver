@@ -59,7 +59,7 @@ class DevelopmentConfiguration(Configuration):
     ENV = 'development'
     DEBUG = True
     TESTING = False
-    
+
     def __init__(self):
         super().__init__()
         os.environ['AUTHLIB_INSECURE_TRANSPORT'] = '1'
@@ -76,6 +76,7 @@ class DevelopmentConfiguration(Configuration):
             self.postgres_port,
             self.postgres_database
         )
+
 
 class TestingConfiguration(Configuration):
     """Testing environment configuration."""
