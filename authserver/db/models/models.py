@@ -10,7 +10,7 @@ from sqlalchemy.dialects.postgresql.json import JSONB
 from marshmallow import Schema, fields, pre_load, validate
 from flask_marshmallow import Marshmallow
 from uuid import uuid4
-from authlib.flask.oauth2.sqla import OAuth2ClientMixin, OAuth2AuthorizationCodeMixin, OAuth2TokenMixin
+from authlib.integrations.sqla_oauth2 import OAuth2ClientMixin, OAuth2AuthorizationCodeMixin, OAuth2TokenMixin
 
 db = SQLAlchemy()
 ma = Marshmallow()
@@ -287,4 +287,4 @@ class AuthorizedClients(db.Model):
 
     user_id = db.Column(db.String, db.ForeignKey('users.id'), primary_key=True)
     client_id = db.Column(db.String, db.ForeignKey('oauth2_clients.id'), primary_key=True)
-    authorized = db.Column(db.Boolean, required=True)
+    authorized = db.Column(db.Boolean, nullable=False, default=False)

@@ -2,4 +2,10 @@ version: '2'
 services:
   postgres:
     image: postgres:latest
+    environment: 
+      - POSTGRES_DB=authserver
+      - POSTGRES_USER=brighthive_admin
+      - POSTGRES_PASSWORD=password
+    ports:
+      - 5432:5432
 

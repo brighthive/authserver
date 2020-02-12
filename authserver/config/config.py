@@ -64,10 +64,10 @@ class DevelopmentConfiguration(Configuration):
         super().__init__()
         os.environ['AUTHLIB_INSECURE_TRANSPORT'] = '1'
         self.configuration_name = 'DEVELOPMENT'
-        self.postgres_user = os.getenv('PG_USER')
-        self.postgres_password = os.getenv('PG_PASSWORD')
-        self.postgres_hostname = os.getenv('PG_HOSTNAME')
-        self.postgres_database = os.getenv('PG_DB')
+        self.postgres_user = os.getenv('PG_USER', 'brighthive_admin')
+        self.postgres_password = os.getenv('PG_PASSWORD', 'password')
+        self.postgres_hostname = os.getenv('PG_HOSTNAME', 'localhost')
+        self.postgres_database = os.getenv('PG_DB', 'authserver')
         self.postgres_port = os.getenv('PG_PORT', 5432)
         self.sqlalchemy_database_uri = 'postgresql://{}:{}@{}:{}/{}'.format(
             self.postgres_user,
@@ -153,6 +153,7 @@ class ConfigurationFactory(object):
     @staticmethod
     def from_env():
         environment = os.getenv('APP_ENV', 'DEVELOPMENT').upper()
+        print('From ENV {}'.format(environment))
         return ConfigurationFactory.get_config(environment)
 
     @staticmethod

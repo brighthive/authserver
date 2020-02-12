@@ -4,8 +4,8 @@ This module makes use of Authlib to implement core services of AuthServer.
 
 """
 
-from authlib.flask.oauth2 import ResourceProtector
-from authlib.flask.oauth2.sqla import (
+from authlib.integrations.flask_oauth2 import ResourceProtector
+from authlib.integrations.sqla_oauth2 import (
     create_query_client_func,
     create_save_token_func,
     create_revocation_endpoint,
@@ -21,7 +21,7 @@ from authlib.oauth2.rfc6749.errors import (
 
 from authlib.oauth2.rfc6749 import grants
 from authlib.oauth2.rfc7636 import CodeChallenge
-from authlib.flask.oauth2 import AuthorizationServer
+from authlib.integrations.flask_oauth2 import AuthorizationServer
 from werkzeug.security import gen_salt
 from authserver.oauth2 import BrightHiveAuthorizationServer, authenticate_client_secret_json
 from authserver.db import db, User, OAuth2Client, OAuth2AuthorizationCode, OAuth2Token

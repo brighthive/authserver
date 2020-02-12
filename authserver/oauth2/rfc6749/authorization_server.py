@@ -2,7 +2,7 @@
 
 """
 
-from authlib.flask.oauth2 import AuthorizationServer
+from authlib.integrations.flask_oauth2 import AuthorizationServer
 from flask import request as flask_req
 from authlib.oauth2 import OAuth2Request
 from authlib.common.encoding import to_unicode

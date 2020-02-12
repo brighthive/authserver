@@ -10,7 +10,7 @@ image: aws_login
 	docker push $(AWS_ECR_REPO)/$(ORGANIZATION)/$(PROJECT_NAME):$(VERSION)-$(COMMIT_TAG)
 
 aws_login:
-	$(shell aws ecr get-login --no-include-email --region us-east-2)
+	aws ecr get-login --no-include-email --region us-east-2
 
 release: clean image
 	docker tag $(ORGANIZATION)/$(PROJECT_NAME):$(VERSION)-$(COMMIT_TAG) $(AWS_ECR_REPO)/$(ORGANIZATION)/$(PROJECT_NAME):$(VERSION)

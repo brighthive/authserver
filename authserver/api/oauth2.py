@@ -10,7 +10,7 @@ from datetime import datetime
 from flask import Blueprint, request, session, render_template, redirect, url_for
 from flask_restful import Resource, Api, request
 from werkzeug.security import gen_salt
-from authlib.flask.oauth2 import current_token
+from authlib.integrations.flask_oauth2 import current_token
 from authlib.oauth2 import OAuth2Error, OAuth2Request
 from authlib.oauth2.rfc6749 import InvalidGrantError
 
@@ -28,6 +28,7 @@ def current_user():
         return User.query.get(uid)
     return None
 
+
 def clear_user_session():
     '''
     This function clears the Authserver user session.
@@ -37,6 +38,7 @@ def clear_user_session():
     if 'id' in session:
         session.pop('id')
 
+
 @oauth2_bp.route('/authorize', methods=['GET', 'POST'])
 def authorize():
     errors = None
@@ -45,14 +47,14 @@ def authorize():
     if not user:
         client_id = request.args.get('client_id')
         return redirect(url_for('home_ep.login', client_id=client_id, return_to=request.url))
-    
+
     if request.method == 'GET':
         try:
             grant = authorization.validate_consent_request(end_user=user)
         except OAuth2Error as error:
             return error.error
         return render_template('authorize.html', user=user, grant=grant, errors=errors)
-    
+
     try:
         request.form['consent']
     except KeyError:
