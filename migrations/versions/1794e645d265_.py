@@ -30,8 +30,8 @@ data_trust_table = table('data_trusts',
 
 def upgrade():
     environment = os.getenv('APP_ENV', None)
+    data_trust_id = str(uuid4()).replace('-', '')
     if environment == 'TESTING':
-        data_trust_id = str(uuid4())
         op.bulk_insert(data_trust_table, [
             {
                 'id': data_trust_id,
@@ -41,7 +41,6 @@ def upgrade():
             }
         ])
     elif not environment:
-        data_trust_id = str(uuid4())
         op.bulk_insert(data_trust_table, [
             {
                 'id': data_trust_id,

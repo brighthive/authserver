@@ -5,6 +5,7 @@ from expects import expect, be, equal, raise_error, be_above_or_equal
 from authserver.db import db, DataTrust, User
 
 
+@pytest.mark.skip(reason=None)
 class TestUserModel:
     def test_user_model(self, app):
         with app.app_context():
