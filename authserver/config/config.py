@@ -154,7 +154,6 @@ class ConfigurationFactory(object):
     @staticmethod
     def from_env():
         environment = os.getenv('APP_ENV', 'DEVELOPMENT').upper()
-        print('From ENV {}'.format(environment))
         return ConfigurationFactory.get_config(environment)
 
     @staticmethod
@@ -187,4 +186,5 @@ class ConfigurationFactory(object):
         elif environment == 'PRODUCTION':
             return ProductionConfiguration()
         else:
-            raise ConfigurationEnvironmentNotFoundError('Cannot find configuration of type {}'.format(environment))
+            raise ConfigurationEnvironmentNotFoundError(
+                'Cannot find configuration of type {}'.format(environment))

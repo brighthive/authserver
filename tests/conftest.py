@@ -1,5 +1,6 @@
 """Test Fixtures"""
 
+import os
 import pytest
 from time import sleep
 from flask_migrate import upgrade
@@ -62,6 +63,7 @@ def app():
         app (object): The Flask application.
 
     """
+    os.environ['APP_ENV'] = 'TESTING'
     app = create_app('TESTING')
     postgres = PostgreSQLContainer()
     postgres.start_container()
