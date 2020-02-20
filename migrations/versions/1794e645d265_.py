@@ -91,8 +91,7 @@ def upgrade():
                 'date_last_updated': datetime.utcnow()
             }
         ])
-
-        # Set up test client
+    # Set up test client
     elif not environment:
         op.bulk_insert(data_trust_table, [
             {
@@ -119,12 +118,23 @@ def upgrade():
             }
         ])
 
-        client_metadata = {
-            'client_name': 'Sample Client',
+        m2m_client_metadata = {
+            'client_name': 'M2M Client',
             'token_endpoint_auth_method': 'client_secret_json',
             'grant_types': ['client_credentials'],
             'response_types': ['token'],
-            'client_uri': 'http://localhost:8000'
+            'client_uri': 'http://localhost:8000',
+            'scope': ''
+        }
+
+        public_client_metadata = {
+            'client_name': 'Public Client',
+            'token_endpoint_auth_method': 'none',
+            'grant_types': ['authorization_code'],
+            'response_types': ['code'],
+            'client_uri': 'http://localhost:8000',
+            'redirect_uris': ['http://localhost:8000/auth/redirect'],
+            'scope': ''
         }
 
         op.bulk_insert(oauth2_client_table, [
@@ -133,14 +143,23 @@ def upgrade():
                 'client_secret': 'cTQfd67c5uN9df8g56U8T5CwbF9S0LDgl4imUDguKkrGSuzI',
                 'client_id_issued_at': int(time.time()),
                 'client_secret_expires_at': 0,
-                'client_metadata': json.dumps(client_metadata),
-                # 'client_name': 'M2M Client',
-                # 'token_endpoint_auth_method': 'client_secret_basic',
+                'client_metadata': json.dumps(m2m_client_metadata),
                 'id': '13c68e75d02a4c2280585f3a88549d39',
                 'user_id': admin_user_id
 
+            },
+            {
+                'client_id': 'e84UZXW7QcB5ufaVT15C9BtO',
+                'client_secret': '',
+                'client_id_issued_at': int(time.time()),
+                'client_secret_expires_at': 0,
+                'client_metadata': json.dumps(public_client_metadata),
+                'id': '23c68e75d02a4c2280585f3a88549d3b',
+                'user_id': admin_user_id
             }
         ])
+
+# http://localhost:8000/oauth/authorize?scope=user:details&response_type=code&client_id=e84UZXW7QcB5ufaVT15C9BtO&redirect_uri=http://localhost:8000/auth/redirect
 
 
 def downgrade():
