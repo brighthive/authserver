@@ -14,7 +14,7 @@ class BrightHiveAuthorizationServer(AuthorizationServer):
 
     Overrides the base Authlib AuthorizationServer class to provide a custom method
     for passing the OAuth 2.0 grant type as a field in the JSON request body, but still
-    maintains the ability to handle the grant type as a query parameter. 
+    maintains the ability to handle the grant type as a query parameter.
 
     """
 
