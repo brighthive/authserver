@@ -57,7 +57,7 @@ class BrightHiveAuthorizationServer(AuthorizationServer):
     def create_token_response(self, request=None):
         """Validate token request and create token response.
 
-        Args: 
+        Args:
             request (obj): OAuth2Request instance.
 
         Returns:

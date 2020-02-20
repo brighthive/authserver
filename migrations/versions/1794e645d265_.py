@@ -7,8 +7,11 @@ Create Date: 2020-02-12 17:37:49.538592
 """
 
 import os
+import json
 import sqlalchemy as sa
 import bcrypt
+import time
+from datetime import datetime
 from sqlalchemy.sql import table, column
 from alembic import op
 from datetime import datetime
@@ -40,6 +43,16 @@ user_table = table('users',
                    column('password_hash', sa.String),
                    column('date_created', sa.TIMESTAMP),
                    column('date_last_updated', sa.TIMESTAMP))
+
+
+oauth2_client_table = table('oauth2_clients',
+                            column('client_id', sa.String),
+                            column('client_secret', sa.String),
+                            column('client_id_issued_at', sa.Integer),
+                            column('client_secret_expires_at', sa.Integer),
+                            column('client_metadata', sa.TEXT),
+                            column('id', sa.String),
+                            column('user_id', sa.String))
 
 
 def hash_password(password: str):
@@ -78,6 +91,8 @@ def upgrade():
                 'date_last_updated': datetime.utcnow()
             }
         ])
+
+        # Set up test client
     elif not environment:
         op.bulk_insert(data_trust_table, [
             {
@@ -101,6 +116,29 @@ def upgrade():
                 'password_hash': hash_password('143DATATRUST341'),
                 'date_created': datetime.utcnow(),
                 'date_last_updated': datetime.utcnow()
+            }
+        ])
+
+        client_metadata = {
+            'client_name': 'Sample Client',
+            'token_endpoint_auth_method': 'client_secret_json',
+            'grant_types': ['client_credentials'],
+            'response_types': ['token'],
+            'client_uri': 'http://localhost:8000'
+        }
+
+        op.bulk_insert(oauth2_client_table, [
+            {
+                'client_id': 'd84UZXW7QcB5ufaVT15C9BtO',
+                'client_secret': 'cTQfd67c5uN9df8g56U8T5CwbF9S0LDgl4imUDguKkrGSuzI',
+                'client_id_issued_at': int(time.time()),
+                'client_secret_expires_at': 0,
+                'client_metadata': json.dumps(client_metadata),
+                # 'client_name': 'M2M Client',
+                # 'token_endpoint_auth_method': 'client_secret_basic',
+                'id': '13c68e75d02a4c2280585f3a88549d39',
+                'user_id': admin_user_id
+
             }
         ])
 

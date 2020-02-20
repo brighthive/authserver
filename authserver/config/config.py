@@ -132,7 +132,7 @@ class ProductionConfiguration(Configuration):
 
     def __init__(self):
         super().__init__()
-        os.environ['AUTHLIB_INSECURE_TRANSPORT'] = '1'
+        os.environ['AUTHLIB_INSECURE_TRANSPORT'] = '0'
         self.configuration_name = 'PRODUCTION'
         self.postgres_user = os.getenv('PG_USER')
         self.postgres_password = os.getenv('PG_PASSWORD')

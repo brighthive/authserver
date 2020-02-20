@@ -91,10 +91,6 @@ authorization = BrightHiveAuthorizationServer(
     query_client=query_client,
     save_token=save_token,
 )
-# authorization = AuthorizationServer(
-#     query_client=query_client,
-#     save_token=save_token
-# )
 require_oauth = ResourceProtector()
 
 

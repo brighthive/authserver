@@ -21,7 +21,7 @@ def authenticate_client_secret_json(query_client, request):
         client_id = data['client_id']
         client_secret = data['client_secret']
         if client_id and client_secret:
-            client = _validate_client(query_client, client_id, request.state)
+            client = _validate_client(query_client, client_id, request.state, 401)
             if client.check_token_endpoint_auth_method('client_secret_json') and client.check_client_secret(client_secret):
                 return client
     except Exception:
