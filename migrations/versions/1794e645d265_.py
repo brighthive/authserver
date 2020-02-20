@@ -64,18 +64,23 @@ def upgrade():
     environment = os.getenv('APP_ENV', None)
     data_trust_id = str(uuid4()).replace('-', '')
     admin_user_id = str(uuid4()).replace('-', '')
-    if environment == 'TESTING':
-        # Set up data trust
+
+    if environment == 'PRODUCTION':
+        data_trust_name = os.getenv('DATA_TRUST_NAME', 'New Data Trust')
+        facet_redirect_uri = os.getenv('FACET_REDIRECT_URI', 'http://localhost:8000/auth/redirect')
+        honeybadger_redirect_uri = os.getenv('HONEYBADGER_REDIRECT_URI', 'http://localhost:8000/auth/redirect')
+
+        # Create the new data trust
         op.bulk_insert(data_trust_table, [
             {
                 'id': data_trust_id,
-                'data_trust_name': 'Test Data Trust',
+                'data_trust_name': data_trust_name,
                 'date_created': datetime.utcnow(),
                 'date_last_updated': datetime.utcnow()
             }
         ])
 
-        # Set up test user
+        # Set up the initial administrative user
         op.bulk_insert(user_table, [
             {
                 'id': admin_user_id,
@@ -84,32 +89,6 @@ def upgrade():
                 'lastname': 'User',
                 'organization': 'BrightHive',
                 'email_address': 'test_user@brighthive.net',
-                'active': True,
-                'data_trust_id': data_trust_id,
-                'password_hash': hash_password('passw0rd'),
-                'date_created': datetime.utcnow(),
-                'date_last_updated': datetime.utcnow()
-            }
-        ])
-    # Set up test client
-    elif not environment:
-        op.bulk_insert(data_trust_table, [
-            {
-                'id': data_trust_id,
-                'data_trust_name': 'Sample Data Trust',
-                'date_created': datetime.utcnow(),
-                'date_last_updated': datetime.utcnow()
-            }
-        ])
-
-        op.bulk_insert(user_table, [
-            {
-                'id': admin_user_id,
-                'username': 'facet_admin',
-                'firstname': 'Facet',
-                'lastname': 'Administrator',
-                'organization': 'BrightHive',
-                'email_address': 'brighthive_admin@brighthive.net',
                 'active': True,
                 'data_trust_id': data_trust_id,
                 'password_hash': hash_password('143DATATRUST341'),
@@ -127,38 +106,156 @@ def upgrade():
             'scope': ''
         }
 
-        public_client_metadata = {
-            'client_name': 'Public Client',
+        facet_client_metadata = {
+            'client_name': 'Facet',
             'token_endpoint_auth_method': 'none',
             'grant_types': ['authorization_code'],
             'response_types': ['code'],
-            'client_uri': 'http://localhost:8000',
-            'redirect_uris': ['http://localhost:8000/auth/redirect'],
+            'client_uri': '',
+            'redirect_uris': [facet_redirect_uri],
+            'scope': ''
+        }
+
+        honeybadger_client_metadata = {
+            'client_name': 'HoneyBadger',
+            'token_endpoint_auth_method': 'none',
+            'grant_types': ['authorization_code'],
+            'response_types': ['code'],
+            'client_uri': '',
+            'redirect_uris': [honeybadger_redirect_uri],
             'scope': ''
         }
 
         op.bulk_insert(oauth2_client_table, [
+            # Set up a confidential client (M2M access)
             {
                 'client_id': 'd84UZXW7QcB5ufaVT15C9BtO',
                 'client_secret': 'cTQfd67c5uN9df8g56U8T5CwbF9S0LDgl4imUDguKkrGSuzI',
                 'client_id_issued_at': int(time.time()),
                 'client_secret_expires_at': 0,
                 'client_metadata': json.dumps(m2m_client_metadata),
-                'id': '13c68e75d02a4c2280585f3a88549d39',
+                'id': str(uuid4()).replace('-', ''),
                 'user_id': admin_user_id
 
             },
+            # Set up a public client (Facet)
             {
-                'client_id': 'e84UZXW7QcB5ufaVT15C9BtO',
+                'client_id': 'ru2tFykoIcR6vSWpsLgnYTpg',
                 'client_secret': '',
                 'client_id_issued_at': int(time.time()),
                 'client_secret_expires_at': 0,
-                'client_metadata': json.dumps(public_client_metadata),
-                'id': '23c68e75d02a4c2280585f3a88549d3b',
+                'client_metadata': json.dumps(facet_client_metadata),
+                'id': str(uuid4()).replace('-', ''),
+                'user_id': admin_user_id
+            },
+            # Set up a public client (HoneyBadger)
+            {
+                'client_id': 'CFMdr5X9zAp0HwtoM8i8i7UA',
+                'client_secret': '',
+                'client_id_issued_at': int(time.time()),
+                'client_secret_expires_at': 0,
+                'client_metadata': json.dumps(honeybadger_client_metadata),
+                'id': str(uuid4()).replace('-', ''),
                 'user_id': admin_user_id
             }
         ])
+    else:
+        if environment == 'TESTING':
+            # Set up data trust
+            op.bulk_insert(data_trust_table, [
+                {
+                    'id': data_trust_id,
+                    'data_trust_name': 'Test Data Trust',
+                    'date_created': datetime.utcnow(),
+                    'date_last_updated': datetime.utcnow()
+                }
+            ])
+
+            # Set up test user
+            op.bulk_insert(user_table, [
+                {
+                    'id': admin_user_id,
+                    'username': 'test_user',
+                    'firstname': 'Test',
+                    'lastname': 'User',
+                    'organization': 'BrightHive',
+                    'email_address': 'test_user@brighthive.net',
+                    'active': True,
+                    'data_trust_id': data_trust_id,
+                    'password_hash': hash_password('passw0rd'),
+                    'date_created': datetime.utcnow(),
+                    'date_last_updated': datetime.utcnow()
+                }
+            ])
+        # Set up test client
+        elif not environment:
+            op.bulk_insert(data_trust_table, [
+                {
+                    'id': data_trust_id,
+                    'data_trust_name': 'Sample Data Trust',
+                    'date_created': datetime.utcnow(),
+                    'date_last_updated': datetime.utcnow()
+                }
+            ])
+
+            op.bulk_insert(user_table, [
+                {
+                    'id': admin_user_id,
+                    'username': 'facet_admin',
+                    'firstname': 'Facet',
+                    'lastname': 'Administrator',
+                    'organization': 'BrightHive',
+                    'email_address': 'brighthive_admin@brighthive.net',
+                    'active': True,
+                    'data_trust_id': data_trust_id,
+                    'password_hash': hash_password('143DATATRUST341'),
+                    'date_created': datetime.utcnow(),
+                    'date_last_updated': datetime.utcnow()
+                }
+            ])
+
+            m2m_client_metadata = {
+                'client_name': 'M2M Client',
+                'token_endpoint_auth_method': 'client_secret_json',
+                'grant_types': ['client_credentials'],
+                'response_types': ['token'],
+                'client_uri': 'http://localhost:8000',
+                'scope': ''
+            }
+
+            public_client_metadata = {
+                'client_name': 'Public Client',
+                'token_endpoint_auth_method': 'none',
+                'grant_types': ['authorization_code'],
+                'response_types': ['code'],
+                'client_uri': 'http://localhost:8000',
+                'redirect_uris': ['http://localhost:8000/auth/redirect'],
+                'scope': ''
+            }
+
+            op.bulk_insert(oauth2_client_table, [
+                {
+                    'client_id': 'd84UZXW7QcB5ufaVT15C9BtO',
+                    'client_secret': 'cTQfd67c5uN9df8g56U8T5CwbF9S0LDgl4imUDguKkrGSuzI',
+                    'client_id_issued_at': int(time.time()),
+                    'client_secret_expires_at': 0,
+                    'client_metadata': json.dumps(m2m_client_metadata),
+                    'id': '13c68e75d02a4c2280585f3a88549d39',
+                    'user_id': admin_user_id
+
+                },
+                {
+                    'client_id': 'e84UZXW7QcB5ufaVT15C9BtO',
+                    'client_secret': '',
+                    'client_id_issued_at': int(time.time()),
+                    'client_secret_expires_at': 0,
+                    'client_metadata': json.dumps(public_client_metadata),
+                    'id': '23c68e75d02a4c2280585f3a88549d3b',
+                    'user_id': admin_user_id
+                }
+            ])
 
 
 def downgrade():
+    op.execute('DELETE FROM authorized_clients CASCADE')
     op.execute('DELETE FROM data_trusts CASCADE')
