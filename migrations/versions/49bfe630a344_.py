@@ -22,7 +22,6 @@ def upgrade():
                     sa.Column('user_id', sa.String(), nullable=False),
                     sa.Column('client_id', sa.String(), nullable=False),
                     sa.Column('authorized', sa.Boolean(), nullable=False),
-                    sa.ForeignKeyConstraint(['client_id'], ['oauth2_clients.id'], ),
                     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
                     sa.PrimaryKeyConstraint('user_id', 'client_id')
                     )

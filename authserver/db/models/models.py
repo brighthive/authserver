@@ -276,7 +276,7 @@ class OAuth2Token(db.Model, OAuth2TokenMixin):
         return expires_at < time.time()
 
 
-class AuthorizedClients(db.Model):
+class AuthorizedClient(db.Model):
     """Clients authorized by a user.
 
     This class maintains a list of clients that a user has authorized to act on their behalf.
@@ -286,5 +286,5 @@ class AuthorizedClients(db.Model):
     __tablename__ = 'authorized_clients'
 
     user_id = db.Column(db.String, db.ForeignKey('users.id'), primary_key=True)
-    client_id = db.Column(db.String, db.ForeignKey('oauth2_clients.id'), primary_key=True)
+    client_id = db.Column(db.String, db.ForeignKey('oauth2_clients.client_id'), primary_key=True)
     authorized = db.Column(db.Boolean, nullable=False, default=False)

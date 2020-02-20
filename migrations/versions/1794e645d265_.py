@@ -159,8 +159,6 @@ def upgrade():
             }
         ])
 
-# http://localhost:8000/oauth/authorize?scope=user:details&response_type=code&client_id=e84UZXW7QcB5ufaVT15C9BtO&redirect_uri=http://localhost:8000/auth/redirect
-
 
 def downgrade():
     op.execute('DELETE FROM data_trusts CASCADE')

@@ -15,21 +15,30 @@ from authlib.oauth2 import OAuth2Error, OAuth2Request
 from authlib.oauth2.rfc6749 import InvalidGrantError
 
 from authserver.utilities import ResponseBody
-from authserver.db import db, User, OAuth2Client
+from authserver.db import db, User, OAuth2Client, AuthorizedClient
 from authserver.utilities.oauth2 import authorization, require_oauth
 
 oauth2_bp = Blueprint('oauth2_ep', __name__,
                       static_folder='static', template_folder='templates', url_prefix='/oauth')
 
 
-def current_user():
+def _current_user():
     if 'id' in session:
         uid = session['id']
         return User.query.get(uid)
     return None
 
 
-def clear_user_session():
+def _store_client_authorization(client_id, user_id):
+    authorized_client = AuthorizedClient()
+    authorized_client.client_id = client_id
+    authorized_client.user_id = user_id
+    authorized_client.authorized = True
+    db.session.add(authorized_client)
+    db.session.commit()
+
+
+def _clear_user_session():
     '''
     This function clears the Authserver user session.
     The `authorize` endpoint calls it, immediately before the redirect, since
@@ -39,10 +48,14 @@ def clear_user_session():
         session.pop('id')
 
 
+def _client_authorized(client_id, user_id):
+    return AuthorizedClient.query.filter_by(user_id=user_id, client_id=client_id, authorized=True).count() > 0
+
+
 @oauth2_bp.route('/authorize', methods=['GET', 'POST'])
 def authorize():
     errors = None
-    user = current_user()
+    user = _current_user()
 
     if not user:
         client_id = request.args.get('client_id')
@@ -53,10 +66,19 @@ def authorize():
             grant = authorization.validate_consent_request(end_user=user)
         except OAuth2Error as error:
             return error.error
-        return render_template('authorize.html', user=user, grant=grant, errors=errors)
+
+        # Determine if the user has already given the client consent to act on their behalf.
+        client_id = request.args.get('client_id')
+        if _client_authorized(client_id, user.id):
+            _clear_user_session()
+            return authorization.create_authorization_response(grant_user=user)
+        else:
+            return render_template('authorize.html', user=user, grant=grant, errors=errors)
 
     try:
         request.form['consent']
+        client_id = request.args.get('client_id')
+        _store_client_authorization(client_id, user.id)
     except KeyError:
         grant = authorization.validate_consent_request(end_user=user)
         errors = "Please read and agree to the below statement to continue."
@@ -66,7 +88,7 @@ def authorize():
         username = request.form.get('username')
         user = User.query.filter_by(username=username).first()
 
-    clear_user_session()
+    _clear_user_session()
 
     return authorization.create_authorization_response(grant_user=user)
 
