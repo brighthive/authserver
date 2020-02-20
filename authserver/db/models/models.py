@@ -95,7 +95,6 @@ class User(db.Model):
         try:
             return bcrypt.checkpw(password.encode('utf-8'), self.password_hash.encode('utf-8'))
         except Exception as e:
-            print(e)
             return False
 
     def get_user_id(self):
@@ -104,9 +103,9 @@ class User(db.Model):
     def __init__(self, username, password, firstname, lastname, organization, email_address, data_trust_id, telephone=None):
         self.id = str(uuid4()).replace('-', '')
         self.username = username
-        self.password = password
         self.firstname = firstname
         self.lastname = lastname
+        self.password = password
         self.organization = organization
         self.email_address = email_address
         self.telephone = telephone
@@ -286,5 +285,5 @@ class AuthorizedClient(db.Model):
     __tablename__ = 'authorized_clients'
 
     user_id = db.Column(db.String, db.ForeignKey('users.id'), primary_key=True)
-    client_id = db.Column(db.String, db.ForeignKey('oauth2_clients.client_id'), primary_key=True)
+    client_id = db.Column(db.String, primary_key=True)
     authorized = db.Column(db.Boolean, nullable=False, default=False)

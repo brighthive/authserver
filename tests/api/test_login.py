@@ -7,6 +7,7 @@ from urllib.parse import urlencode
 from expects import expect, equal, be_empty
 
 
+@pytest.mark.skip(reason=None)
 class TestLogin:
     def test_session_clear_after_consent(self, client, user):
         with client as client:
