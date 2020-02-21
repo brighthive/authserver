@@ -10,7 +10,7 @@ from expects import expect, equal, be_empty
 @pytest.mark.skip(reason=None)
 class TestLogin:
     def test_session_clear_after_consent(self, client, user):
-        with client as client:
+        with client:
             # `session_transaction` provides a way to simulate a call to the current SecureCookieSession, allowing us to check or modify its value (before and after making an HTTP request)
             # https://flask.palletsprojects.com/en/0.12.x/testing/#accessing-and-modifying-sessions
             # https://github.com/pytest-dev/pytest-flask/issues/69

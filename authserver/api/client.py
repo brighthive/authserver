@@ -95,6 +95,7 @@ class ClientResource(Resource):
             client.user_id = request_data['user_id']
             client.client_id = gen_salt(24)
             client.client_secret = gen_salt(48)
+            client_metadata = {'scope': ''}
             for k, v in request_data.items():
                 if hasattr(client, k):
                     if k == 'roles':
@@ -108,10 +109,15 @@ class ClientResource(Resource):
                         except Exception as e:
                             return self.response_handler.custom_response(code=400, messages={'roles': ['Error assigning role to client.']})
                     else:
-                        setattr(client, k, v)
+                        try:
+                            setattr(client, k, v)
+                        except Exception as e:
+                            client_metadata[k] = v
+            client.set_client_metadata(client_metadata)
             db.session.add(client)
             db.session.commit()
         except Exception as e:
+            print('A BAD HAPPENED?')
             db.session.rollback()
             exception_name = type(e).__name__
             return self.response_handler.exception_response(exception_name, request=request_data)

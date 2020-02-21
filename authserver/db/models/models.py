@@ -133,7 +133,7 @@ class UserSchema(ma.Schema):
     lastname = fields.String(required=True)
     organization = fields.String(required=True)
     email_address = fields.Email(required=True)
-    telephone = fields.String()
+    telephone = fields.String(required=True)
     active = fields.Boolean(dump_only=True)
     data_trust_id = fields.String(required=True)
     date_created = fields.DateTime(dump_only=True)
@@ -245,6 +245,10 @@ class OAuth2ClientSchema(ma.Schema):
     i18n_metadata = fields.String()
     software_id = fields.String()
     software_version = fields.String()
+    grant_types = fields.List(fields.String())
+    response_types = fields.List(fields.String())
+    contacts = fields.List(fields.String())
+    jwks = fields.List(fields.String())
 
 
 class OAuth2AuthorizationCode(db.Model, OAuth2AuthorizationCodeMixin):
