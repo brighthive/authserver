@@ -5,7 +5,6 @@ from expects import expect, be, equal, raise_error, be_above_or_equal
 from authserver.db import db, DataTrust, User
 
 
-# @pytest.mark.skip(reason=None)
 class TestUserModel:
     def test_user_model(self, app):
         with app.app_context():
@@ -52,9 +51,9 @@ class TestUserModel:
             db.session.commit()
             expect(User.query.count()).to(equal(1))
 
-            # Clean up data trusts
             data_trusts = DataTrust.query.all()
             for data_trust in data_trusts:
-                DataTrust.query.filter_by(id=data_trust.id).delete()
-                db.session.commit()
-            expect(DataTrust.query.count()).to(equal(0))
+                if data_trust.id == trust_id:
+                    db.session.delete(data_trust)
+                    db.session.commit()
+            expect(DataTrust.query.count()).to(equal(1))

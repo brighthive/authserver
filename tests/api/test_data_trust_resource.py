@@ -1,23 +1,24 @@
 """Data Trust Entity Unit Tests."""
 
 import pytest
+import requests
 import json
+from authserver.db import OAuth2Client
 from flask import Response
 from expects import expect, be, equal, raise_error, be_above_or_equal
 
 
-@pytest.mark.skip(reason=None)
 class TestDataTrustResource:
-    def test_data_trust_api(self, client):
+    def test_data_trust_api(self, client, token_generator):
 
         # Common headers go in this dict
-        headers = {'content-type': 'application/json'}
+        headers = {'content-type': 'application/json', 'authorization': f'bearer {token_generator.get_token(client)}'}
 
-        # Database should be empty at the beginning
+        # Database should have pre-populated data trust at the beginning
         response: Response = client.get('/data_trusts', headers=headers)
         response_data = response.json
         expect(response.status_code).to(be(200))
-        expect(len(response_data['response'])).to(equal(0))
+        expect(len(response_data['response'])).to(equal(1))
 
         # POST a new data trust
         request_body = {
