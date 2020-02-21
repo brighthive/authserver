@@ -130,6 +130,11 @@ class SandboxConfiguration(Configuration):
 class ProductionConfiguration(Configuration):
     """Production environment configuration."""
 
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    ENV = 'production'
+    DEBUG = False
+    TESTING = False
+
     def __init__(self):
         super().__init__()
         os.environ['AUTHLIB_INSECURE_TRANSPORT'] = '0'
