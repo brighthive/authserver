@@ -4,13 +4,13 @@ PROJECT_NAME	:= authserver
 VERSION 		:= 0.0.1
 AWS_ECR_REPO	:= 396527728813.dkr.ecr.us-east-2.amazonaws.com
 
-image: aws_login
+image:
 	docker build -t $(ORGANIZATION)/$(PROJECT_NAME):$(VERSION)-$(COMMIT_TAG) .
 	docker tag $(ORGANIZATION)/$(PROJECT_NAME):$(VERSION)-$(COMMIT_TAG) $(AWS_ECR_REPO)/$(ORGANIZATION)/$(PROJECT_NAME):$(VERSION)-$(COMMIT_TAG)
 	docker push $(AWS_ECR_REPO)/$(ORGANIZATION)/$(PROJECT_NAME):$(VERSION)-$(COMMIT_TAG)
 
 aws_login:
-	aws ecr get-login --no-include-email --region us-east-2
+	$(aws ecr get-login --no-include-email --region us-east-2)
 
 release: clean image
 	docker tag $(ORGANIZATION)/$(PROJECT_NAME):$(VERSION)-$(COMMIT_TAG) $(AWS_ECR_REPO)/$(ORGANIZATION)/$(PROJECT_NAME):$(VERSION)

@@ -84,11 +84,11 @@ def upgrade():
         op.bulk_insert(user_table, [
             {
                 'id': admin_user_id,
-                'username': 'test_user',
-                'firstname': 'Test',
-                'lastname': 'User',
+                'username': 'brighthive_admin',
+                'firstname': 'BrightHive',
+                'lastname': 'Administrator',
                 'organization': 'BrightHive',
-                'email_address': 'test_user@brighthive.net',
+                'email_address': 'brighthive_admin@brighthive.net',
                 'active': True,
                 'data_trust_id': data_trust_id,
                 'password_hash': hash_password('143DATATRUST341'),
@@ -96,15 +96,6 @@ def upgrade():
                 'date_last_updated': datetime.utcnow()
             }
         ])
-
-        m2m_client_metadata = {
-            'client_name': 'M2M Client',
-            'token_endpoint_auth_method': 'client_secret_json',
-            'grant_types': ['client_credentials'],
-            'response_types': ['token'],
-            'client_uri': 'http://localhost:8000',
-            'scope': ''
-        }
 
         facet_client_metadata = {
             'client_name': 'Facet',
@@ -127,17 +118,6 @@ def upgrade():
         }
 
         op.bulk_insert(oauth2_client_table, [
-            # Set up a confidential client (M2M access)
-            {
-                'client_id': 'd84UZXW7QcB5ufaVT15C9BtO',
-                'client_secret': 'cTQfd67c5uN9df8g56U8T5CwbF9S0LDgl4imUDguKkrGSuzI',
-                'client_id_issued_at': int(time.time()),
-                'client_secret_expires_at': 0,
-                'client_metadata': json.dumps(m2m_client_metadata),
-                'id': str(uuid4()).replace('-', ''),
-                'user_id': admin_user_id
-
-            },
             # Set up a public client (Facet)
             {
                 'client_id': 'ru2tFykoIcR6vSWpsLgnYTpg',
@@ -201,8 +181,8 @@ def upgrade():
             op.bulk_insert(user_table, [
                 {
                     'id': admin_user_id,
-                    'username': 'facet_admin',
-                    'firstname': 'Facet',
+                    'username': 'brighthive_admin',
+                    'firstname': 'BrightHive',
                     'lastname': 'Administrator',
                     'organization': 'BrightHive',
                     'email_address': 'brighthive_admin@brighthive.net',
@@ -228,8 +208,8 @@ def upgrade():
             'token_endpoint_auth_method': 'none',
             'grant_types': ['authorization_code'],
             'response_types': ['code'],
-            'client_uri': 'http://localhost:8000',
-            'redirect_uris': ['http://localhost:8000/auth/redirect'],
+            'client_uri': 'http://localhost:8001',
+            'redirect_uris': ['http://localhost:8001/auth/redirect'],
             'scope': ''
         }
 
