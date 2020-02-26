@@ -120,8 +120,7 @@ USERS = [
         'email_address': 'user7@brighthive.me',
         'username': 'user7',
         'password': 'password',
-        'data_trust_id': '',
-        'telephone': '967-555-1234'
+        'data_trust_id': ''
     },
     {
         'firstname': 'Danielle',
@@ -130,8 +129,7 @@ USERS = [
         'email_address': 'user8@brighthive.me',
         'username': 'user8',
         'password': 'password',
-        'data_trust_id': '',
-        'telephone': '681-555-0123'
+        'data_trust_id': ''
     }
 ]
 

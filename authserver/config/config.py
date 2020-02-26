@@ -193,3 +193,15 @@ class ConfigurationFactory(object):
         else:
             raise ConfigurationEnvironmentNotFoundError(
                 'Cannot find configuration of type {}'.format(environment))
+
+    @staticmethod
+    def generate_secret_key():
+        """Generate a secret for securing the Flask session.
+        Returns:
+            byte: A random string of bytes for secret.
+        """
+        environment = os.getenv('APP_ENV', 'development')
+        if environment.lower() == 'production':
+            return os.getenv('SECRET_KEY', os.urandom(16))
+        else:
+            return b'supersecretaccesscode'

@@ -25,7 +25,7 @@ def login():
             return render_template('login.html', form=form)
         else:
             return render_template('login.html', client_id=client_id, return_to=return_to, form=form)
-    
+
     if form.validate():
         username = form.username.data
         password = form.password.data
@@ -36,7 +36,7 @@ def login():
                 errors = "You do not have an active user account."
             elif not user.verify_password(password):
                 errors = "You did not enter a valid password."
-            else: 
+            else:
                 session['id'] = user.id
                 return redirect(return_to)
         except AttributeError:

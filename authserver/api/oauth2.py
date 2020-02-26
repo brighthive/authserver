@@ -56,7 +56,6 @@ def _client_authorized(client_id, user_id):
 def authorize():
     errors = None
     user = _current_user()
-    print('Hello........')
     if not user:
         client_id = request.args.get('client_id')
         return redirect(url_for('home_ep.login', client_id=client_id, return_to=request.url))
