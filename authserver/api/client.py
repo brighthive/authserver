@@ -117,7 +117,6 @@ class ClientResource(Resource):
             db.session.add(client)
             db.session.commit()
         except Exception as e:
-            print('A BAD HAPPENED?')
             db.session.rollback()
             exception_name = type(e).__name__
             return self.response_handler.exception_response(exception_name, request=request_data)
