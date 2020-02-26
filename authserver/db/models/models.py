@@ -10,7 +10,7 @@ from sqlalchemy.dialects.postgresql.json import JSONB
 from marshmallow import Schema, fields, pre_load, validate
 from flask_marshmallow import Marshmallow
 from uuid import uuid4
-from authlib.flask.oauth2.sqla import OAuth2ClientMixin, OAuth2AuthorizationCodeMixin, OAuth2TokenMixin
+from authlib.integrations.sqla_oauth2 import OAuth2ClientMixin, OAuth2AuthorizationCodeMixin, OAuth2TokenMixin
 
 db = SQLAlchemy()
 ma = Marshmallow()
@@ -95,7 +95,6 @@ class User(db.Model):
         try:
             return bcrypt.checkpw(password.encode('utf-8'), self.password_hash.encode('utf-8'))
         except Exception as e:
-            print(e)
             return False
 
     def get_user_id(self):
@@ -104,9 +103,9 @@ class User(db.Model):
     def __init__(self, username, password, firstname, lastname, organization, email_address, data_trust_id, telephone=None):
         self.id = str(uuid4()).replace('-', '')
         self.username = username
-        self.password = password
         self.firstname = firstname
         self.lastname = lastname
+        self.password = password
         self.organization = organization
         self.email_address = email_address
         self.telephone = telephone
@@ -246,6 +245,10 @@ class OAuth2ClientSchema(ma.Schema):
     i18n_metadata = fields.String()
     software_id = fields.String()
     software_version = fields.String()
+    grant_types = fields.List(fields.String())
+    response_types = fields.List(fields.String())
+    contacts = fields.List(fields.String())
+    jwks = fields.List(fields.String())
 
 
 class OAuth2AuthorizationCode(db.Model, OAuth2AuthorizationCodeMixin):
@@ -274,3 +277,17 @@ class OAuth2Token(db.Model, OAuth2TokenMixin):
     def is_refresh_token_expired(self):
         expires_at = self.issued_at + self.expires_in * 2
         return expires_at < time.time()
+
+
+class AuthorizedClient(db.Model):
+    """Clients authorized by a user.
+
+    This class maintains a list of clients that a user has authorized to act on their behalf.
+
+    """
+
+    __tablename__ = 'authorized_clients'
+
+    user_id = db.Column(db.String, db.ForeignKey('users.id'), primary_key=True)
+    client_id = db.Column(db.String, primary_key=True)
+    authorized = db.Column(db.Boolean, nullable=False, default=False)

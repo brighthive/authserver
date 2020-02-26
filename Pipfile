@@ -29,6 +29,7 @@ flask-cors = "*"
 webargs = "*"
 flask-wtf = "*"
 gevent = "*"
+flask-script = "*"
 
 [requires]
 python_version = "3.7"

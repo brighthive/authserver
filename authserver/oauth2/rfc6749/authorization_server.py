@@ -2,7 +2,7 @@
 
 """
 
-from authlib.flask.oauth2 import AuthorizationServer
+from authlib.integrations.flask_oauth2 import AuthorizationServer
 from flask import request as flask_req
 from authlib.oauth2 import OAuth2Request
 from authlib.common.encoding import to_unicode
@@ -14,7 +14,7 @@ class BrightHiveAuthorizationServer(AuthorizationServer):
 
     Overrides the base Authlib AuthorizationServer class to provide a custom method
     for passing the OAuth 2.0 grant type as a field in the JSON request body, but still
-    maintains the ability to handle the grant type as a query parameter. 
+    maintains the ability to handle the grant type as a query parameter.
 
     """
 
@@ -57,7 +57,7 @@ class BrightHiveAuthorizationServer(AuthorizationServer):
     def create_token_response(self, request=None):
         """Validate token request and create token response.
 
-        Args: 
+        Args:
             request (obj): OAuth2Request instance.
 
         Returns:

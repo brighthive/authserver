@@ -34,7 +34,8 @@ class TestDataTrustModel:
             expect(found_trust.id).to(equal(uuid))
             expect(found_trust.data_trust_name).to(equal(new_name))
 
-            # Delete the data trusts
-            expect(DataTrust.query.count()).to(equal(1))
+            # Delete the data trusts, accounting for pre-populated one from migration.
+            expect(DataTrust.query.count()).to(equal(2))
             db.session.delete(found_trust)
-            expect(DataTrust.query.count()).to(equal(0))
+            db.session.commit()
+            expect(DataTrust.query.count()).to(equal(1))

@@ -119,8 +119,6 @@ class UserResource(Resource):
                         data_trust_id=request_data['data_trust_id'])
             if 'telephone' in request_data.keys():
                 user.telephone = request_data['telephone']
-            else:
-                user.telephone = 'N/A'
             db.session.add(user)
             db.session.commit()
         except Exception as e:

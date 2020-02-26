@@ -59,15 +59,15 @@ class DevelopmentConfiguration(Configuration):
     ENV = 'development'
     DEBUG = True
     TESTING = False
-    
+
     def __init__(self):
         super().__init__()
         os.environ['AUTHLIB_INSECURE_TRANSPORT'] = '1'
         self.configuration_name = 'DEVELOPMENT'
-        self.postgres_user = os.getenv('PG_USER')
-        self.postgres_password = os.getenv('PG_PASSWORD')
-        self.postgres_hostname = os.getenv('PG_HOSTNAME')
-        self.postgres_database = os.getenv('PG_DB')
+        self.postgres_user = os.getenv('PG_USER', 'brighthive_admin')
+        self.postgres_password = os.getenv('PG_PASSWORD', 'password')
+        self.postgres_hostname = os.getenv('PG_HOSTNAME', 'localhost')
+        self.postgres_database = os.getenv('PG_DB', 'authserver')
         self.postgres_port = os.getenv('PG_PORT', 5432)
         self.sqlalchemy_database_uri = 'postgresql://{}:{}@{}:{}/{}'.format(
             self.postgres_user,
@@ -76,6 +76,7 @@ class DevelopmentConfiguration(Configuration):
             self.postgres_port,
             self.postgres_database
         )
+
 
 class TestingConfiguration(Configuration):
     """Testing environment configuration."""
@@ -129,9 +130,14 @@ class SandboxConfiguration(Configuration):
 class ProductionConfiguration(Configuration):
     """Production environment configuration."""
 
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    ENV = 'production'
+    DEBUG = False
+    TESTING = False
+
     def __init__(self):
         super().__init__()
-        os.environ['AUTHLIB_INSECURE_TRANSPORT'] = '1'
+        os.environ['AUTHLIB_INSECURE_TRANSPORT'] = '0'
         self.configuration_name = 'PRODUCTION'
         self.postgres_user = os.getenv('PG_USER')
         self.postgres_password = os.getenv('PG_PASSWORD')
@@ -185,4 +191,17 @@ class ConfigurationFactory(object):
         elif environment == 'PRODUCTION':
             return ProductionConfiguration()
         else:
-            raise ConfigurationEnvironmentNotFoundError('Cannot find configuration of type {}'.format(environment))
+            raise ConfigurationEnvironmentNotFoundError(
+                'Cannot find configuration of type {}'.format(environment))
+
+    @staticmethod
+    def generate_secret_key():
+        """Generate a secret for securing the Flask session.
+        Returns:
+            byte: A random string of bytes for secret.
+        """
+        environment = os.getenv('APP_ENV', 'development')
+        if environment.lower() == 'production':
+            return os.getenv('SECRET_KEY', os.urandom(16))
+        else:
+            return b'supersecretaccesscode'

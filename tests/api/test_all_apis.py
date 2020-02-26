@@ -60,7 +60,8 @@ USERS = [
         'email_address': 'user1@brighthive.me',
         'username': 'user1',
         'password': 'password',
-        'data_trust_id': ''
+        'data_trust_id': '',
+        'telephone': '304-555-1234'
     },
     {
         'firstname': 'Kwame',
@@ -69,7 +70,8 @@ USERS = [
         'email_address': 'user2@brighthive.me',
         'username': 'user2',
         'password': 'password',
-        'data_trust_id': ''
+        'data_trust_id': '',
+        'telephone': '304-555-5678'
     },
     {
         'firstname': 'Logan',
@@ -78,7 +80,8 @@ USERS = [
         'email_address': 'user3@brighthive.me',
         'username': 'user3',
         'password': 'password',
-        'data_trust_id': ''
+        'data_trust_id': '',
+        'telephone': '301-555-1234'
     },
     {
         'firstname': 'Amanda',
@@ -87,7 +90,8 @@ USERS = [
         'email_address': 'user4@brighthive.me',
         'username': 'user4',
         'password': 'password',
-        'data_trust_id': ''
+        'data_trust_id': '',
+        'telephone': '412-555-4567'
     },
     {
         'firstname': 'Greg',
@@ -96,7 +100,8 @@ USERS = [
         'email_address': 'user5@brighthive.me',
         'username': 'user5',
         'password': 'password',
-        'data_trust_id': ''
+        'data_trust_id': '',
+        'telephone': '812-555-1234'
     },
     {
         'firstname': 'Tom',
@@ -105,7 +110,8 @@ USERS = [
         'email_address': 'user6@brighthive.me',
         'username': 'user6',
         'password': 'password',
-        'data_trust_id': ''
+        'data_trust_id': '',
+        'telephone': '912-555-1234'
     },
     {
         'firstname': 'Vyki',
@@ -164,13 +170,13 @@ CLIENTS = [
 
 
 class TestAllAPIs(object):
-    def test_all_apis(self, client):
+    def test_all_apis(self, client, token_generator):
         # Common headers go in this dict
-        headers = {'content-type': 'application/json'}
+        headers = {'content-type': 'application/json', 'authorization': f'bearer {token_generator.get_token(client)}'}
 
-        data_trust_id = self._post_data_trust(client)
-        user_ids = self._post_users(client, data_trust_id)
-        client_ids = self._post_clients(client, user_ids)
+        data_trust_id = self._post_data_trust(client, token_generator)
+        user_ids = self._post_users(client, data_trust_id, token_generator)
+        client_ids = self._post_clients(client, user_ids, token_generator)
 
         # Create roles
         role_ids = []
@@ -199,36 +205,36 @@ class TestAllAPIs(object):
             expect(user_ids).to(contain(result['user_id']))
             expect(len(result['roles'])).to(equal(len(role_ids)))
 
-        self._cleanup(client, data_trust_id,
+        self._cleanup(client, data_trust_id, token_generator,
                       user_ids=user_ids, role_ids=role_ids)
 
-    def test_client_secret_delete_rotate(self, client):
-        headers = {'content-type': 'application/json'}
-        data_trust_id = self._post_data_trust(client)
-        user_ids = self._post_users(client, data_trust_id)
-        client_ids = self._post_clients(client, user_ids)
+    def test_client_secret_delete_rotate(self, client, token_generator):
+        headers = {'content-type': 'application/json', 'authorization': f'bearer {token_generator.get_token(client)}'}
+        data_trust_id = self._post_data_trust(client, token_generator)
+        user_ids = self._post_users(client, data_trust_id, token_generator)
+        client_ids = self._post_clients(client, user_ids, token_generator)
 
         client_to_patch = client_ids[0]
 
         response = client.post('/clients?action=delete_secret',
                                data=json.dumps({"id": client_to_patch}), headers=headers)
         expect(response.status_code).to(equal(200))
-        response = client.get('/clients/{}'.format(client_to_patch))
+        response = client.get('/clients/{}'.format(client_to_patch), headers=headers)
         expect(response.json['response']['client_secret']).to(equal(None))
 
         response = client.post('/clients?action=rotate_secret',
                                data=json.dumps({"id": client_to_patch}), headers=headers)
         expect(response.status_code).to(equal(200))
-        response = client.get('/clients/{}'.format(client_to_patch))
+        response = client.get('/clients/{}'.format(client_to_patch), headers=headers)
         expect(len(response.json['response']['client_secret'])).to(equal(48))
 
-        self._cleanup(client, data_trust_id, user_ids=user_ids)
+        self._cleanup(client, data_trust_id, token_generator, user_ids=user_ids)
 
-    def _post_data_trust(self, client):
+    def _post_data_trust(self, client, token_generator):
         '''
         Helper function that creates (and tests creating) a Data Trust entity.
         '''
-        headers = {'content-type': 'application/json'}
+        headers = {'content-type': 'application/json', 'authorization': f'bearer {token_generator.get_token(client)}'}
         response: Response = client.post(
             '/data_trusts', data=json.dumps(DATA_TRUST), headers=headers)
         expect(response.status_code).to(equal(201))
@@ -237,11 +243,11 @@ class TestAllAPIs(object):
 
         return data_trust_id
 
-    def _post_users(self, client, data_trust_id):
+    def _post_users(self, client, data_trust_id, token_generator):
         '''
         Helper function that creates (and tests creating) a collection of Users.
         '''
-        headers = {'content-type': 'application/json'}
+        headers = {'content-type': 'application/json', 'authorization': f'bearer {token_generator.get_token(client)}'}
         user_ids = []
         for user in USERS:
             user['data_trust_id'] = data_trust_id
@@ -255,15 +261,15 @@ class TestAllAPIs(object):
 
         return user_ids
 
-    def _post_clients(self, client, user_ids):
+    def _post_clients(self, client, user_ids, token_generator):
         '''
         Helper function that creates (and tests creating) a collection of Clients.
         '''
-        headers = {'content-type': 'application/json'}
+        headers = {'content-type': 'application/json', 'authorization': f'bearer {token_generator.get_token(client)}'}
         client_ids = []
         for i, api_client in enumerate(CLIENTS):
             api_client['user_id'] = user_ids[i]
-            response = client.post('/clients', data=json.dumps(api_client))
+            response = client.post('/clients', data=json.dumps(api_client), headers=headers)
             expect(response.status_code).to(equal(201))
             client_ids.append(response.json['response'][0]['id'])
 
@@ -271,8 +277,8 @@ class TestAllAPIs(object):
 
         return client_ids
 
-    def _cleanup(self, client, data_trust_id, role_ids=[], user_ids=[]):
-        headers = {'content-type': 'application/json'}
+    def _cleanup(self, client, data_trust_id, token_generator, role_ids=[], user_ids=[]):
+        headers = {'content-type': 'application/json', 'authorization': f'bearer {token_generator.get_token(client)}'}
         for role_id in role_ids:
             response = client.delete(
                 '/roles/{}'.format(role_id), headers=headers)

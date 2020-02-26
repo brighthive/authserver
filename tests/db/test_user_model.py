@@ -46,14 +46,14 @@ class TestUserModel:
             expect(found_user.lastname).to(equal(new_last_name))
 
             # Delete the user
-            expect(User.query.count()).to(equal(1))
+            expect(User.query.count()).to(equal(2))
             db.session.delete(found_user)
             db.session.commit()
-            expect(User.query.count()).to(equal(0))
+            expect(User.query.count()).to(equal(1))
 
-            # Clean up data trusts
             data_trusts = DataTrust.query.all()
             for data_trust in data_trusts:
-                DataTrust.query.filter_by(id=data_trust.id).delete()
-                db.session.commit()
-            expect(DataTrust.query.count()).to(equal(0))
+                if data_trust.id == trust_id:
+                    db.session.delete(data_trust)
+                    db.session.commit()
+            expect(DataTrust.query.count()).to(equal(1))
