@@ -1,7 +1,7 @@
 COMMIT_TAG		:= $(shell git log | grep commit | head -1 | cut -d' ' -f2 | cut -c1-5)
 ORGANIZATION	:= brighthive
 PROJECT_NAME	:= authserver
-VERSION 		:= 0.0.1
+VERSION 		:= 1.1.0
 AWS_ECR_REPO	:= 396527728813.dkr.ecr.us-east-2.amazonaws.com
 
 image:

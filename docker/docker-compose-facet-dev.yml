@@ -6,11 +6,13 @@ services:
       depends_on:
         - postgres
       environment:
-        - APP_ENV=DEVELOPMENT
+        - APP_ENV=PRODUCTION
         - PG_USER=brighthive_admin
         - PG_PASSWORD=password
         - PG_HOSTNAME=postgres
         - PG_DB=authserver
+        - FACET_REDIRECT_URI=http://localhost:3000/auth/redirect
+        - SECRET_KEY=supersecretkey
       ports:
         - "8000:8000"
       volumes:
