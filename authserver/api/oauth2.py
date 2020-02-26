@@ -5,17 +5,19 @@ An API for handling OAuth 2.0 interactions.
 """
 
 import json
-import requests
 from datetime import datetime
-from flask import Blueprint, request, session, render_template, redirect, url_for
-from flask_restful import Resource, Api, request
-from werkzeug.security import gen_salt
+
+import requests
 from authlib.integrations.flask_oauth2 import current_token
 from authlib.oauth2 import OAuth2Error, OAuth2Request
 from authlib.oauth2.rfc6749 import InvalidGrantError
+from flask import (Blueprint, redirect, render_template, request, session,
+                   url_for)
+from flask_restful import Api, Resource, request
+from werkzeug.security import gen_salt
 
+from authserver.db import AuthorizedClient, OAuth2Client, OAuth2Token, User, db
 from authserver.utilities import ResponseBody
-from authserver.db import db, User, OAuth2Client, AuthorizedClient
 from authserver.utilities.oauth2 import authorization, require_oauth
 
 oauth2_bp = Blueprint('oauth2_ep', __name__,
@@ -92,30 +94,39 @@ def authorize():
     return authorization.create_authorization_response(grant_user=user)
 
 
-class CreateOAuth2TokenResource(Resource):
-    """A User Resource.
-
-    This resource defines an Auth Service user who may have zero or more OAuth 2.0 clients
-    associated with their accounts.
-
+class ValidateOAuth2TokenResource(Resource):
     """
+    This resource determines the validity of an OAuth2Token.
+    """
+    def __init__(self):
+        self.response_handler = ResponseBody()
 
+    def post(self):
+        req_json = request.get_json(force=True)
+        access_token = req_json["token"]
+        access_token_in_db = OAuth2Token.query.filter_by(access_token=access_token).first() 
+
+        # TODO: Refactor with try-except
+        if access_token_in_db:
+            is_expired = access_token_in_db.is_access_token_expired()
+
+            if not is_expired:
+                return self.response_handler.custom_response(code=200, messages="True")
+
+        return self.response_handler.custom_response(code=200, messages="False")
+
+
+class CreateOAuth2TokenResource(Resource):
     def post(self):
         return authorization.create_token_response()
 
 
 class RevokeOAuth2TokenResource(Resource):
-    """A User Resource.
-
-    This resource defines an Auth Service user who may have zero or more OAuth 2.0 clients
-    associated with their accounts.
-
-    """
-
     def post(self):
         return authorization.create_endpoint_response('revocation')
 
 
 oauth2_api = Api(oauth2_bp)
+oauth2_api.add_resource(ValidateOAuth2TokenResource, '/validate')
 oauth2_api.add_resource(CreateOAuth2TokenResource, '/token')
 oauth2_api.add_resource(RevokeOAuth2TokenResource, '/revoke')
