@@ -93,12 +93,12 @@ class TestingConfiguration(Configuration):
         self.configuration_name = 'TESTING'
         self.postgres_user = 'test_user'
         self.postgres_password = 'test_password'
-        self.postgres_hostname = 'localhost'
+        self.postgres_hostname = os.getenv('DB_PORT_5432_TCP_ADDR', 'localhost')
         self.container_name = 'postgres-test'
         self.image_name = 'postgres'
         self.image_version = '11.1'
         self.postgres_database = 'authservice_test'
-        self.postgres_port = 5433
+        self.postgres_port = os.getenv('DB_PORT_5432_TCP_PORT', 5433)
         self.sqlalchemy_database_uri = 'postgresql://{}:{}@{}:{}/{}'.format(
             self.postgres_user,
             self.postgres_password,
