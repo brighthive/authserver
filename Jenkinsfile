@@ -109,8 +109,22 @@ pipeline {
           sh 'docker rmi $REGISTRY_URI/$REGISTRY_NAME:$TAGNAME'
         }
       }
+      stage('Deploy') {
+        when {
+          expression {
+            env.GIT_BRANCH == env.BRANCH_ALLOW_DEPLOYMENT
+          }
+        }
+        steps {
+          echo 'Deploying to development server...'
+          sshagent([env.K8_SERVER_SSH_KEY_NAME]) {
+            sh 'ssh -o StrictHostKeyChecking=no -T $K8_USERNAME@$K8_HOST kubectl set image deployment authserver authserver=$REGISTRY_URI/$REGISTRY_NAME:$TAGNAME'
+          }
+        }
+      }
   }
 }
+
 
 def initialize() {
     // Docker Defs
@@ -120,13 +134,13 @@ def initialize() {
     env.REGISTRY_NAME = 'brighthive/authserver'
     env.REGISTRY_URI = '396527728813.dkr.ecr.us-east-2.amazonaws.com'
     env.BRANCH_IMAGE_BUILD_PUSH = 'jenkins-base-config'
-    env.BRANCH_ALLOW_DEPLOYMENT = ''
+    env.BRANCH_ALLOW_DEPLOYMENT = 'jenkins-base-config'
     env.SYSTEM_NAME = 'Jenkins'
     env.IS_JENKINS_TEST = '1'
     env.AWS_REGION = 'us-east-2'
     env.MAX_ENVIRONMENTNAME_LENGTH = 32
     env.BUILD_VERSION = '1.1.0'
-    env.TAGNAME = env.GIT_COMMIT.substring(0,5) + '-' + env.BUILD_VERSION
+    env.TAGNAME = env.BUILD_VERSION + '-' + env.GIT_COMMIT.substring(0,5)
     // DB Configs
     env.POSTGRES_HOST = 'localhost'
     env.POSTGRES_POT = 5432
