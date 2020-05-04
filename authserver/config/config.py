@@ -115,13 +115,13 @@ class JenkinsConfiguration(Configuration):
     """Jenkins environment configuration."""
 
     SQLALCHEMY_TRACK_MODIFICATIONS = True
-    ENV = 'jenkins'
+    ENV = 'testing'
     DEBUG = False
     TESTING = True
 
     def __init__(self):
         super().__init__()
-        os.environ['FLASK_ENV'] = 'jenkins'
+        os.environ['FLASK_ENV'] = 'testing'
         os.environ['AUTHLIB_INSECURE_TRANSPORT'] = '1'
         self.configuration_name = 'JENKINS'
         self.postgres_user = 'test_user'
@@ -131,7 +131,7 @@ class JenkinsConfiguration(Configuration):
         self.image_name = 'postgres'
         self.image_version = '11.1'
         self.postgres_database = 'authservice_test'
-        self.postgres_port = os.getenv('DB_PORT_5432_TCP_PORT', 5432)
+        self.postgres_port = os.getenv('DB_PORT_5432_TCP_PORT', 5433)
         self.sqlalchemy_database_uri = 'postgresql://{}:{}@{}:{}/{}'.format(
             self.postgres_user,
             self.postgres_password,
