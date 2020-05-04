@@ -152,4 +152,6 @@ def initialize() {
     env.K8_SERVER_SSH_KEY_NAME = 'dev-k8-server-ssh'
     env.K8_APP_SERVICE_NAME = 'authserver'
     env.K8_APP_DEPLOYMENT_NAME = 'authserver'
+    env.K8_USERNAME = 'ubuntu'
+    env.K8_HOST = 'ec2-3-90-205-205.compute-1.amazonaws.com'
 }
