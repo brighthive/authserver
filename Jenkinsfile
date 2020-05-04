@@ -87,11 +87,12 @@ pipeline {
           }
         }
         steps {
+          echo '${GIT_COMMIT:0:5}'-'${BUILD_VERSION}'
           sh 'aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $REGISTRY_URI/$REGISTRY_NAME'
           sh 'docker tag $REGISTRY_NAME:latest $REGISTRY_URI/$REGISTRY_NAME:latest'
           sh 'docker push $REGISTRY_URI/$REGISTRY_NAME:latest'
-          sh 'docker tag $REGISTRY_NAME:latest $REGISTRY_URI/$REGISTRY_NAME:${GIT_COMMIT:0:5}'-'${BUILD_VERSION}'
-          sh 'docker push $REGISTRY_URI/$REGISTRY_NAME:${GIT_COMMIT:0:5}'-'${BUILD_VERSION}'
+          sh 'docker tag $REGISTRY_NAME:latest $REGISTRY_URI/$REGISTRY_NAME:$BUILD_NUMBER'
+          sh 'docker push $REGISTRY_URI/$REGISTRY_NAME:$BUILD_NUMBER'
         }
       }
       /*
@@ -106,7 +107,7 @@ pipeline {
         steps {
           sh 'docker rmi $REGISTRY_URI/$REGISTRY_NAME'
           sh 'docker rmi $REGISTRY_NAME:latest'
-          sh 'docker rmi $REGISTRY_URI/$REGISTRY_NAME:${GIT_COMMIT:0:5}'-'${BUILD_VERSION}'
+          sh 'docker rmi $REGISTRY_URI/$REGISTRY_NAME:$BUILD_NUMBER'
         }
       }
   }
