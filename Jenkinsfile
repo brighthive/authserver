@@ -123,7 +123,7 @@ def initialize() {
     env.BRANCH_ALLOW_DEPLOYMENT = ''
     env.SYSTEM_NAME = 'Jenkins'
     env.IS_JENKINS_TEST = '1'
-    env.AWS_REGION = 'us-west-1'
+    env.AWS_REGION = 'us-west-2'
     env.MAX_ENVIRONMENTNAME_LENGTH = 32
     env.BUILD_VERSION = '1.1.0'
     // DB Configs
