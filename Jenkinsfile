@@ -118,7 +118,7 @@ pipeline {
         steps {
           echo 'Deploying to development server...'
           sshagent([env.K8_SERVER_SSH_KEY_NAME]) {
-            sh 'ssh -o StrictHostKeyChecking=no -T $K8_USERNAME@$K8_HOST kubectl set image deployment authserver authserver=$REGISTRY_URI/$REGISTRY_NAME:$TAGNAME'
+            sh 'ssh -o StrictHostKeyChecking=no -T $K8_USERNAME@$K8_HOST kubectl set image deployment $K8_APP_DEPLOYMENT_NAME $K8_APP_SERVICE_NAME=$REGISTRY_URI/$REGISTRY_NAME:$TAGNAME'
           }
         }
       }
@@ -149,8 +149,7 @@ def initialize() {
     env.POSTGRES_PASSWORD = 'test_password'
     env.POSTGRES_DB_NAME = 'authservice_test'
     // K8 Deployment Parameters
-    env.K8_SERVER_SSH_KEY_NAME = ''
-    env.K8_APP_NAME_SERVICE = ''
-    env.K8_USERNAME = ''
-    env.K8_HOST = ''
+    env.K8_SERVER_SSH_KEY_NAME = 'dev-k8-server-ssh'
+    env.K8_APP_SERVICE_NAME = 'authserver'
+    env.K8_APP_DEPLOYMENT_NAME = 'authserver'
 }
