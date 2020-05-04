@@ -206,6 +206,9 @@ class ConfigurationFactory(object):
             ConfigurationEnvironmentNotFoundError: If an unknown configuration type is passed.
 
         """
+
+        print("get_config environment", environment)
+        
         if environment is None:
             environment = 'DEVELOPMENT'
         else:
