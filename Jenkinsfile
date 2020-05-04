@@ -133,8 +133,8 @@ def initialize() {
     // AWS ERC Parameters / Push Rules
     env.REGISTRY_NAME = 'brighthive/authserver'
     env.REGISTRY_URI = '396527728813.dkr.ecr.us-east-2.amazonaws.com'
-    env.BRANCH_IMAGE_BUILD_PUSH = 'jenkins-base-config'
-    env.BRANCH_ALLOW_DEPLOYMENT = 'jenkins-base-config'
+    env.BRANCH_IMAGE_BUILD_PUSH = 'master'
+    env.BRANCH_ALLOW_DEPLOYMENT = 'master'
     env.SYSTEM_NAME = 'Jenkins'
     env.IS_JENKINS_TEST = '1'
     env.AWS_REGION = 'us-east-2'
