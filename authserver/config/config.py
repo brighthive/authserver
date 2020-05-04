@@ -115,13 +115,13 @@ class JenkinsConfiguration(Configuration):
     """Jenkins environment configuration."""
 
     SQLALCHEMY_TRACK_MODIFICATIONS = True
-    ENV = 'jenkins'
+    ENV = 'testing'
     DEBUG = False
     TESTING = True
 
     def __init__(self):
         super().__init__()
-        os.environ['FLASK_ENV'] = 'jenkins'
+        os.environ['FLASK_ENV'] = 'testing'
         os.environ['AUTHLIB_INSECURE_TRANSPORT'] = '1'
         self.configuration_name = 'JENKINS'
         self.postgres_user = 'test_user'
@@ -208,7 +208,7 @@ class ConfigurationFactory(object):
         """
 
         print("get_config environment", environment)
-        
+
         if environment is None:
             environment = 'DEVELOPMENT'
         else:
