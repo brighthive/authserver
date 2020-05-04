@@ -89,11 +89,14 @@ def app():
         app (object): The Flask application.
 
     """
-    os.environ['APP_ENV'] = 'TESTING'
-    app = create_app('TESTING')
-    postgres = PostgreSQLContainer()
-
+    envname = 'TESTING'
     is_jenkins = bool(int(os.getenv('IS_JENKINS_TEST', '0')))
+    if is_jenkins:
+        envname = 'JENKINS'
+
+    os.environ['APP_ENV'] = envname
+    app = create_app(envname)
+    postgres = PostgreSQLContainer()
 
     if is_jenkins != True:
         postgres.start_container()
