@@ -87,12 +87,11 @@ pipeline {
           }
         }
         steps {
-          echo '${GIT_COMMIT:0:5}'-'${BUILD_VERSION}'
           sh 'aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $REGISTRY_URI/$REGISTRY_NAME'
           sh 'docker tag $REGISTRY_NAME:latest $REGISTRY_URI/$REGISTRY_NAME:latest'
           sh 'docker push $REGISTRY_URI/$REGISTRY_NAME:latest'
-          sh 'docker tag $REGISTRY_NAME:latest $REGISTRY_URI/$REGISTRY_NAME:$BUILD_NUMBER'
-          sh 'docker push $REGISTRY_URI/$REGISTRY_NAME:$BUILD_NUMBER'
+          sh 'docker tag $REGISTRY_NAME:latest $REGISTRY_URI/$REGISTRY_NAME:$TAGNAME'
+          sh 'docker push $REGISTRY_URI/$REGISTRY_NAME:$TAGNAME'
         }
       }
       /*
@@ -107,7 +106,7 @@ pipeline {
         steps {
           sh 'docker rmi $REGISTRY_URI/$REGISTRY_NAME'
           sh 'docker rmi $REGISTRY_NAME:latest'
-          sh 'docker rmi $REGISTRY_URI/$REGISTRY_NAME:$BUILD_NUMBER'
+          sh 'docker rmi $REGISTRY_URI/$REGISTRY_NAME:$TAGNAME'
         }
       }
   }
@@ -127,6 +126,7 @@ def initialize() {
     env.AWS_REGION = 'us-east-2'
     env.MAX_ENVIRONMENTNAME_LENGTH = 32
     env.BUILD_VERSION = '1.1.0'
+    env.TAGNAME = env.GIT_COMMIT.substring(0,5) + '-' + env.BUILD_VERSION
     // DB Configs
     env.POSTGRES_HOST = 'localhost'
     env.POSTGRES_POT = 5432
