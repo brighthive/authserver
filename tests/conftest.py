@@ -96,7 +96,7 @@ def app():
 
     os.environ['APP_ENV'] = envname
     app = create_app(envname)
-    postgres = PostgreSQLContainer()
+    postgres = PostgreSQLContainer(configuration=envname)
 
     if is_jenkins != True:
         postgres.start_container()

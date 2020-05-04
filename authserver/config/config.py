@@ -131,7 +131,7 @@ class JenkinsConfiguration(Configuration):
         self.image_name = 'postgres'
         self.image_version = '11.1'
         self.postgres_database = 'authservice_test'
-        self.postgres_port = os.getenv('DB_PORT_5432_TCP_PORT', 5433)
+        self.postgres_port = os.getenv('DB_PORT_5432_TCP_PORT', 5432)
         self.sqlalchemy_database_uri = 'postgresql://{}:{}@{}:{}/{}'.format(
             self.postgres_user,
             self.postgres_password,
