@@ -111,6 +111,36 @@ class TestingConfiguration(Configuration):
         return '{}:{}'.format(self.image_name, self.image_version)
 
 
+class JenkinsConfiguration(Configuration):
+    """Testing environment configuration."""
+
+    SQLALCHEMY_TRACK_MODIFICATIONS = True
+    ENV = 'testing'
+    DEBUG = False
+    TESTING = True
+
+    def __init__(self):
+        super().__init__()
+        os.environ['FLASK_ENV'] = 'testing'
+        os.environ['AUTHLIB_INSECURE_TRANSPORT'] = '1'
+        self.configuration_name = 'TESTING'
+        self.postgres_user = 'test_user'
+        self.postgres_password = 'test_password'
+        self.postgres_hostname = os.getenv('DB_PORT_5432_TCP_ADDR', '0.0.0.0')
+        self.container_name = 'postgres-test'
+        self.image_name = 'postgres'
+        self.image_version = '11.1'
+        self.postgres_database = 'authservice_test'
+        self.postgres_port = os.getenv('DB_PORT_5432_TCP_PORT', 5432)
+        self.sqlalchemy_database_uri = 'postgresql://{}:{}@{}:{}/{}'.format(
+            self.postgres_user,
+            self.postgres_password,
+            self.postgres_hostname,
+            self.postgres_port,
+            self.postgres_database
+        )
+
+
 class StagingConfiguration(Configuration):
     """Staging environment configuration."""
 
@@ -183,7 +213,11 @@ class ConfigurationFactory(object):
         if environment == 'DEVELOPMENT':
             return DevelopmentConfiguration()
         elif environment == 'TESTING':
-            return TestingConfiguration()
+            is_jenkins = bool(int(os.getenv('IS_JENKINS_TEST', '0')))
+            if is_jenkins:
+                return JenkinsConfiguration()
+            else:
+                return TestingConfiguration()
         elif environment == 'STAGING':
             return StagingConfiguration()
         elif environment == 'SANDBOX':

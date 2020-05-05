@@ -91,8 +91,13 @@ def app():
     """
     os.environ['APP_ENV'] = 'TESTING'
     app = create_app('TESTING')
-    postgres = PostgreSQLContainer()
-    postgres.start_container()
+
+    is_jenkins = bool(int(os.getenv('IS_JENKINS_TEST', '0')))
+
+    if is_jenkins != True:
+        postgres = PostgreSQLContainer()
+        postgres.start_container()
+
     upgraded = False
 
     while not upgraded:
@@ -103,7 +108,9 @@ def app():
         except Exception as e:
             sleep(1)
     yield app
-    postgres.stop_container()
+
+    if is_jenkins != True:
+        postgres.stop_container()
 
 
 @pytest.fixture

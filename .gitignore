@@ -11,3 +11,5 @@
 
 # sphinx artifacts
 **/docs/build
+
+**.DS_Store
