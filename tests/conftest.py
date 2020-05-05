@@ -91,11 +91,11 @@ def app():
     """
     os.environ['APP_ENV'] = 'TESTING'
     app = create_app('TESTING')
-    postgres = PostgreSQLContainer()
 
     is_jenkins = bool(int(os.getenv('IS_JENKINS_TEST', '0')))
 
     if is_jenkins != True:
+        postgres = PostgreSQLContainer()
         postgres.start_container()
 
     upgraded = False
