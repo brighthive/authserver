@@ -12,6 +12,7 @@ from authserver.config import ConfigurationFactory
 from authserver.db import db
 from authserver.db import db, DataTrust, User
 
+
 class TokenGenerator:
     def __init__(self):
         self.client_id = 'd84UZXW7QcB5ufaVT15C9BtO'
@@ -75,12 +76,7 @@ def client():
         client (object): The Flask test client for the application.
 
     """
-    is_jenkins = bool(int(os.getenv('IS_JENKINS_TEST', '0')))
-    envname = 'TESTING'
-    if is_jenkins:
-        envname = 'JENKINS'
-
-    app = create_app(envname)
+    app = create_app('TESTING')
     client = app.test_client()
     return client
 
@@ -93,14 +89,11 @@ def app():
         app (object): The Flask application.
 
     """
-    is_jenkins = bool(int(os.getenv('IS_JENKINS_TEST', '0')))
-    envname = 'TESTING'
-    if is_jenkins:
-        envname = 'JENKINS'
+    os.environ['APP_ENV'] = 'TESTING'
+    app = create_app('TESTING')
+    postgres = PostgreSQLContainer()
 
-    os.environ['APP_ENV'] = envname
-    app = create_app(envname)
-    postgres = PostgreSQLContainer(configuration=envname)
+    is_jenkins = bool(int(os.getenv('IS_JENKINS_TEST', '0')))
 
     if is_jenkins != True:
         postgres.start_container()
@@ -125,7 +118,6 @@ def environments():
     return [
         'DEVELOPMENT',
         'TESTING',
-        'JENKINS',
         'STAGING',
         'SANDBOX',
         'PRODUCTION'

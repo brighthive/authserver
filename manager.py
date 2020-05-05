@@ -6,8 +6,6 @@ from authserver import create_app
 environment = os.getenv('APP_ENV', None)
 app = application = create_app(environment)
 
-print("manager environment", environment)
-
 manager = Manager(app)
 manager.add_command('db', MigrateCommand)
 
