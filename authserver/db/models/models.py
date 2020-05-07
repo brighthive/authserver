@@ -227,7 +227,7 @@ class OAuth2ClientSchema(ma.Schema):
     user_id = fields.String(required=True)
     client_id = fields.String(dump_only=True)
     client_secret = fields.String(dump_only=True)
-    issued_at = fields.Integer(dump_only=True)
+    client_id_issued_at = fields.Integer()
     expires_at = fields.Integer(dump_only=True)
     redirect_uri = fields.String()
     token_endpoint_auth_method = fields.String()

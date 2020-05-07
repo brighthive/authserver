@@ -8,7 +8,7 @@ demonstrating how to interact with the various APIs.
 import pytest
 import json
 from flask import Response
-from expects import expect, be, equal, raise_error, be_above_or_equal, contain
+from expects import expect, be, equal, raise_error, be_above, be_above_or_equal, contain
 from authserver.db import db, DataTrust, User
 
 DATA_TRUST = {
@@ -196,12 +196,13 @@ class TestAllAPIs(object):
                 '/clients/{}'.format(client_id), data=json.dumps(request_body), headers=headers)
             expect(response.status_code).to(equal(200))
 
-        # Ensure that clients actually have roles and users
+        # Ensure that clients actually have roles, users, and other crucial fields
         for client_id in client_ids:
             response = client.get(
                 '/clients/{}'.format(client_id), headers=headers)
             result = response.json['response']
             expect(result['id']).to(equal(client_id))
+            expect(result['client_id_issued_at']).to(be_above(0))
             expect(user_ids).to(contain(result['user_id']))
             expect(len(result['roles'])).to(equal(len(role_ids)))
 
