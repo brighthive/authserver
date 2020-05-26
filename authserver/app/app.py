@@ -43,7 +43,7 @@ def create_app(environment: str = None):
         """ Logging every request. """
         print(request.remote_addr, dt.utcnow().strftime("%d/%b/%Y:%H:%M:%S.%f")[:-3],
             request.method, request.path, request.scheme.upper(), response.status,
-            response.content_length, request.referrer, request.user_agent)
+            response.content_length, request.referrer, request.user_agent, flush=True)
         return response
 
     db.init_app(app)
