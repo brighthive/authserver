@@ -1,6 +1,6 @@
 """Flask Application."""
 
-from flask import Flask
+from flask import Flask, request
 from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_restful import Api
@@ -11,7 +11,7 @@ from authserver.api import (client_bp, data_trust_bp, health_api_bp, oauth2_bp,
 from authserver.config import ConfigurationFactory
 from authserver.db import db
 from authserver.utilities import config_oauth
-
+from datetime import datetime as dt
 
 def create_app(environment: str = None):
     """Create the Flask application.
@@ -37,6 +37,15 @@ def create_app(environment: str = None):
         },
         SECRET_KEY=ConfigurationFactory.generate_secret_key()
     )
+
+    @app.after_request
+    def after_request(response):
+        """ Logging every request. """
+        print(request.remote_addr, dt.utcnow().strftime("%d/%b/%Y:%H:%M:%S.%f")[:-3],
+            request.method, request.path, request.scheme.upper(), response.status,
+            response.content_length, request.referrer, request.user_agent)
+        return response
+
     db.init_app(app)
     config_oauth(app)
     CORS(app)
