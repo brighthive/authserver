@@ -13,6 +13,10 @@ from authserver.db import db
 from authserver.utilities import config_oauth
 from datetime import datetime as dt
 
+import json
+import os
+from elasticapm.contrib.flask import ElasticAPM
+
 def create_app(environment: str = None):
     """Create the Flask application.
 
@@ -41,10 +45,27 @@ def create_app(environment: str = None):
     @app.after_request
     def after_request(response):
         """ Logging every request. """
-        print(request.remote_addr, dt.utcnow().strftime("%d/%b/%Y:%H:%M:%S.%f")[:-3],
-            request.method, request.path, request.scheme.upper(), response.status,
-            response.content_length, request.referrer, request.user_agent, flush=True)
+        print(json.dumps({
+            "remote_addr": request.remote_addr,
+            "request_time": str(dt.utcnow()),
+            "method": request.method,
+            "path": request.path,
+            "scheme": request.scheme.upper(),
+            "statusCode": response.status_code,
+            "status": response.status,
+            "content_length": response.content_length,
+            "user_agent": str(request.user_agent)
+        }),  flush=True)
         return response
+
+    apm_enabled = bool(int(os.getenv('APM_ENABLED', '0')))
+    if apm_enabled == True:
+        app.config['ELASTIC_APM'] = {
+          'SERVICE_NAME': 'authserver',
+          'SECRET_TOKEN': os.getenv('APM_TOKEN', ''),
+          'SERVER_URL': 'http://' + os.getenv('APM_HOSTNAME', '') + ":" + os.getenv('APM_PORT', ''),
+        }
+        apm = ElasticAPM(app)
 
     db.init_app(app)
     config_oauth(app)
