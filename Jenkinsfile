@@ -55,9 +55,12 @@ pipeline {
                 }
                 docker.image(env.DOCKER_PYTHON_NAME).inside("-u root:root --link ${db.id}:db") {
                     sh "python --version"
+                    sh "apt-get update"
+                    sh "apt-get install -y --no-install-recommends gcc"
+                    sh "apt-get install python-dev --assume-yes"
                     sh "pip install --no-cache-dir pipenv"
                     sh "pipenv install --dev"
-                    sh 'printenv'
+                    sh "printenv"
                     sh "pipenv run pytest -s"
                 }
               }
@@ -129,7 +132,7 @@ pipeline {
 def initialize() {
     // Docker Defs
     env.DOCKER_DB_IMAGE_NAME = 'postgres:11.1'
-    env.DOCKER_PYTHON_NAME = 'python:3.7-slim'
+    env.DOCKER_PYTHON_NAME = 'python:3.7.4-slim'
     // AWS ERC Parameters / Push Rules
     env.REGISTRY_NAME = 'brighthive/authserver'
     env.REGISTRY_URI = '396527728813.dkr.ecr.us-east-2.amazonaws.com'
