@@ -63,7 +63,7 @@ def create_app(environment: str = None):
         app.config['ELASTIC_APM'] = {
           'SERVICE_NAME': 'authserver',
           'SECRET_TOKEN': os.getenv('APM_TOKEN', ''),
-          'SERVER_URL': 'http://' + os.getenv('APM_HOSTNAME', '') + ":" + os.getenv('APM_PORT', ''),
+          'SERVER_URL': os.getenv('APM_HOSTNAME', ''),
         }
         apm = ElasticAPM(app)
 

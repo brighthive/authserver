@@ -19,5 +19,8 @@ services:
       - PG_HOSTNAME=postgres_service
       - PG_DB=authserver
       - PG_PORT=5432
+      - APM_ENABLED=0
+      - APM_TOKEN=
+      - APM_HOSTNAME=
     ports:
       - 8000:8000
