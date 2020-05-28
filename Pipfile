@@ -30,9 +30,6 @@ webargs = "*"
 flask-wtf = "*"
 gevent = "*"
 flask-script = "*"
-elastic-apm = "*"
-blinker = "*"
-psutil = "*"
 
 [requires]
 python_version = "3.7"

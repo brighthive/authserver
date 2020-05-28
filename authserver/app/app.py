@@ -15,7 +15,7 @@ from datetime import datetime as dt
 
 import json
 import os
-from elasticapm.contrib.flask import ElasticAPM
+# from elasticapm.contrib.flask import ElasticAPM
 
 def create_app(environment: str = None):
     """Create the Flask application.
@@ -58,14 +58,14 @@ def create_app(environment: str = None):
         }),  flush=True)
         return response
 
-    apm_enabled = bool(int(os.getenv('APM_ENABLED', '0')))
-    if apm_enabled == True:
-        app.config['ELASTIC_APM'] = {
-          'SERVICE_NAME': 'authserver',
-          'SECRET_TOKEN': os.getenv('APM_TOKEN', ''),
-          'SERVER_URL': os.getenv('APM_HOSTNAME', ''),
-        }
-        apm = ElasticAPM(app)
+    #apm_enabled = bool(int(os.getenv('APM_ENABLED', '0')))
+    #if apm_enabled == True:
+    #    app.config['ELASTIC_APM'] = {
+    #      'SERVICE_NAME': 'authserver',
+    #      'SECRET_TOKEN': os.getenv('APM_TOKEN', ''),
+    #      'SERVER_URL': os.getenv('APM_HOSTNAME', ''),
+    #    }
+    #    apm = ElasticAPM(app)
 
     db.init_app(app)
     config_oauth(app)
