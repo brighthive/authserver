@@ -15,6 +15,8 @@ from datetime import datetime as dt
 
 import json
 import os
+import logging
+from pprint import pformat
 from elasticapm.contrib.flask import ElasticAPM
 
 def create_app(environment: str = None):
@@ -43,12 +45,13 @@ def create_app(environment: str = None):
     )
 
     is_testing = environment == 'TESTING'
+    logging.basicConfig(format='%(message)s', level=logging.INFO)
 
     @app.after_request
     def after_request(response):
         """ Logging every request. """
         if is_testing != True:
-            print(json.dumps({
+            jsonstr = json.dumps({
                 "remote_addr": request.remote_addr,
                 "request_time": str(dt.utcnow()),
                 "method": request.method,
@@ -58,7 +61,8 @@ def create_app(environment: str = None):
                 "status": response.status,
                 "content_length": response.content_length,
                 "user_agent": str(request.user_agent)
-            }),  flush=True)
+            })
+            logging.info(jsonstr)
         return response
 
     if is_testing != True:
