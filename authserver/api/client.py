@@ -61,7 +61,7 @@ class ClientResource(Resource):
         if not request_data:
             return self.response_handler.empty_request_body_response()
 
-        # Check for query params/webargs (i.e., action).
+        # Check for query params
         action = request.args.get("action")
         if action:
             try:
@@ -74,7 +74,7 @@ class ClientResource(Resource):
             elif action == 'rotate_secret':
                 return self._rotate_secret(client_id)
             else:
-                return self.response_handler.custom_response(code=422, messages="Invalid query param! The 'action' must be either 'delete_secret' or 'rotate_secret'.")
+                return self.response_handler.custom_response(code=422, messages="Invalid query param! 'action' must be either 'delete_secret' or 'rotate_secret'.")
 
         # Assume that the request intends to create a new user: an ID should not be in the request data.
         if id is not None:

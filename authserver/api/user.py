@@ -9,18 +9,9 @@ from datetime import datetime
 
 from flask import Blueprint
 from flask_restful import Api, Resource, request
-from webargs import fields, validate
-from webargs.flaskparser import use_args, use_kwargs
 
 from authserver.db import DataTrust, DataTrustSchema, User, UserSchema, db, OAuth2Client, OAuth2Token
 from authserver.utilities import ResponseBody, require_oauth
-
-POST_ARGS = {
-    'action': fields.Str(
-        required=False,
-        validate=validate.OneOf(['deactivate']),
-    )
-}
 
 
 class UserDetailResource(Resource):
@@ -88,8 +79,7 @@ class UserResource(Resource):
                 return self.response_handler.not_found_response(id)
 
     @require_oauth()
-    @use_args(POST_ARGS)
-    def post(self, action, id: str = None):
+    def post(self, id: str = None):
         # Check for data, since all POST requests need it.
         try:
             request_data = request.get_json(force=True)
@@ -101,14 +91,18 @@ class UserResource(Resource):
         if id is not None:
             return self.response_handler.method_not_allowed_response()
 
-        # Check for query params/webargs (i.e., action).
+        # Check for query params
+        action = request.args.get("action")
         if action:
             try:
                 user_id = request_data['id']
             except KeyError as e:
                 return self.response_handler.custom_response(code=422, messages='Please provide the ID of the user.')
             else:
-                return self._deactivate(user_id)
+                if action == "deactivate":
+                    return self._deactivate(user_id)
+                else:
+                    return self.response_handler.custom_response(code=422, messages="Invalid query param! 'action' can only be 'deactivate'.")
 
         data, errors = self.user_schema.load(request_data)
         if errors:
