@@ -230,6 +230,21 @@ class TestAllAPIs(object):
         expect(len(response.json['response']['client_secret'])).to(equal(48))
 
         self._cleanup(client, data_trust_id, token_generator, user_ids=user_ids)
+    
+    def test_client_post_invalid_action(self, client, token_generator):
+        headers = {'content-type': 'application/json', 'authorization': f'bearer {token_generator.get_token(client)}'}
+        data_trust_id = self._post_data_trust(client, token_generator)
+        user_ids = self._post_users(client, data_trust_id, token_generator)
+        client_ids = self._post_clients(client, user_ids, token_generator)
+
+        client_to_patch = client_ids[0]
+
+        response = client.post('/clients?action=some_invalid_action',
+                               data=json.dumps({"id": client_to_patch}), headers=headers)
+        expect(response.status_code).to(equal(422))
+        expect(response.json['messages']).to(contain("Invalid query param!"))
+
+        self._cleanup(client, data_trust_id, token_generator, user_ids=user_ids)
 
     def _post_data_trust(self, client, token_generator):
         '''

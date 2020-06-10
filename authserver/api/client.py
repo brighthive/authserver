@@ -11,20 +11,11 @@ from uuid import uuid4
 
 from flask import Blueprint
 from flask_restful import Api, Resource, request
-from webargs import fields, validate
-from webargs.flaskparser import use_args, use_kwargs
 from werkzeug.security import gen_salt
 
 from authserver.db import (DataTrust, DataTrustSchema, OAuth2Client,
                            OAuth2ClientSchema, Role, User, UserSchema, db)
 from authserver.utilities import ResponseBody, require_oauth
-
-POST_ARGS = {
-    'action': fields.Str(
-        required=False,
-        validate=validate.OneOf(['delete_secret', 'rotate_secret']),
-    )
-}
 
 
 class ClientResource(Resource):
@@ -54,14 +45,14 @@ class ClientResource(Resource):
                 return self.response_handler.not_found_response(id)
 
     @require_oauth()
-    @use_args(POST_ARGS)
-    def post(self, action, id: str = None):
+    def post(self, id: str = None):
         '''
         The POST method mainly enables the following:
         (1) creation of a new Client.
         (2) deletion or rotatation of the secret of an existing client – accomplished by POSTing with 
         query params (?action=delete_secret, or ?action=rotate_secret).
         '''
+
         # Check for data, since all POST requests need it.
         try:
             request_data = request.get_json(force=True)
@@ -70,17 +61,20 @@ class ClientResource(Resource):
         if not request_data:
             return self.response_handler.empty_request_body_response()
 
-        # Check for query params/webargs (i.e., action).
+        # Check for query params
+        action = request.args.get("action")
         if action:
             try:
                 client_id = request_data['id']
             except KeyError as e:
                 return self.response_handler.custom_response(code=422, messages='Please provide the ID of the client.')
 
-            if action['action'] == 'delete_secret':
+            if action == 'delete_secret':
                 return self._delete_secret(client_id)
-            elif action['action'] == 'rotate_secret':
+            elif action == 'rotate_secret':
                 return self._rotate_secret(client_id)
+            else:
+                return self.response_handler.custom_response(code=422, messages="Invalid query param! 'action' must be either 'delete_secret' or 'rotate_secret'.")
 
         # Assume that the request intends to create a new user: an ID should not be in the request data.
         if id is not None:
