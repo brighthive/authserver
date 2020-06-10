@@ -1,7 +1,7 @@
 FROM python:3.7.4-slim
 RUN apt-get update
 RUN apt-get install -y --no-install-recommends gcc
-RUn apt-get install python-dev --assume-yes
+RUN apt-get install python-dev --assume-yes
 WORKDIR /authserver
 ADD authserver authserver
 ADD migrations migrations
