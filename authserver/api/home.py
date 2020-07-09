@@ -5,11 +5,13 @@ from wtforms import Form, StringField, PasswordField, validators
 
 from authserver.db import db, User, OAuth2Client
 
-home_bp = Blueprint('home_ep', __name__, static_folder='static', template_folder='templates', url_prefix='/')
+home_bp = Blueprint('home_ep', __name__, static_folder='static',
+                    template_folder='templates', url_prefix='/')
 
 
 class LoginForm(Form):
-    username = StringField('Username', [validators.DataRequired(), validators.length(min=4, max=40)])
+    username = StringField(
+        'Username', [validators.DataRequired(), validators.length(min=4, max=40)])
     password = PasswordField('Password', [validators.DataRequired()])
 
 
