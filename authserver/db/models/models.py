@@ -144,12 +144,12 @@ class UserSchema(ma.Schema):
 class Organization(db.Model):
     """Data Trust Organization."""
     __tablename__ = 'organizations'
-    __table_args__ = (db.UniqueConstraint('name'), )
 
     id = db.Column(db.String, primary_key=True)
     name = db.Column(db.String(40), unique=True, nullable=False)
     date_created = db.Column(db.TIMESTAMP)
     date_last_updated = db.Column(db.TIMESTAMP)
+    users = db.relationship('User', backref='user', lazy=True)
 
     def __init__(self, name):
         self.id = str(uuid4()).replace('-', '')
