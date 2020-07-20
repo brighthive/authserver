@@ -72,7 +72,8 @@ class User(db.Model):
     username = db.Column(db.String(40), unique=True, nullable=False)
     firstname = db.Column(db.String(40), nullable=False)
     lastname = db.Column(db.String(40), nullable=False)
-    organization = db.Column(db.String(120), nullable=False)
+    organization_id = db.Column(
+        db.String, db.ForeignKey('organizations.id', ondelete='CASCADE'), nullable=False)
     email_address = db.Column(db.String(40), nullable=False)
     telephone = db.Column(db.String(20), nullable=True)
     active = db.Column(db.Boolean, nullable=False, default=True)
@@ -100,13 +101,13 @@ class User(db.Model):
     def get_user_id(self):
         return self.id
 
-    def __init__(self, username, password, firstname, lastname, organization, email_address, data_trust_id, telephone=None):
+    def __init__(self, username, password, firstname, lastname, organization_id, email_address, data_trust_id, telephone=None):
         self.id = str(uuid4()).replace('-', '')
         self.username = username
         self.firstname = firstname
         self.lastname = lastname
         self.password = password
-        self.organization = organization
+        self.organization_id = organization_id
         self.email_address = email_address
         self.telephone = telephone
         self.data_trust_id = data_trust_id
@@ -131,7 +132,7 @@ class UserSchema(ma.Schema):
     password = fields.String(required=True)
     firstname = fields.String(required=True)
     lastname = fields.String(required=True)
-    organization = fields.String(required=True)
+    organization_id = fields.String(required=True)
     email_address = fields.Email(required=True)
     telephone = fields.String()
     active = fields.Boolean(dump_only=True)
