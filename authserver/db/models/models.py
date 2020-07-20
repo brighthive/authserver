@@ -63,6 +63,40 @@ class DataTrustSchema(ma.Schema):
     date_last_updated = fields.DateTime(dump_only=True)
 
 
+class Organization(db.Model):
+    """Data Trust Organization."""
+    __tablename__ = 'organizations'
+
+    id = db.Column(db.String, primary_key=True)
+    name = db.Column(db.String(40), unique=True, nullable=False)
+    date_created = db.Column(db.TIMESTAMP)
+    date_last_updated = db.Column(db.TIMESTAMP)
+
+    def __init__(self, name):
+        self.id = str(uuid4()).replace('-', '')
+        self.name = name
+        self.date_created = datetime.utcnow()
+        self.date_last_updated = datetime.utcnow()
+
+    def __str__(self):
+        return '{} {} {}'.format(self.id, self.name)
+
+
+class OrganizationSchema(ma.Schema):
+    """Organization Schema
+
+    A marshmallow schema for validating the Organization model.
+    """
+
+    class Meta:
+        ordered = True
+
+    id = fields.String(dump_only=True)
+    name = fields.String(required=True)
+    date_created = fields.DateTime(dump_only=True)
+    date_last_updated = fields.DateTime(dump_only=True)
+
+
 class User(db.Model):
     """Data Trust User."""
     __tablename__ = 'users'
@@ -72,6 +106,7 @@ class User(db.Model):
     username = db.Column(db.String(40), unique=True, nullable=False)
     firstname = db.Column(db.String(40), nullable=False)
     lastname = db.Column(db.String(40), nullable=False)
+    organization = db.relationship('Organization', backref='users')
     organization_id = db.Column(
         db.String, db.ForeignKey('organizations.id', ondelete='CASCADE'), nullable=False)
     email_address = db.Column(db.String(40), nullable=False)
@@ -133,45 +168,13 @@ class UserSchema(ma.Schema):
     firstname = fields.String(required=True)
     lastname = fields.String(required=True)
     organization_id = fields.String(required=True)
+    organization = fields.Nested(OrganizationSchema, dump_only=True)
     email_address = fields.Email(required=True)
     telephone = fields.String()
     active = fields.Boolean(dump_only=True)
     data_trust_id = fields.String(required=True)
     date_created = fields.DateTime(dump_only=True)
     date_last_updated = fields.DateTime(dump_only=True)
-
-
-class Organization(db.Model):
-    """Data Trust Organization."""
-    __tablename__ = 'organizations'
-
-    id = db.Column(db.String, primary_key=True)
-    name = db.Column(db.String(40), unique=True, nullable=False)
-    date_created = db.Column(db.TIMESTAMP)
-    date_last_updated = db.Column(db.TIMESTAMP)
-    users = db.relationship('User', backref='user', lazy=True)
-
-    def __init__(self, name):
-        self.id = str(uuid4()).replace('-', '')
-        self.name = name
-        self.date_created = datetime.utcnow()
-        self.date_last_updated = datetime.utcnow()
-
-    def __str__(self):
-        return '{} {} {}'.format(self.id, self.name)
-
-
-class OrganizationSchema(ma.Schema):
-    """Organization Schema
-
-    A marshmallow schema for validating the Organization model.
-    """
-
-    class Meta:
-        ordered = True
-
-    id = fields.String(dump_only=True)
-    name = fields.String(required=True)
 
 
 class JSONField(fields.Field):

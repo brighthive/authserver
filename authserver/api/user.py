@@ -34,7 +34,7 @@ class UserDetailResource(Resource):
                     'username': user.username,
                     'firstname': user.firstname,
                     'lastname': user.lastname,
-                    # 'organization': user.organization,
+                    'organization_id': user.organization_id,
                     'email_address': user.email_address,
                     'telephone': user.telephone,
                     'active': user.active,
