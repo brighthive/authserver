@@ -9,11 +9,8 @@ from authserver.db import db, DataTrust, User, Role, OAuth2Client, Organization
 
 
 class TestRoleModel:
-    def test_role_model(self, app):
+    def test_role_model(self, app, organization):
         with app.app_context():
-            # Fetch "BrightHive" Organization instantiated by migrations.
-            organization = Organization.query.filter_by(name="BrightHive").first()
-
             # Create a test data trust
             trust_name = 'Sample Data Trust'
             new_trust = DataTrust(trust_name)

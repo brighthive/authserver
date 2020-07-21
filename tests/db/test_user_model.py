@@ -1,16 +1,15 @@
-import pytest
 import json
+
+import pytest
+from expects import be, be_above_or_equal, equal, expect, raise_error
 from flask import Response
-from expects import expect, be, equal, raise_error, be_above_or_equal
-from authserver.db import db, DataTrust, User, Organization
+
+from authserver.db import DataTrust, Organization, User, db
 
 
 class TestUserModel:
-    def test_user_model(self, app):
+    def test_user_model(self, app, organization):
         with app.app_context():
-            # Fetch "BrightHive" Organization inserted by migrations.
-            organization = Organization.query.filter_by(name="BrightHive").first()
-
             # Create a test data trust
             trust_name = 'Sample Data Trust'
             new_trust = DataTrust(trust_name)

@@ -79,7 +79,7 @@ class Organization(db.Model):
         self.date_last_updated = datetime.utcnow()
 
     def __str__(self):
-        return '{} {} {}'.format(self.id, self.name)
+        return '{} - {}'.format(self.id, self.name)
 
 
 class OrganizationSchema(ma.Schema):
