@@ -5,12 +5,15 @@ import json
 from uuid import uuid4
 from flask import Response
 from expects import expect, be, equal, raise_error, be_above_or_equal
-from authserver.db import db, DataTrust, User, Role, OAuth2Client
+from authserver.db import db, DataTrust, User, Role, OAuth2Client, Organization
 
 
 class TestRoleModel:
     def test_role_model(self, app):
         with app.app_context():
+            # Fetch "BrightHive" Organization instantiated by migrations.
+            organization = Organization.query.filter_by(name="BrightHive").first()
+
             # Create a test data trust
             trust_name = 'Sample Data Trust'
             new_trust = DataTrust(trust_name)
@@ -20,7 +23,7 @@ class TestRoleModel:
 
             # Create a new user
             new_user = User(username='demo', password='passw0rd', firstname='Demonstration', lastname='User',
-                            organization='Sample Organization', email_address='demo@me.com',
+                            organization_id=organization.id, email_address='demo@me.com',
                             data_trust_id=trust_id, telephone='304-555-1234')
             db.session.add(new_user)
             db.session.commit()
