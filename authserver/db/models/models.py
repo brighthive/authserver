@@ -106,7 +106,7 @@ class User(db.Model):
     username = db.Column(db.String(40), unique=True, nullable=False)
     firstname = db.Column(db.String(40), nullable=False)
     lastname = db.Column(db.String(40), nullable=False)
-    organization = db.relationship('Organization', backref='users')
+    organization = db.relationship('Organization', backref='users', lazy='subquery')
     organization_id = db.Column(
         db.String, db.ForeignKey('organizations.id', ondelete='CASCADE'), nullable=False)
     email_address = db.Column(db.String(40), nullable=False)

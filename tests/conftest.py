@@ -50,7 +50,7 @@ def data_trust(app):
 def organization(app):
     '''
     The migrations insert an instance of an Organization with name "BrightHive."
-    This fixture simply finds and returns that organization.
+    This fixture simply finds and returns this organization.
     '''
     with app.app_context():
         organization = Organization.query.filter_by(name="BrightHive").first()
@@ -58,24 +58,14 @@ def organization(app):
     return organization
 
 
-@pytest.fixture(scope='session')
-def user(app, data_trust):
+@pytest.fixture()
+def user(app, organization):
+    '''
+    The migrations insert a User ("brighthive_admin") that relates to the "BrightHive" Organization.
+    This fixture simply finds and returns this user.
+    '''
     with app.app_context():
-        user_data = {
-            'username': 'test-user-1',
-            'email_address': 'demo@me.com',
-            'password': 'password',
-            'firstname': 'David',
-            'lastname': 'Michaels',
-            'organization': 'BrightHive',
-            'telephone': '304-555-1234',
-            'data_trust_id': data_trust.id,
-        }
-        user = User(**user_data)
-        db.session.add(user)
-        db.session.commit()
-
-        new_user = User.query.filter_by(username="test-user-1").first()
+        user = User.query.filter_by(organization_id=organization.id).first()
 
     return user
 
