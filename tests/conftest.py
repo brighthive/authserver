@@ -10,7 +10,7 @@ from authserver import create_app
 from authserver.utilities import PostgreSQLContainer
 from authserver.config import ConfigurationFactory
 from authserver.db import db
-from authserver.db import db, DataTrust, User
+from authserver.db import db, DataTrust, User, Organization
 
 
 class TokenGenerator:
@@ -44,6 +44,20 @@ def data_trust(app):
 
         new_data_trust = DataTrust.query.filter_by(data_trust_name="trusty trust").first()
     return new_data_trust
+
+
+# @pytest.fixture()
+# def organization(app):
+#     with app.app_context():
+#         organization_data = {
+#             'name': 'BrightHive'
+#         }
+
+#         organization = Organization(**organization_data)
+
+#         db.session.add(organization)
+
+#     return organization
 
 
 @pytest.fixture(scope='session')

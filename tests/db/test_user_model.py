@@ -2,12 +2,15 @@ import pytest
 import json
 from flask import Response
 from expects import expect, be, equal, raise_error, be_above_or_equal
-from authserver.db import db, DataTrust, User
+from authserver.db import db, DataTrust, User, Organization
 
 
 class TestUserModel:
     def test_user_model(self, app):
         with app.app_context():
+            # Fetch "BrightHive" Organization instantiated by migrations.
+            organization = Organization.query.filter_by(name="BrightHive").first()
+
             # Create a test data trust
             trust_name = 'Sample Data Trust'
             new_trust = DataTrust(trust_name)
@@ -17,7 +20,7 @@ class TestUserModel:
 
             # Create a new user
             new_user = User(username='demo', password='password', firstname='Demonstration', lastname='User',
-                            organization='Sample Organization', email_address='demo@me.com',
+                            organization_id=organization.id, email_address='demo@me.com',
                             data_trust_id=trust_id, telephone='304-555-1234')
             db.session.add(new_user)
             db.session.commit()
@@ -27,7 +30,7 @@ class TestUserModel:
 
             # Do not allow creation of users with the same username
             duplicate_user = User(username='demo', password='password', firstname='Demonstration', lastname='User',
-                                  organization='Sample Organization', email_address='demo@me.com',
+                                  organization_id=organization.id, email_address='demo@me.com',
                                   data_trust_id=trust_id, telephone='304-555-1234')
             duplicate_user_id = duplicate_user.id
             db.session.add(duplicate_user)
