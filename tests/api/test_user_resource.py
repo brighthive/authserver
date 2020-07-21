@@ -1,7 +1,11 @@
-import pytest
 import json
+
+import pytest
+from expects import be, be_above_or_equal, contain, equal, expect, raise_error
 from flask import Response
-from expects import expect, be, equal, raise_error, be_above_or_equal, contain
+
+from tests.utils import post_users
+from authserver.db import Organization
 
 
 USERS = [
@@ -11,7 +15,6 @@ USERS = [
         'password': 'password',
         'firstname': 'David',
         'lastname': 'Michaels',
-        'organization': 'BrightHive',
         'telephone': '304-555-1234'
     },
     {
@@ -20,7 +23,6 @@ USERS = [
         'password': 'password',
         'firstname': 'Janet',
         'lastname': 'Ferguson',
-        'organization': 'Second Organization',
         'telephone': '304-555-5678'
     },
     {
@@ -29,18 +31,17 @@ USERS = [
         'password': 'password',
         'firstname': 'James',
         'lastname': 'Piper',
-        'organization': 'Second Organization',
         'telephone': '304-555-9101'
     }
 ]
 
 
 class TestUserResource:
-    def test_user_api(self, client, token_generator):
+    def test_user_api(self, client, organization, token_generator):
         # Common headers go in this dict
         headers = {'content-type': 'application/json', 'authorization': f'bearer {token_generator.get_token(client)}'}
 
-        # Database should be empty at the beginning
+        # Database should only include data inserted at time of migrations.
         response: Response = client.get('/data_trusts', headers=headers)
         response_data = response.json
         expect(response.status_code).to(be(200))
@@ -53,7 +54,7 @@ class TestUserResource:
 
         # Populate database with a data trust and users
         data_trust_id = self._post_data_trust(client, token_generator)
-        self._post_users(client, data_trust_id, token_generator)
+        post_users(USERS, client, data_trust_id, organization.id, token_generator)
 
         # GET all users
         response = client.get('/users', headers=headers)
@@ -88,12 +89,14 @@ class TestUserResource:
         expect(response.status_code).to(equal(422))
 
         # Rename a user with a PUT, providing the entire object
-        added_users[0]['firstname'] = new_name
-        added_users[0]['password'] = 'password'
-        if not added_users[0]['telephone']:
-            added_users[0]['telephone'] = 'N/A'
-        response = client.put('/users/{}'.format(user_id),
-                              data=json.dumps(added_users[0]), headers=headers)
+        user_to_update = added_users[0]
+        user_to_update['firstname'] = new_name
+        user_to_update['password'] = 'password'
+        user_to_update.pop('organization', None)
+        if not user_to_update['telephone']:
+            user_to_update['telephone'] = 'N/A'
+
+        response = client.put('/users/{}'.format(user_id), data=json.dumps(user_to_update), headers=headers)
         expect(response.status_code).to(equal(200))
 
         # DELETE the data trusts and by extension delete the users
@@ -107,10 +110,10 @@ class TestUserResource:
         response_data = response.json
         expect(len(response_data['response'])).to(equal(1))
 
-    def test_user_deactivate(self, client, token_generator):
+    def test_user_deactivate(self, client, organization, token_generator):
         # Populate database with a data trust and users
         data_trust_id = self._post_data_trust(client, token_generator)
-        self._post_users(client, data_trust_id, token_generator)
+        post_users(USERS, client, data_trust_id, organization.id, token_generator)
 
         headers = {'content-type': 'application/json', 'authorization': f'bearer {token_generator.get_token(client)}'}
         response = client.get('/users', headers=headers)
@@ -164,21 +167,6 @@ class TestUserResource:
         data_trust_id = response.json['response'][0]['id']
 
         return data_trust_id
-
-    def _post_users(self, client, data_trust_id, token_generator):
-        '''
-        Helper function that creates (and tests creating) a several Users.
-        '''
-        headers = {'content-type': 'application/json', 'authorization': f'bearer {token_generator.get_token(client)}'}
-        for user in USERS:
-            user['data_trust_id'] = data_trust_id
-            response = client.post(
-                '/users', data=json.dumps(user), headers=headers)
-            response_data = response.json
-            expect(response.status_code).to(be(201))
-        response = client.get('/users', headers=headers)
-
-        expect(len(response.json['response'])).to(be_above_or_equal(3))
 
     def _post_client(self, client, user_id, token_generator):
         headers = {'content-type': 'application/json', 'authorization': f'bearer {token_generator.get_token(client)}'}

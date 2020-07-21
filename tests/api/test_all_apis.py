@@ -5,11 +5,16 @@ demonstrating how to interact with the various APIs.
 
 """
 
-import pytest
 import json
+
+import pytest
+from expects import (be, be_above, be_above_or_equal, contain, equal, expect,
+                     raise_error)
 from flask import Response
-from expects import expect, be, equal, raise_error, be_above, be_above_or_equal, contain
-from authserver.db import db, DataTrust, User
+
+from tests.utils import post_users
+from authserver.db import DataTrust, User, db
+
 
 DATA_TRUST = {
     'data_trust_name': 'Sample Data Trust'
@@ -170,12 +175,12 @@ CLIENTS = [
 
 
 class TestAllAPIs(object):
-    def test_all_apis(self, client, token_generator):
+    def test_all_apis(self, client, organization, token_generator):
         # Common headers go in this dict
         headers = {'content-type': 'application/json', 'authorization': f'bearer {token_generator.get_token(client)}'}
 
         data_trust_id = self._post_data_trust(client, token_generator)
-        user_ids = self._post_users(client, data_trust_id, token_generator)
+        user_ids = post_users(USERS, client, data_trust_id, organization.id, token_generator)
         client_ids = self._post_clients(client, user_ids, token_generator)
 
         # Create roles
@@ -209,10 +214,10 @@ class TestAllAPIs(object):
         self._cleanup(client, data_trust_id, token_generator,
                       user_ids=user_ids, role_ids=role_ids)
 
-    def test_client_secret_delete_rotate(self, client, token_generator):
+    def test_client_secret_delete_rotate(self, client, organization, token_generator):
         headers = {'content-type': 'application/json', 'authorization': f'bearer {token_generator.get_token(client)}'}
         data_trust_id = self._post_data_trust(client, token_generator)
-        user_ids = self._post_users(client, data_trust_id, token_generator)
+        user_ids = post_users(USERS, client, data_trust_id, organization.id, token_generator)
         client_ids = self._post_clients(client, user_ids, token_generator)
 
         client_to_patch = client_ids[0]
@@ -231,10 +236,10 @@ class TestAllAPIs(object):
 
         self._cleanup(client, data_trust_id, token_generator, user_ids=user_ids)
     
-    def test_client_post_invalid_action(self, client, token_generator):
+    def test_client_post_invalid_action(self, client, organization, token_generator):
         headers = {'content-type': 'application/json', 'authorization': f'bearer {token_generator.get_token(client)}'}
         data_trust_id = self._post_data_trust(client, token_generator)
-        user_ids = self._post_users(client, data_trust_id, token_generator)
+        user_ids = post_users(USERS, client, data_trust_id, organization.id, token_generator)
         client_ids = self._post_clients(client, user_ids, token_generator)
 
         client_to_patch = client_ids[0]
@@ -259,23 +264,6 @@ class TestAllAPIs(object):
 
         return data_trust_id
 
-    def _post_users(self, client, data_trust_id, token_generator):
-        '''
-        Helper function that creates (and tests creating) a collection of Users.
-        '''
-        headers = {'content-type': 'application/json', 'authorization': f'bearer {token_generator.get_token(client)}'}
-        user_ids = []
-        for user in USERS:
-            user['data_trust_id'] = data_trust_id
-            user['active'] = True
-            response = client.post(
-                '/users', data=json.dumps(user), headers=headers)
-            expect(response.status_code).to(equal(201))
-            user_ids.append(response.json['response'][0]['id'])
-
-        expect(len(user_ids)).to(equal(8))
-
-        return user_ids
 
     def _post_clients(self, client, user_ids, token_generator):
         '''

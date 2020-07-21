@@ -109,7 +109,7 @@ class UserResource(Resource):
             return self.response_handler.custom_response(code=422, messages=errors)
         try:
             user = User(request_data['username'], request_data['password'], firstname=request_data['firstname'], lastname=request_data['lastname'],
-                        organization=request_data['organization'], email_address=request_data['email_address'],
+                        organization_id=request_data['organization_id'], email_address=request_data['email_address'],
                         data_trust_id=request_data['data_trust_id'])
             if 'telephone' in request_data.keys():
                 user.telephone = request_data['telephone']

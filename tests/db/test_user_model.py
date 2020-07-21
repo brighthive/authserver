@@ -8,7 +8,7 @@ from authserver.db import db, DataTrust, User, Organization
 class TestUserModel:
     def test_user_model(self, app):
         with app.app_context():
-            # Fetch "BrightHive" Organization instantiated by migrations.
+            # Fetch "BrightHive" Organization inserted by migrations.
             organization = Organization.query.filter_by(name="BrightHive").first()
 
             # Create a test data trust

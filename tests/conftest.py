@@ -46,18 +46,16 @@ def data_trust(app):
     return new_data_trust
 
 
-# @pytest.fixture()
-# def organization(app):
-#     with app.app_context():
-#         organization_data = {
-#             'name': 'BrightHive'
-#         }
-
-#         organization = Organization(**organization_data)
-
-#         db.session.add(organization)
-
-#     return organization
+@pytest.fixture()
+def organization(app):
+    '''
+    The migrations insert an instance of an Organization with name "BrightHive."
+    This fixture simply finds and returns that organization.
+    '''
+    with app.app_context():
+        organization = Organization.query.filter_by(name="BrightHive").first()
+    
+    return organization
 
 
 @pytest.fixture(scope='session')
