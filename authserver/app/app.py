@@ -7,7 +7,7 @@ from flask_restful import Api
 from flask_sqlalchemy import SQLAlchemy
 
 from authserver.api import (client_bp, data_trust_bp, health_api_bp, oauth2_bp,
-                            role_bp, user_bp, home_bp)
+                            role_bp, user_bp, organization_bp, home_bp)
 from authserver.config import ConfigurationFactory
 from authserver.db import db
 from authserver.utilities import config_oauth
@@ -83,6 +83,7 @@ def create_app(environment: str = None):
     app.register_blueprint(health_api_bp)
     app.register_blueprint(data_trust_bp)
     app.register_blueprint(user_bp)
+    app.register_blueprint(organization_bp)
     app.register_blueprint(client_bp)
     app.register_blueprint(oauth2_bp)
     app.register_blueprint(role_bp)

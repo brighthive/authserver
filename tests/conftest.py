@@ -35,54 +35,6 @@ def token_generator():
     return TokenGenerator()
 
 
-@pytest.fixture(scope='session')
-def data_trust(app):
-    with app.app_context():
-        data_trust = DataTrust(**{'data_trust_name': "trusty trust"})
-        db.session.add(data_trust)
-        db.session.commit()
-
-        new_data_trust = DataTrust.query.filter_by(data_trust_name="trusty trust").first()
-    return new_data_trust
-
-
-@pytest.fixture()
-def organization(app):
-    '''
-    The migrations insert an instance of an Organization with name "BrightHive."
-    This fixture simply finds and returns this organization.
-    '''
-    with app.app_context():
-        organization = Organization.query.filter_by(name="BrightHive").first()
-    
-    return organization
-
-
-@pytest.fixture()
-def user(app, organization):
-    '''
-    The migrations insert a User ("brighthive_admin") that relates to the "BrightHive" Organization.
-    This fixture simply finds and returns this user.
-    '''
-    with app.app_context():
-        user = User.query.filter_by(organization_id=organization.id).first()
-
-    return user
-
-
-@pytest.fixture(scope='session')
-def client():
-    """Setup the Flask application and return an instance of its test client.
-
-    Returns:
-        client (object): The Flask test client for the application.
-
-    """
-    app = create_app('TESTING')
-    client = app.test_client()
-    return client
-
-
 @pytest.fixture(scope='session', autouse=True)
 def app():
     """Setup the PostgreSQL database instance and return the Flask application.
@@ -109,10 +61,51 @@ def app():
                 upgraded = True
         except Exception as e:
             sleep(1)
+    
     yield app
 
     if is_jenkins != True:
         postgres.stop_container()
+
+
+
+@pytest.fixture(scope='session')
+def data_trust(app):
+    data_trust = DataTrust(**{'data_trust_name': "trusty trust"})
+    db.session.add(data_trust)
+    new_data_trust = DataTrust.query.filter_by(data_trust_name="trusty trust").first()
+
+    return new_data_trust
+
+
+@pytest.fixture
+def organization(client):
+    '''
+    The migrations insert an instance of an Organization with name "BrightHive."
+    This fixture simply finds and returns this organization.
+    '''
+    organization = Organization.query.filter_by(name="BrightHive").first()
+    
+    return organization
+
+
+@pytest.fixture
+def organization_hh(client):
+    organization = Organization(**{'name': 'Helping Hands'})
+    db.session.add(organization)
+        
+    return organization
+
+
+@pytest.fixture
+def user(client, organization):
+    '''
+    The migrations insert a User ("brighthive_admin") that relates to the "BrightHive" Organization.
+    This fixture simply finds and returns this user.
+    '''
+    user = User.query.filter_by(organization_id=organization.id).first()
+
+    return user
 
 
 @pytest.fixture
