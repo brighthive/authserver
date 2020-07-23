@@ -6,7 +6,7 @@ from flask import Response
 from authserver.db import Organization, db
 
 
-def test_get_organizations(client, organization, organization_hh, token_generator, mocker):
+def test_get_organizations(client, organization, organization_hh, mocker):
     mocker.patch(
         "authlib.integrations.flask_oauth2.resource_protector.ResourceProtector.acquire_token",
         return_value=True,
@@ -22,7 +22,7 @@ def test_get_organizations(client, organization, organization_hh, token_generato
     assert organization_hh.id in [org['id'] for org in response_data['response']]
 
 
-def test_get_one_organization(client, organization, token_generator, mocker):
+def test_get_one_organization(client, organization, mocker):
     mocker.patch(
         "authlib.integrations.flask_oauth2.resource_protector.ResourceProtector.acquire_token",
         return_value=True,
@@ -39,7 +39,7 @@ def test_get_one_organization(client, organization, token_generator, mocker):
     expect(response.json['response']['date_last_updated']).not_to(be_none)
 
 
-def test_post_with_empty_body(client, token_generator, mocker):
+def test_post_with_empty_body(client, mocker):
     mocker.patch(
         "authlib.integrations.flask_oauth2.resource_protector.ResourceProtector.acquire_token",
         return_value=True,
@@ -52,7 +52,7 @@ def test_post_with_empty_body(client, token_generator, mocker):
     expect(response.json['messages'][0]).to(equal('Empty request body.'))
 
 
-def test_post_with_invalid_data(client, token_generator, mocker):
+def test_post_with_invalid_data(client, mocker):
     mocker.patch(
         "authlib.integrations.flask_oauth2.resource_protector.ResourceProtector.acquire_token",
         return_value=True,
@@ -79,7 +79,7 @@ def test_delete_organization(client, organization_hh, mocker):
     expect(response.json['messages'][0]).to(equal('Successfully deleted Organization record.'))
 
 
-def test_post_organization(client, token_generator, mocker):
+def test_post_organization(client, mocker):
     mocker.patch(
         "authlib.integrations.flask_oauth2.resource_protector.ResourceProtector.acquire_token",
         return_value=True,
@@ -96,4 +96,21 @@ def test_post_organization(client, token_generator, mocker):
     client.delete(f"/organizations/{response.json['response'][0]['id']}", headers=headers)
 
 
+def test_patch_and_put_organization(client, organization_hh, mocker):
+    mocker.patch(
+        "authlib.integrations.flask_oauth2.resource_protector.ResourceProtector.acquire_token",
+        return_value=True,
+    )
+    headers = {'content-type': 'application/json', 'authorization': 'bearer fake-token-2213xx6r'}
+   
+    # TODO: patch
+    # org_data = {'name': 'Chicago Lyric Opera'}
+    # response: Response = client.patch(f'/organizations/{organization_hh.id}', data=json.dumps(org_data), headers=headers)
+    # expect(response.status_code).to(equal(200))
+    # expect(response.json['messages'][0]).to(equal('Successfully updated existing Organization record.'))
 
+    # put
+    org_data = {'name': 'Chicago Opera Theater'}
+    response: Response = client.put(f'/organizations/{organization_hh.id}', data=json.dumps(org_data), headers=headers)
+    expect(response.status_code).to(equal(200))
+    expect(response.json['messages'][0]).to(equal('Successfully updated existing Organization record.'))
