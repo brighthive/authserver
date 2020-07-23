@@ -1,15 +1,18 @@
 """Test Fixtures"""
 
+import json
 import os
+from time import sleep
+
 import pytest
 import requests
-import json
-from time import sleep
+from flask import Response
 from flask_migrate import upgrade
+
 from authserver import create_app
-from authserver.utilities import PostgreSQLContainer
 from authserver.config import ConfigurationFactory
-from authserver.db import db, DataTrust, User, Organization
+from authserver.db import DataTrust, Organization, User, db
+from authserver.utilities import PostgreSQLContainer
 
 
 class TokenGenerator:
@@ -93,10 +96,7 @@ def organization_hh(client):
     organization = Organization(**{'name': 'Helping Hands'})
     db.session.add(organization)
 
-    yield organization
-
-    db.session.delete(organization)
-    db.session.commit()
+    return organization
 
 
 @pytest.fixture

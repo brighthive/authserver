@@ -57,9 +57,24 @@ class OrganizationResource(Resource):
             return self.response_handler.exception_response(exception_name, request=request_data)
         return self.response_handler.successful_creation_response('Organization', organization.id, request_data)
 
+    @require_oauth()
+    def delete(self, id: str = None):
+        if id is None:
+            return self.response_handler.method_not_allowed_response()
+        try:
+            organization = Organization.query.filter_by(id=id).first()
+            if organization:
+                organization_obj = self.organization_schema.dump(organization).data
+                db.session.delete(organization)
+                db.session.commit()
+                return self.response_handler.successful_delete_response('Organization', id, organization_obj)
+            else:
+                return self.response_handler.not_found_response(id)
+        except Exception:
+            return self.response_handler.not_found_response(id)
+    
     # Put
     # Patch
-    # Delete
 
 
 organization_bp = Blueprint('organization_ep', __name__)

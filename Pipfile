@@ -13,6 +13,7 @@ expects = "==0.9.0"
 sphinx = "==2.4.1"
 doc8 = "==0.8.0"
 pytest-flask = "*"
+pytest-mock = "*"
 
 [packages]
 flask = "==1.1.1"

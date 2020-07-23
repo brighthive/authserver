@@ -92,6 +92,7 @@ authorization = BrightHiveAuthorizationServer(
     save_token=save_token,
 )
 require_oauth = ResourceProtector()
+print(require_oauth, "!!")
 
 
 def config_oauth(app):
