@@ -9,7 +9,6 @@ from flask_migrate import upgrade
 from authserver import create_app
 from authserver.utilities import PostgreSQLContainer
 from authserver.config import ConfigurationFactory
-from authserver.db import db
 from authserver.db import db, DataTrust, User, Organization
 
 
@@ -93,8 +92,11 @@ def organization(client):
 def organization_hh(client):
     organization = Organization(**{'name': 'Helping Hands'})
     db.session.add(organization)
-        
-    return organization
+
+    yield organization
+
+    db.session.delete(organization)
+    db.session.commit()
 
 
 @pytest.fixture

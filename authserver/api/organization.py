@@ -19,7 +19,7 @@ class OrganizationResource(Resource):
         self.organizations_schema = OrganizationSchema(many=True)
         self.response_handler = ResponseBody()
     
-    # @require_oauth()
+    @require_oauth()
     def get(self, id: str = None):
         if not id:
             organizations = Organization.query.all()
@@ -32,6 +32,35 @@ class OrganizationResource(Resource):
                 return self.response_handler.get_one_response(organization_obj, request={'id': id})
             else:
                 return self.response_handler.not_found_response(id)
+
+    @require_oauth()
+    def post(self):
+        # Check for data, since all POST requests need it.
+        try:
+            request_data = request.get_json(force=True)
+        except Exception as e:
+            return self.response_handler.empty_request_body_response()
+        if not request_data:
+            return self.response_handler.empty_request_body_response()
+
+        data, errors = self.organization_schema.load(request_data)
+        if errors:
+            return self.response_handler.custom_response(code=422, messages=errors)
+        
+        try:
+            organization = Organization(name=request_data['name'])
+            db.session.add(organization)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            exception_name = type(e).__name__
+            return self.response_handler.exception_response(exception_name, request=request_data)
+        return self.response_handler.successful_creation_response('Organization', organization.id, request_data)
+
+    # Put
+    # Patch
+    # Delete
+
 
 organization_bp = Blueprint('organization_ep', __name__)
 organization_api = Api(organization_bp)
