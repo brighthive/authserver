@@ -39,9 +39,10 @@ class OrganizationResource(Resource):
             request_data = request.get_json(force=True)
         except Exception as e:
             return self.response_handler.empty_request_body_response()
+        
         if not request_data:
             return self.response_handler.empty_request_body_response()
-
+        
         data, errors = self.organization_schema.load(request_data)
         if errors:
             return self.response_handler.custom_response(code=422, messages=errors)
@@ -83,6 +84,7 @@ class OrganizationResource(Resource):
     def patch(self, id: str = None):
         if id is None:
             return self.response_handler.method_not_allowed_response()
+            
         return self._update(request, id)
 
     def _update(self, request, id: str, partial=True):
@@ -95,24 +97,25 @@ class OrganizationResource(Resource):
             request_data = request.get_json(force=True)
         except Exception as e:
             return self.response_handler.empty_request_body_response()
+        
         if not request_data:
             return self.response_handler.empty_request_body_response()
-        
+
         organization = Organization.query.filter_by(id=id).first()
         if not organization:
             return self.response_handler.not_found_response(id)
-        
+
         data, errors = self.organization_schema.load(request_data, partial=partial)
         if errors:
             return self.response_handler.custom_response(code=422, messages=errors)
 
-        for k, v in request_data.items():
+        for k, v in data.items():
             if hasattr(organization, k):
                 setattr(organization, k, v)
         try:
             organization.date_last_updated = datetime.utcnow()
             db.session.commit()
-            return self.response_handler.successful_update_response('Organization', id, request_data)
+            return self.response_handler.successful_update_response('Organization', id, data)
         except Exception as e:
             db.session.rollback()
             exception_name = type(e).__name__

@@ -103,11 +103,11 @@ def test_patch_and_put_organization(client, organization_hh, mocker):
     )
     headers = {'content-type': 'application/json', 'authorization': 'bearer fake-token-2213xx6r'}
    
-    # TODO: patch
-    # org_data = {'name': 'Chicago Lyric Opera'}
-    # response: Response = client.patch(f'/organizations/{organization_hh.id}', data=json.dumps(org_data), headers=headers)
-    # expect(response.status_code).to(equal(200))
-    # expect(response.json['messages'][0]).to(equal('Successfully updated existing Organization record.'))
+    # patch
+    org_data = {'name': 'Chicago Lyric Opera'}
+    response: Response = client.patch(f'/organizations/{organization_hh.id}', data=json.dumps(org_data), headers=headers)
+    expect(response.status_code).to(equal(200))
+    expect(response.json['messages'][0]).to(equal('Successfully updated existing Organization record.'))
 
     # put
     org_data = {'name': 'Chicago Opera Theater'}
