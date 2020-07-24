@@ -1,16 +1,21 @@
 """Auth Server Database Models."""
 
-import time
 import json
-import bcrypt
+import time
 from datetime import datetime
+from uuid import uuid4
+
+import bcrypt
+from authlib.integrations.sqla_oauth2 import (OAuth2AuthorizationCodeMixin,
+                                              OAuth2ClientMixin,
+                                              OAuth2TokenMixin)
+from flask_marshmallow import Marshmallow
 from flask_sqlalchemy import SQLAlchemy
+from marshmallow import Schema, fields, pre_load, validate
 from sqlalchemy import text as sa_text
 from sqlalchemy.dialects.postgresql.json import JSONB
-from marshmallow import Schema, fields, pre_load, validate
-from flask_marshmallow import Marshmallow
-from uuid import uuid4
-from authlib.integrations.sqla_oauth2 import OAuth2ClientMixin, OAuth2AuthorizationCodeMixin, OAuth2TokenMixin
+
+from authserver.utilities.db import must_not_be_blank
 
 db = SQLAlchemy()
 ma = Marshmallow()
@@ -168,13 +173,26 @@ class UserSchema(ma.Schema):
     firstname = fields.String(required=True)
     lastname = fields.String(required=True)
     organization_id = fields.String(required=True)
-    organization = fields.Nested(OrganizationSchema, dump_only=True)
+    # TODO: why does exclude not work?
+    organization = fields.Nested(OrganizationSchema(exclude=("id")), dump_only=True)
     email_address = fields.Email(required=True)
     telephone = fields.String()
     active = fields.Boolean(dump_only=True)
     data_trust_id = fields.String(required=True)
     date_created = fields.DateTime(dump_only=True)
     date_last_updated = fields.DateTime(dump_only=True)
+
+    # # Allow client to pass a string value for organization, i.e., the ID.
+    # # Reference: https://marshmallow.readthedocs.io/en/stable/examples.html#quotes-api-flask-sqlalchemy
+    # @pre_load
+    # def process_author(self, data, **kwargs):
+    #     organization = data.get("organization")
+    #     if isinstance(organization, str):
+    #         data.pop("organization")
+    #         data["organization_id"] = organization
+        
+    #     print(data, "!!!!")
+    #     return data
 
 
 class JSONField(fields.Field):

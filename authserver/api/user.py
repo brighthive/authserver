@@ -69,11 +69,13 @@ class UserResource(Resource):
         if not id:
             users = User.query.all()
             users_obj = self.users_schema.dump(users).data
-            return self.response_handler.get_all_response(users_obj)
+            users_obj_clean = [{k: v for k, v in user.items() if k != 'organization_id'} for user in users_obj]
+            return self.response_handler.get_all_response(users_obj_clean)
         else:
             user = User.query.filter_by(id=id).first()
             if user:
                 user_obj = self.user_schema.dump(user).data
+                user_obj.pop('organization_id')
                 return self.response_handler.get_one_response(user_obj, request={'id': id})
             else:
                 return self.response_handler.not_found_response(id)

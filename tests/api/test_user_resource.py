@@ -92,6 +92,7 @@ class TestUserResource:
         user_to_update = added_users[0]
         user_to_update['firstname'] = new_name
         user_to_update['password'] = 'password'
+        user_to_update['organization_id'] = user_to_update['organization']['id']
         user_to_update.pop('organization', None)
         if not user_to_update['telephone']:
             user_to_update['telephone'] = 'N/A'
