@@ -173,26 +173,13 @@ class UserSchema(ma.Schema):
     firstname = fields.String(required=True)
     lastname = fields.String(required=True)
     organization_id = fields.String(required=True)
-    # TODO: why does exclude not work?
-    organization = fields.Nested(OrganizationSchema(exclude=("id")), dump_only=True)
+    organization = fields.Nested(OrganizationSchema(), dump_only=True)
     email_address = fields.Email(required=True)
     telephone = fields.String()
     active = fields.Boolean(dump_only=True)
     data_trust_id = fields.String(required=True)
     date_created = fields.DateTime(dump_only=True)
     date_last_updated = fields.DateTime(dump_only=True)
-
-    # # Allow client to pass a string value for organization, i.e., the ID.
-    # # Reference: https://marshmallow.readthedocs.io/en/stable/examples.html#quotes-api-flask-sqlalchemy
-    # @pre_load
-    # def process_author(self, data, **kwargs):
-    #     organization = data.get("organization")
-    #     if isinstance(organization, str):
-    #         data.pop("organization")
-    #         data["organization_id"] = organization
-        
-    #     print(data, "!!!!")
-    #     return data
 
 
 class JSONField(fields.Field):
