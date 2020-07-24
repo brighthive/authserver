@@ -15,7 +15,6 @@ from marshmallow import Schema, fields, pre_load, validate
 from sqlalchemy import text as sa_text
 from sqlalchemy.dialects.postgresql.json import JSONB
 
-from authserver.utilities.db import must_not_be_blank
 
 db = SQLAlchemy()
 ma = Marshmallow()
