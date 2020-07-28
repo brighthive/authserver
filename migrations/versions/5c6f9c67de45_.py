@@ -21,6 +21,7 @@ depends_on = None
 organizations_table = table('organizations',
     column('id', sa.String),
     column('name', sa.String),
+    column('url', sa.String),
     column('date_created', sa.TIMESTAMP),
     column('date_last_updated', sa.TIMESTAMP))
 
@@ -34,6 +35,7 @@ def upgrade():
     op.create_table('organizations',
         sa.Column('id', sa.String(), nullable=False),
         sa.Column('name', sa.String(length=40), nullable=False),
+        sa.Column('url', sa.String()),
         sa.Column('date_created', sa.TIMESTAMP(), nullable=True),
         sa.Column('date_last_updated', sa.TIMESTAMP(), nullable=True),
         sa.PrimaryKeyConstraint('id'),

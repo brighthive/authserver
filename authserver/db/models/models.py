@@ -73,12 +73,14 @@ class Organization(db.Model):
 
     id = db.Column(db.String, primary_key=True)
     name = db.Column(db.String(40), unique=True, nullable=False)
+    url = db.Column(db.String)
     date_created = db.Column(db.TIMESTAMP)
     date_last_updated = db.Column(db.TIMESTAMP)
 
-    def __init__(self, name):
+    def __init__(self, name, url=None):
         self.id = str(uuid4()).replace('-', '')
         self.name = name
+        self.url = url
         self.date_created = datetime.utcnow()
         self.date_last_updated = datetime.utcnow()
 
@@ -97,6 +99,7 @@ class OrganizationSchema(ma.Schema):
 
     id = fields.String(dump_only=True)
     name = fields.String(required=True)
+    url = fields.String()
     date_created = fields.DateTime(dump_only=True)
     date_last_updated = fields.DateTime(dump_only=True)
 
