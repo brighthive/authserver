@@ -34,7 +34,10 @@ class UserDetailResource(Resource):
                     'username': user.username,
                     'firstname': user.firstname,
                     'lastname': user.lastname,
-                    'organization': user.organization,
+                    'organization': {
+                        'id': user.organization.id,
+                        'name': user.organization.name
+                    },
                     'email_address': user.email_address,
                     'telephone': user.telephone,
                     'active': user.active,
@@ -69,11 +72,13 @@ class UserResource(Resource):
         if not id:
             users = User.query.all()
             users_obj = self.users_schema.dump(users).data
-            return self.response_handler.get_all_response(users_obj)
+            users_obj_clean = [{k: v for k, v in user.items() if k != 'organization_id'} for user in users_obj]
+            return self.response_handler.get_all_response(users_obj_clean)
         else:
             user = User.query.filter_by(id=id).first()
             if user:
                 user_obj = self.user_schema.dump(user).data
+                user_obj.pop('organization_id')
                 return self.response_handler.get_one_response(user_obj, request={'id': id})
             else:
                 return self.response_handler.not_found_response(id)
@@ -109,7 +114,7 @@ class UserResource(Resource):
             return self.response_handler.custom_response(code=422, messages=errors)
         try:
             user = User(request_data['username'], request_data['password'], firstname=request_data['firstname'], lastname=request_data['lastname'],
-                        organization=request_data['organization'], email_address=request_data['email_address'],
+                        organization_id=request_data['organization_id'], email_address=request_data['email_address'],
                         data_trust_id=request_data['data_trust_id'])
             if 'telephone' in request_data.keys():
                 user.telephone = request_data['telephone']

@@ -13,3 +13,5 @@
 **/docs/build
 
 **.DS_Store
+
+.env
