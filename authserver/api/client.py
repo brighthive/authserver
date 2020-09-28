@@ -13,8 +13,7 @@ from flask import Blueprint
 from flask_restful import Api, Resource, request
 from werkzeug.security import gen_salt
 
-from authserver.db import (DataTrust, DataTrustSchema, OAuth2Client,
-                           OAuth2ClientSchema, Role, User, UserSchema, db)
+from authserver.db import (OAuth2Client, OAuth2ClientSchema, Role, User, UserSchema, db)
 from authserver.utilities import ResponseBody, require_oauth
 
 

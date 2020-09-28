@@ -10,7 +10,7 @@ from datetime import datetime
 from flask import Blueprint
 from flask_restful import Api, Resource, request
 
-from authserver.db import DataTrust, DataTrustSchema, User, UserSchema, db, OAuth2Client, OAuth2Token
+from authserver.db import User, UserSchema, db, OAuth2Client, OAuth2Token
 from authserver.utilities import ResponseBody, require_oauth
 
 
@@ -41,7 +41,6 @@ class UserDetailResource(Resource):
                     'email_address': user.email_address,
                     'telephone': user.telephone,
                     'active': user.active,
-                    'data_trust_id': user.data_trust_id,
                     'date_created': str(user.date_created),
                     'date_last_updated': str(user.date_last_updated)
                 }
@@ -61,8 +60,6 @@ class UserResource(Resource):
     """
 
     def __init__(self):
-        self.data_trust_schema = DataTrustSchema()
-        self.data_trusts_schema = DataTrustSchema(many=True)
         self.user_schema = UserSchema()
         self.users_schema = UserSchema(many=True)
         self.response_handler = ResponseBody()
@@ -114,8 +111,7 @@ class UserResource(Resource):
             return self.response_handler.custom_response(code=422, messages=errors)
         try:
             user = User(request_data['username'], request_data['password'], firstname=request_data['firstname'], lastname=request_data['lastname'],
-                        organization_id=request_data['organization_id'], email_address=request_data['email_address'],
-                        data_trust_id=request_data['data_trust_id'])
+                        organization_id=request_data['organization_id'], email_address=request_data['email_address'])
             if 'telephone' in request_data.keys():
                 user.telephone = request_data['telephone']
             db.session.add(user)

@@ -1,5 +1,4 @@
 from authserver.api.health import health_api_bp
-from authserver.api.data_trust import data_trust_bp
 from authserver.api.user import user_bp
 from authserver.api.organization import organization_bp
 from authserver.api.client import client_bp

@@ -6,7 +6,7 @@ from flask_migrate import Migrate
 from flask_restful import Api
 from flask_sqlalchemy import SQLAlchemy
 
-from authserver.api import (client_bp, data_trust_bp, health_api_bp, oauth2_bp,
+from authserver.api import (client_bp, health_api_bp, oauth2_bp,
                             role_bp, user_bp, organization_bp, home_bp)
 from authserver.config import ConfigurationFactory
 from authserver.db import db
@@ -18,6 +18,7 @@ import os
 import logging
 from pprint import pformat
 from elasticapm.contrib.flask import ElasticAPM
+
 
 def create_app(environment: str = None):
     """Create the Flask application.
@@ -69,9 +70,9 @@ def create_app(environment: str = None):
         apm_enabled = bool(int(os.getenv('APM_ENABLED', '0')))
         if apm_enabled == True:
             app.config['ELASTIC_APM'] = {
-              'SERVICE_NAME': 'authserver',
-              'SECRET_TOKEN': os.getenv('APM_TOKEN', ''),
-              'SERVER_URL': os.getenv('APM_HOSTNAME', ''),
+                'SERVICE_NAME': 'authserver',
+                'SECRET_TOKEN': os.getenv('APM_TOKEN', ''),
+                'SERVER_URL': os.getenv('APM_HOSTNAME', ''),
             }
             apm = ElasticAPM(app)
 
@@ -81,7 +82,6 @@ def create_app(environment: str = None):
     migrate = Migrate(app, db)
     app.register_blueprint(home_bp)
     app.register_blueprint(health_api_bp)
-    app.register_blueprint(data_trust_bp)
     app.register_blueprint(user_bp)
     app.register_blueprint(organization_bp)
     app.register_blueprint(client_bp)
