@@ -36,4 +36,4 @@ blinker = "==1.4"
 psutil = "==5.7.0"
 
 [requires]
-python_version = "3.7"
+python_version = "3.8"
