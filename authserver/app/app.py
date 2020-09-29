@@ -51,7 +51,7 @@ def create_app(environment: str = None):
     @app.after_request
     def after_request(response):
         """ Logging every request. """
-        if is_testing != True:
+        if not is_testing:
             jsonstr = json.dumps({
                 "remote_addr": request.remote_addr,
                 "request_time": str(dt.utcnow()),
@@ -66,9 +66,9 @@ def create_app(environment: str = None):
             logging.info(jsonstr)
         return response
 
-    if is_testing != True:
+    if not is_testing:
         apm_enabled = bool(int(os.getenv('APM_ENABLED', '0')))
-        if apm_enabled == True:
+        if apm_enabled:
             app.config['ELASTIC_APM'] = {
                 'SERVICE_NAME': 'authserver',
                 'SECRET_TOKEN': os.getenv('APM_TOKEN', ''),

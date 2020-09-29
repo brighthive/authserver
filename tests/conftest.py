@@ -11,7 +11,7 @@ from flask_migrate import upgrade
 
 from authserver import create_app
 from authserver.config import ConfigurationFactory
-from authserver.db import DataTrust, Organization, User, db
+from authserver.db import Organization, User, db
 from authserver.utilities import PostgreSQLContainer
 
 
@@ -49,8 +49,9 @@ def app():
     app = create_app('TESTING')
 
     is_jenkins = bool(int(os.getenv('IS_JENKINS_TEST', '0')))
+    postgres = None
 
-    if is_jenkins != True:
+    if not is_jenkins:
         postgres = PostgreSQLContainer()
         postgres.start_container()
 
@@ -63,21 +64,11 @@ def app():
                 upgraded = True
         except Exception as e:
             sleep(1)
-    
+
     yield app
 
-    if is_jenkins != True:
+    if not is_jenkins:
         postgres.stop_container()
-
-
-
-@pytest.fixture(scope='session')
-def data_trust(app):
-    data_trust = DataTrust(**{'data_trust_name': "trusty trust"})
-    db.session.add(data_trust)
-    new_data_trust = DataTrust.query.filter_by(data_trust_name="trusty trust").first()
-
-    return new_data_trust
 
 
 @pytest.fixture
@@ -87,7 +78,7 @@ def organization(client):
     This fixture simply finds and returns this organization.
     '''
     organization = Organization.query.filter_by(name="BrightHive").first()
-    
+
     return organization
 
 

@@ -13,12 +13,7 @@ from expects import (be, be_above, be_above_or_equal, contain, equal, expect,
 from flask import Response
 
 from tests.utils import post_users
-from authserver.db import DataTrust, User, db
-
-
-DATA_TRUST = {
-    'data_trust_name': 'Sample Data Trust'
-}
+from authserver.db import User, db
 
 ORGANIZATION = {
     'name': 'Sample Organization'
@@ -69,7 +64,6 @@ USERS = [
         'email_address': 'user1@brighthive.me',
         'username': 'user1',
         'password': 'password',
-        'data_trust_id': '',
         'telephone': '304-555-1234'
     },
     {
@@ -78,7 +72,6 @@ USERS = [
         'email_address': 'user2@brighthive.me',
         'username': 'user2',
         'password': 'password',
-        'data_trust_id': '',
         'telephone': '304-555-5678'
     },
     {
@@ -87,7 +80,6 @@ USERS = [
         'email_address': 'user3@brighthive.me',
         'username': 'user3',
         'password': 'password',
-        'data_trust_id': '',
         'telephone': '301-555-1234'
     },
     {
@@ -96,7 +88,6 @@ USERS = [
         'email_address': 'user4@brighthive.me',
         'username': 'user4',
         'password': 'password',
-        'data_trust_id': '',
         'telephone': '412-555-4567'
     },
     {
@@ -105,7 +96,6 @@ USERS = [
         'email_address': 'user5@brighthive.me',
         'username': 'user5',
         'password': 'password',
-        'data_trust_id': '',
         'telephone': '812-555-1234'
     },
     {
@@ -114,7 +104,6 @@ USERS = [
         'email_address': 'user6@brighthive.me',
         'username': 'user6',
         'password': 'password',
-        'data_trust_id': '',
         'telephone': '912-555-1234'
     },
     {
@@ -122,16 +111,14 @@ USERS = [
         'lastname': 'Bennett',
         'email_address': 'user7@brighthive.me',
         'username': 'user7',
-        'password': 'password',
-        'data_trust_id': ''
+        'password': 'password'
     },
     {
         'firstname': 'Danielle',
         'lastname': 'Bevins',
         'email_address': 'user8@brighthive.me',
         'username': 'user8',
-        'password': 'password',
-        'data_trust_id': ''
+        'password': 'password'
     }
 ]
 
@@ -177,9 +164,8 @@ class TestAllAPIs(object):
         headers = {'content-type': 'application/json', 'authorization': f'bearer {token_generator.get_token(client)}'}
 
         # Create a data trust, organization, users, and clients
-        data_trust_id = self._post_data_trust(client, token_generator)
         organization_id = self._post_organization(client, token_generator)
-        user_ids = post_users(USERS, client, data_trust_id, organization_id, token_generator)
+        user_ids = post_users(USERS, client, organization_id, token_generator.get_token(client))
         client_ids = self._post_clients(client, user_ids, token_generator)
 
         # Create roles
@@ -210,14 +196,12 @@ class TestAllAPIs(object):
             expect(user_ids).to(contain(result['user_id']))
             expect(len(result['roles'])).to(equal(len(role_ids)))
 
-        self._cleanup(client, data_trust_id, token_generator,
+        self._cleanup(client, token_generator,
                       user_ids=user_ids, role_ids=role_ids, organization_id=None)
-
 
     def test_client_secret_delete_rotate(self, client, organization, token_generator):
         headers = {'content-type': 'application/json', 'authorization': f'bearer {token_generator.get_token(client)}'}
-        data_trust_id = self._post_data_trust(client, token_generator)
-        user_ids = post_users(USERS, client, data_trust_id, organization.id, token_generator)
+        user_ids = post_users(USERS, client, organization.id, token_generator.get_token(client))
         client_ids = self._post_clients(client, user_ids, token_generator)
 
         client_to_patch = client_ids[0]
@@ -234,13 +218,11 @@ class TestAllAPIs(object):
         response = client.get('/clients/{}'.format(client_to_patch), headers=headers)
         expect(len(response.json['response']['client_secret'])).to(equal(48))
 
-        self._cleanup(client, data_trust_id, token_generator, user_ids=user_ids)
-    
+        self._cleanup(client, token_generator, user_ids=user_ids)
 
     def test_client_post_invalid_action(self, client, organization, token_generator):
         headers = {'content-type': 'application/json', 'authorization': f'bearer {token_generator.get_token(client)}'}
-        data_trust_id = self._post_data_trust(client, token_generator)
-        user_ids = post_users(USERS, client, data_trust_id, organization.id, token_generator)
+        user_ids = post_users(USERS, client, organization.id, token_generator.get_token(client))
         client_ids = self._post_clients(client, user_ids, token_generator)
 
         client_to_patch = client_ids[0]
@@ -250,22 +232,7 @@ class TestAllAPIs(object):
         expect(response.status_code).to(equal(422))
         expect(response.json['messages']).to(contain("Invalid query param!"))
 
-        self._cleanup(client, data_trust_id, token_generator, user_ids=user_ids)
-
-
-    def _post_data_trust(self, client, token_generator):
-        '''
-        Helper function that creates (and tests creating) a Data Trust entity.
-        '''
-        headers = {'content-type': 'application/json', 'authorization': f'bearer {token_generator.get_token(client)}'}
-        response: Response = client.post(
-            '/data_trusts', data=json.dumps(DATA_TRUST), headers=headers)
-        expect(response.status_code).to(equal(201))
-
-        data_trust_id = response.json['response'][0]['id']
-
-        return data_trust_id
-
+        self._cleanup(client, token_generator, user_ids=user_ids)
 
     def _post_organization(self, client, token_generator):
         '''
@@ -279,7 +246,6 @@ class TestAllAPIs(object):
         organization_id = response.json['response'][0]['id']
 
         return organization_id
-
 
     def _post_clients(self, client, user_ids, token_generator):
         '''
@@ -297,8 +263,7 @@ class TestAllAPIs(object):
 
         return client_ids
 
-
-    def _cleanup(self, client, data_trust_id, token_generator, role_ids=[], user_ids=[], organization_id=None):
+    def _cleanup(self, client, token_generator, role_ids=[], user_ids=[], organization_id=None):
         headers = {'content-type': 'application/json', 'authorization': f'bearer {token_generator.get_token(client)}'}
         for role_id in role_ids:
             response = client.delete(
@@ -314,8 +279,3 @@ class TestAllAPIs(object):
             response = client.delete(
                 '/organizations/{}'.format(organization_id), headers)
             expect(response.status_code).to(equal(200))
-
-        response = client.delete(
-            '/data_trusts/{}'.format(data_trust_id), headers=headers)
-        expect(response.status_code).to(equal(200))
-
