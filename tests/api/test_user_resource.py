@@ -38,7 +38,6 @@ USERS = [
 
 
 class TestUserResource:
-    # @pytest.mark.skip
     def test_user_api(self, client, organization, token_generator):
         # Common headers go in this dict
         headers = {'content-type': 'application/json', 'authorization': f'bearer {token_generator.get_token(client)}'}
@@ -57,6 +56,11 @@ class TestUserResource:
         expect(response.status_code).to(be(200))
         expect(len(response_data['response'])).to(be_above_or_equal(3))
         added_users = response_data['response']
+
+        # Store ID for all users since we will break the data.
+        added_user_ids = []
+        for user in added_users:
+            added_user_ids.append(user['id'])
 
         # Attempt to POST an existing user
         response = client.post(
@@ -89,6 +93,9 @@ class TestUserResource:
         user_to_update['password'] = 'password'
         user_to_update['organization_id'] = user_to_update['organization']['id']
         user_to_update.pop('organization', None)
+        user_to_update.pop('date_created', None)
+        user_to_update.pop('id', None)
+        user_to_update.pop('date_last_updated', None)
         if not user_to_update['telephone']:
             user_to_update['telephone'] = 'N/A'
 
@@ -101,7 +108,9 @@ class TestUserResource:
         response_data = response.json
 
         # Deactivate a user
+        headers = {'content-type': 'application/json', 'authorization': f'bearer {token_generator.get_token(client)}'}
         response = client.get('/users', headers=headers)
+
         a_user_id = response.json['response'][1]['id']
         associated_client_id = self._post_client(client, a_user_id, token_generator)
 
@@ -133,9 +142,11 @@ class TestUserResource:
             '/clients/{}'.format(associated_client_id), headers=headers)
         expect(response.json['response']['client_secret']).to(be(None))
 
-        # Delete users
-        for user in added_users:
-            response = client.delete(f"/users/{user['id']}", headers=headers)
+        # Delete users and clients
+        response = client.delete(f'/clients/{associated_client_id}', headers=headers)
+        expect(response.status_code).to(be(200))
+        for user_id in added_user_ids:
+            response = client.delete(f"/users/{user_id}", headers=headers)
             expect(response.status_code).to(be(200))
 
     def _post_client(self, client, user_id, token_generator):

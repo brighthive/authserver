@@ -60,7 +60,6 @@ USERS = [
     {
         'firstname': 'Regina',
         'lastname': 'Wolfgang',
-        'organization': 'BrightHive',
         'email_address': 'user1@brighthive.me',
         'username': 'user1',
         'password': 'password',

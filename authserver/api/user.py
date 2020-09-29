@@ -68,13 +68,13 @@ class UserResource(Resource):
     def get(self, id: str = None):
         if not id:
             users = User.query.all()
-            users_obj = self.users_schema.dump(users).data
+            users_obj = self.users_schema.dump(users)
             users_obj_clean = [{k: v for k, v in user.items() if k != 'organization_id'} for user in users_obj]
             return self.response_handler.get_all_response(users_obj_clean)
         else:
             user = User.query.filter_by(id=id).first()
             if user:
-                user_obj = self.user_schema.dump(user).data
+                user_obj = self.user_schema.dump(user)
                 user_obj.pop('organization_id')
                 return self.response_handler.get_one_response(user_obj, request={'id': id})
             else:
@@ -106,7 +106,7 @@ class UserResource(Resource):
                 else:
                     return self.response_handler.custom_response(code=422, messages="Invalid query param! 'action' can only be 'deactivate'.")
 
-        data, errors = self.user_schema.load(request_data)
+        errors = self.user_schema.validate(request_data)
         if errors:
             return self.response_handler.custom_response(code=422, messages=errors)
         try:
@@ -142,7 +142,7 @@ class UserResource(Resource):
         try:
             user = User.query.filter_by(id=id).first()
             if user:
-                user_obj = self.user_schema.dump(user).data
+                user_obj = self.user_schema.dump(user)
                 db.session.delete(user)
                 db.session.commit()
                 return self.response_handler.successful_delete_response('User', id, user_obj)
@@ -167,7 +167,7 @@ class UserResource(Resource):
             return self.response_handler.not_found_response(id)
         if not request_data:
             return self.response_handler.empty_request_body_response()
-        data, errors = self.user_schema.load(request_data, partial=partial)
+        errors = self.user_schema.validate(request_data, partial=partial)
         if errors:
             return self.response_handler.custom_response(code=422, messages=errors)
 

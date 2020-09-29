@@ -4,14 +4,12 @@ An API for registering roles with Auth Server.
 
 """
 
-import json
 from uuid import uuid4
 from datetime import datetime
 from flask import Blueprint
 from flask_restful import Resource, Api, request
 from werkzeug.security import gen_salt
-from authserver.db import db, User, UserSchema, OAuth2Client,\
-    OAuth2ClientSchema, Role, RoleSchema
+from authserver.db import db, Role, RoleSchema
 from authserver.utilities import ResponseBody, require_oauth
 
 
@@ -31,12 +29,12 @@ class RoleResource(Resource):
     def get(self, id: str = None):
         if not id:
             roles = Role.query.all()
-            roles_obj = self.roles_schema.dump(roles).data
+            roles_obj = self.roles_schema.dump(roles)
             return self.response_handler.get_all_response(roles_obj)
         else:
             role = Role.query.filter_by(id=id).first()
             if role:
-                role_obj = self.role_schema.dump(role).data
+                role_obj = self.role_schema.dump(role)
                 return self.response_handler.get_one_response(role_obj, request={'id': id})
             else:
                 return self.response_handler.not_found_response(id)
@@ -51,7 +49,7 @@ class RoleResource(Resource):
             return self.response_handler.empty_request_body_response()
         if not request_data:
             return self.response_handler.empty_request_body_response()
-        data, errors = self.role_schema.load(request_data)
+        errors = self.role_schema.validate(request_data)
         if errors:
             return self.response_handler.custom_response(code=422, messages=errors)
 
@@ -87,7 +85,7 @@ class RoleResource(Resource):
         try:
             role = Role.query.filter_by(id=id).first()
             if role:
-                role_obj = self.role_schema.dump(role).data
+                role_obj = self.role_schema.dump(role)
                 db.session.delete(role)
                 db.session.commit()
                 return self.response_handler.successful_delete_response('Role', id, role_obj)
@@ -112,7 +110,7 @@ class RoleResource(Resource):
             return self.response_handler.not_found_response(id)
         if not request_data:
             return self.response_handler.empty_request_body_response()
-        data, errors = self.role_schema.load(request_data, partial=partial)
+        errors = self.role_schema.validate(request_data, partial=partial)
         if errors:
             return self.response_handler.custom_response(code=422, messages=errors)
 

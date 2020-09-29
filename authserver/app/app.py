@@ -1,5 +1,6 @@
 """Flask Application."""
 
+from _pytest.mark.structures import MarkDecorator
 from flask import Flask, request
 from flask_cors import CORS
 from flask_migrate import Migrate

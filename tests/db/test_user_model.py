@@ -11,7 +11,7 @@ class TestUserModel:
     def test_user_model(self, app, organization):
         with app.app_context():
             # Create a new user
-            new_user = User(username='demo_2', password='password', firstname='Demonstration', lastname='User',
+            new_user = User(username='demo', password='password', firstname='Demonstration', lastname='User',
                             organization_id=organization.id, email_address='demo@me.com', telephone='304-555-1234')
             db.session.add(new_user)
             db.session.commit()
@@ -38,8 +38,7 @@ class TestUserModel:
             expect(found_user.firstname).to(equal(new_first_name))
             expect(found_user.lastname).to(equal(new_last_name))
 
-            # Delete the user
-            expect(User.query.count()).to(equal(2))
-            db.session.delete(found_user)
+            # Delete all users
+            User.query.delete()
             db.session.commit()
-            expect(User.query.count()).to(equal(1))
+            expect(User.query.count()).to(equal(0))

@@ -47,7 +47,7 @@ class Organization(db.Model):
         return '{} - {}'.format(self.id, self.name)
 
 
-class OrganizationSchema(ma.Schema):
+class OrganizationSchema(ma.SQLAlchemySchema):
     """Organization Schema
 
     A marshmallow schema for validating the Organization model.
@@ -55,12 +55,13 @@ class OrganizationSchema(ma.Schema):
 
     class Meta:
         ordered = True
+        model = Organization
 
-    id = fields.String(dump_only=True)
-    name = fields.String(required=True)
-    url = fields.String()
-    date_created = fields.DateTime(dump_only=True)
-    date_last_updated = fields.DateTime(dump_only=True)
+    id = ma.auto_field(dump_only=True)
+    name = ma.auto_field(required=True)
+    url = ma.auto_field()
+    date_created = ma.auto_field(dump_only=True)
+    date_last_updated = ma.auto_field(dump_only=True)
 
 
 class User(db.Model):
@@ -117,7 +118,7 @@ class User(db.Model):
         return '{} {} {}'.format(self.id, self.firstname, self.lastname)
 
 
-class UserSchema(ma.Schema):
+class UserSchema(ma.SQLAlchemySchema):
     """User Schema
 
     A marshmallow schema for validating the User model.
@@ -125,19 +126,20 @@ class UserSchema(ma.Schema):
 
     class Meta:
         ordered = True
+        model = User
 
-    id = fields.String(dump_only=True)
-    username = fields.String(required=True)
+    id = ma.auto_field(dump_only=True)
+    username = ma.auto_field(required=True)
     password = fields.String(required=True)
-    firstname = fields.String(required=True)
-    lastname = fields.String(required=True)
-    organization_id = fields.String(required=True)
+    firstname = ma.auto_field(required=True)
+    lastname = ma.auto_field(required=True)
+    organization_id = ma.auto_field(required=True)
     organization = fields.Nested(OrganizationSchema(), dump_only=True)
-    email_address = fields.Email(required=True)
-    telephone = fields.String()
-    active = fields.Boolean(dump_only=True)
-    date_created = fields.DateTime(dump_only=True)
-    date_last_updated = fields.DateTime(dump_only=True)
+    email_address = ma.auto_field(required=True)
+    telephone = ma.auto_field()
+    active = ma.auto_field()
+    date_created = ma.auto_field(dump_only=True)
+    date_last_updated = ma.auto_field(dump_only=True)
 
 
 class JSONField(fields.Field):
@@ -186,7 +188,7 @@ class Role(db.Model):
         return self.id
 
 
-class RoleSchema(ma.Schema):
+class RoleSchema(ma.SQLAlchemySchema):
     """User Schema
 
     A marshmallow schema for validating the Role model.
@@ -194,14 +196,15 @@ class RoleSchema(ma.Schema):
 
     class Meta:
         ordered = True
+        model = Role
 
-    id = fields.String(dump_only=True)
-    role = fields.String(required=True)
-    description = fields.String(required=True)
-    rules = JSONField()
-    active = fields.Boolean()
-    date_created = fields.DateTime(dump_only=True)
-    date_last_updated = fields.DateTime(dump_only=True)
+    id = ma.auto_field(dump_only=True)
+    role = ma.auto_field(required=True)
+    description = ma.auto_field(required=True)
+    rules = ma.auto_field()
+    active = ma.auto_field()
+    date_created = ma.auto_field(dump_only=True)
+    date_last_updated = ma.auto_field(dump_only=True)
 
 
 class OAuth2Client(db.Model, OAuth2ClientMixin):
@@ -217,17 +220,18 @@ class OAuth2Client(db.Model, OAuth2ClientMixin):
                             backref=db.backref('clients', lazy=True))
 
 
-class OAuth2ClientSchema(ma.Schema):
+class OAuth2ClientSchema(ma.SQLAlchemySchema):
     """Schema for OAuth 2.0 Client."""
 
     class Meta:
         ordered = True
+        model = OAuth2Client
 
-    id = fields.String(dump_only=True)
-    user_id = fields.String(required=True)
-    client_id = fields.String(dump_only=True)
-    client_secret = fields.String(dump_only=True)
-    client_id_issued_at = fields.Integer(dump_only=True)
+    id = ma.auto_field(dump_only=True)
+    user_id = ma.auto_field(required=True)
+    client_id = ma.auto_field(dump_only=True)
+    client_secret = ma.auto_field(dump_only=True)
+    client_id_issued_at = ma.auto_field(dump_only=True)
     expires_at = fields.Integer(dump_only=True)
     redirect_uris = fields.List(fields.String())
     token_endpoint_auth_method = fields.String()
