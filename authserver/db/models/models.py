@@ -80,6 +80,8 @@ class User(db.Model):
     email_address = db.Column(db.String(40), nullable=False)
     telephone = db.Column(db.String(20), nullable=True)
     active = db.Column(db.Boolean, nullable=False, default=True)
+    role_id = db.Column(db.String, db.ForeignKey('oauth2_roles.id'), nullable=True)
+    role = db.relationship('Role', backref='users', lazy='subquery')
     password_hash = db.Column(db.String(128), nullable=False)
     date_created = db.Column(db.TIMESTAMP)
     date_last_updated = db.Column(db.TIMESTAMP)
@@ -102,13 +104,14 @@ class User(db.Model):
     def get_user_id(self):
         return self.id
 
-    def __init__(self, username, password, firstname, lastname, organization_id, email_address, telephone=None):
+    def __init__(self, username, password, firstname, lastname, organization_id, email_address, role_id=None, telephone=None):
         self.id = str(uuid4()).replace('-', '')
         self.username = username
         self.firstname = firstname
         self.lastname = lastname
         self.password = password
         self.organization_id = organization_id
+        self.role_id = role_id
         self.email_address = email_address
         self.telephone = telephone
         self.date_created = datetime.utcnow()
@@ -116,30 +119,6 @@ class User(db.Model):
 
     def __str__(self):
         return '{} {} {}'.format(self.id, self.firstname, self.lastname)
-
-
-class UserSchema(ma.SQLAlchemySchema):
-    """User Schema
-
-    A marshmallow schema for validating the User model.
-    """
-
-    class Meta:
-        ordered = True
-        model = User
-
-    id = ma.auto_field(dump_only=True)
-    username = ma.auto_field(required=True)
-    password = fields.String(required=True)
-    firstname = ma.auto_field(required=True)
-    lastname = ma.auto_field(required=True)
-    organization_id = ma.auto_field(required=True)
-    organization = fields.Nested(OrganizationSchema(), dump_only=True)
-    email_address = ma.auto_field(required=True)
-    telephone = ma.auto_field()
-    active = ma.auto_field()
-    date_created = ma.auto_field(dump_only=True)
-    date_last_updated = ma.auto_field(dump_only=True)
 
 
 class JSONField(fields.Field):
@@ -202,6 +181,32 @@ class RoleSchema(ma.SQLAlchemySchema):
     role = ma.auto_field(required=True)
     description = ma.auto_field(required=True)
     rules = ma.auto_field()
+    active = ma.auto_field()
+    date_created = ma.auto_field(dump_only=True)
+    date_last_updated = ma.auto_field(dump_only=True)
+
+
+class UserSchema(ma.SQLAlchemySchema):
+    """User Schema
+
+    A marshmallow schema for validating the User model.
+    """
+
+    class Meta:
+        ordered = True
+        model = User
+
+    id = ma.auto_field(dump_only=True)
+    username = ma.auto_field(required=True)
+    password = fields.String(required=True)
+    firstname = ma.auto_field(required=True)
+    lastname = ma.auto_field(required=True)
+    organization_id = ma.auto_field(required=True)
+    organization = fields.Nested(OrganizationSchema(), dump_only=True)
+    role_id = ma.auto_field()
+    role = fields.Nested(RoleSchema(), dump_only=True)
+    email_address = ma.auto_field(required=True)
+    telephone = ma.auto_field()
     active = ma.auto_field()
     date_created = ma.auto_field(dump_only=True)
     date_last_updated = ma.auto_field(dump_only=True)
@@ -299,3 +304,16 @@ class AuthorizedClient(db.Model):
     user_id = db.Column(db.String, db.ForeignKey('users.id'), primary_key=True)
     client_id = db.Column(db.String, primary_key=True)
     authorized = db.Column(db.Boolean, nullable=False, default=False)
+
+
+# class RoleAuthorization(db.Model):
+#     """OAuth2 scopes associated with roles.
+
+#     This class provides a linkage between a role and an associated OAuth2 scope. This allows for the grouping
+#     of scopes by a specific role.
+
+#     """
+
+#     __tablename__ = 'role_authorizations'
+
+#     role_id = db.Column()
