@@ -351,3 +351,27 @@ class ScopeSchema(ma.SQLAlchemySchema):
     description = ma.auto_field(required=True)
     date_created = ma.auto_field(dump_only=True)
     date_last_updated = ma.auto_field(dump_only=True)
+
+
+class AuthorizedScope(db.Model):
+    """Map scopes to roles.
+
+    This class links roles to scopes in order to provide a mapping of
+    what scopes should be associated with a given user.
+
+    """
+
+    __tablename__ = 'authorized_scopes'
+    role_id = db.Column(db.String, db.ForeignKey('oauth2_roles.id'), nullable=False, primary_key=True)
+    scope_id = db.Column(db.String, db.ForeignKey('oauth2_scopes.id'), nullable=False, primary_key=True)
+    date_created = db.Column(db.TIMESTAMP)
+    date_last_updated = db.Column(db.TIMESTAMP)
+
+    def __init__(self, role_id, scope_id):
+        self.role_id = role_id
+        self.scope_id = scope_id
+        self.date_created = datetime.utcnow()
+        self.date_last_updated = datetime.utcnow()
+
+    def __str__(self):
+        return f'{self.role_id} - {self.scope_id}'
