@@ -278,3 +278,72 @@ class TestAllAPIs(object):
             response = client.delete(
                 '/organizations/{}'.format(organization_id), headers)
             expect(response.status_code).to(equal(200))
+
+    def test_assign_scope_to_user(self, client, token_generator):
+        ORGANIZATION = {
+            'name': 'Data Trust Organization'
+        }
+
+        CLIENT = {
+
+        }
+
+        USER = {
+            'username': 'test_user_scope',
+            'firstname': 'test',
+            'lastname': 'testtest',
+            'organization_id': '',
+            'email_address': 'test@demo.com',
+            'password': 'secret',
+            'role_id': ''
+        }
+
+        ROLE = {
+            'role': 'Administrator',
+            'description': 'An administrative user role.'
+        }
+
+        SCOPE = {
+            'scope': 'action:do-all-the-things',
+            'description': 'A scope that grants the holder superpowers'
+        }
+
+        headers = {'content-type': 'application/json', 'authorization': f'bearer {token_generator.get_token(client)}'}
+
+        # Create an organization
+        response = client.post('/organizations', data=json.dumps(ORGANIZATION), headers=headers)
+        expect(response.status_code).to(be(201))
+        organization_id = response.json['response'][0]['id']
+
+        # Create a role
+        response = client.post('/roles', data=json.dumps(ROLE), headers=headers)
+        expect(response.status_code).to(be(201))
+        role_id = response.json['response'][0]['id']
+
+        # Create a scope
+        response = client.post('/scopes', data=json.dumps(SCOPE), headers=headers)
+        expect(response.status_code).to(be(201))
+        scope_id = response.json['response'][0]['id']
+
+        # Bind the scope to the role
+        response = client.post(f'/roles/{role_id}/scopes', data=json.dumps({'scope_id': scope_id}), headers=headers)
+        expect(response.status_code).to(be(201))
+
+        # Create a user, assign to organization, and make the user an administrator
+        USER['organization_id'] = organization_id
+        USER['role_id'] = role_id
+        response = client.post('/users', data=json.dumps(USER), headers=headers)
+        expect(response.status_code).to(be(201))
+        user_id = response.json['response'][0]['id']
+
+        # Cleanup
+        response = client.delete(f'/users/{user_id}', headers=headers)
+        expect(response.status_code).to(be(200))
+        response = client.delete(f'/organizations/{organization_id}', headers=headers)
+        expect(response.status_code).to(be(200))
+        response = client.delete(f'/roles/{role_id}/scopes/{scope_id}', headers=headers)
+        expect(response.status_code).to(be(200))
+        response = client.delete(f'/roles/{role_id}', headers=headers)
+        expect(response.status_code).to(be(200))
+        response = client.delete(f'/scopes/{scope_id}', headers=headers)
+        expect(response.status_code).to(be(200))

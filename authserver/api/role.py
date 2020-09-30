@@ -91,7 +91,8 @@ class RoleResource(Resource):
                 return self.response_handler.successful_delete_response('Role', id, role_obj)
             else:
                 return self.response_handler.not_found_response(id)
-        except Exception:
+        except Exception as e:
+            print(e)
             return self.response_handler.not_found_response(id)
 
     def update(self, id: str, partial=True):
