@@ -306,14 +306,48 @@ class AuthorizedClient(db.Model):
     authorized = db.Column(db.Boolean, nullable=False, default=False)
 
 
-# class RoleAuthorization(db.Model):
-#     """OAuth2 scopes associated with roles.
+class Scope(db.Model):
+    """OAuth2 scopes associated with users and clients.
 
-#     This class provides a linkage between a role and an associated OAuth2 scope. This allows for the grouping
-#     of scopes by a specific role.
+    This class provides an abstraction of an OAuth2 scope. The OAuth2Client entity has a scope
+    field provided by its OAuth2ClientMixin class; however this level of abstraction is
+    needed in order to expose this to clients in an easier way as well as to facilitate the linkage
+    of scopes between clients and users.
 
-#     """
+    """
 
-#     __tablename__ = 'role_authorizations'
+    __tablename__ = 'oauth2_scopes'
+    __table_args__ = (db.UniqueConstraint('scope'), )
 
-#     role_id = db.Column()
+    id = db.Column(db.String, primary_key=True)
+    scope = db.Column(db.String, unique=True, nullable=False)
+    description = db.Column(db.String)
+    date_created = db.Column(db.TIMESTAMP)
+    date_last_updated = db.Column(db.TIMESTAMP)
+
+    def __init__(self, scope, description):
+        self.id = str(uuid4()).replace('-', '')
+        self.scope = scope
+        self.description = description
+        self.date_created = datetime.utcnow()
+        self.date_last_updated = datetime.utcnow()
+
+    def __str__(self):
+        return self.id
+
+
+class ScopeSchema(ma.SQLAlchemySchema):
+    """Scope schema
+
+    A marshmallow schema for validating the Scope model.
+    """
+
+    class Meta:
+        ordered = True
+        model = Scope
+
+    id = ma.auto_field(dump_only=True)
+    scope = ma.auto_field(required=True)
+    description = ma.auto_field(required=True)
+    date_created = ma.auto_field(dump_only=True)
+    date_last_updated = ma.auto_field(dump_only=True)

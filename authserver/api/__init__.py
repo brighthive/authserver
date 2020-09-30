@@ -5,3 +5,4 @@ from authserver.api.client import client_bp
 from authserver.api.oauth2 import oauth2_bp
 from authserver.api.role import role_bp
 from authserver.api.home import home_bp
+from authserver.api.scope import scope_bp
