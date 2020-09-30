@@ -33,9 +33,9 @@ def login():
 
         try:
             if not user.active:
-                errors = "You do not have an active user account."
+                errors = "You did not enter valid login credentials."
             elif not user.verify_password(password):
-                errors = "You did not enter a valid password."
+                errors = "You did not enter valid login credentials."
             else:
                 session['id'] = user.id
                 return redirect(return_to)

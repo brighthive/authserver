@@ -7,15 +7,20 @@ An API for registering users with Auth Server.
 import json
 from datetime import datetime
 
-from flask import Blueprint
+from flask import Blueprint, session
 from flask_restful import Api, Resource, request
 
-from authserver.db import User, UserSchema, db, OAuth2Client, OAuth2Token
+from authserver.db import User, UserSchema, db, OAuth2Client, OAuth2Token, UserSchema
+from authserver.utilities import ResponseBody
 from authserver.utilities import ResponseBody, require_oauth
 
 
 class UserDetailResource(Resource):
     """Details of the currently logged in user."""
+
+    def __init__(self):
+        self.response_handler = ResponseBody()
+        self.user_schema = UserSchema()
 
     @require_oauth()
     def get(self):
@@ -25,30 +30,19 @@ class UserDetailResource(Resource):
             token = None
 
         if token:
-            token_details = OAuth2Token.query.filter_by(access_token=token).first()
-            if token_details:
-                user_id = token_details.user_id
-                user = User.query.filter_by(id=user_id).first()
-                return {
-                    'id': user.id,
-                    'username': user.username,
-                    'firstname': user.firstname,
-                    'lastname': user.lastname,
-                    'organization': {
-                        'id': user.organization.id,
-                        'name': user.organization.name
-                    },
-                    'email_address': user.email_address,
-                    'telephone': user.telephone,
-                    'active': user.active,
-                    'date_created': str(user.date_created),
-                    'date_last_updated': str(user.date_last_updated)
-                }
-
-        return {
-            'firstname': 'Unknown',
-            'lastname': 'Unknown'
-        }
+            try:
+                token_details = OAuth2Token.query.filter_by(access_token=token).first()
+                if token_details:
+                    user_id = token_details.user_id
+                    if not user_id:
+                        if 'id' in session:
+                            user_id = session['id']
+                    user = User.query.filter_by(id=user_id).first()
+                    user_obj = self.user_schema.dump(user)
+                    user_obj.pop('role_id', None)
+                    return self.response_handler.get_one_response(user_obj)
+            except Exception:
+                return self.response_handler.custom_response(messages=[{'error': 'Cannot get an ID for current user.'}])
 
 
 class UserResource(Resource):
