@@ -55,7 +55,6 @@ class ScopeResource(Resource):
 
         try:
             scope = Scope(scope=request_data['scope'], description=request_data['description'])
-            print(scope.scope)
             db.session.add(scope)
             db.session.commit()
         except Exception as e:
