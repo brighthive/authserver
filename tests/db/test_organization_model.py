@@ -4,7 +4,7 @@ import pytest
 from expects import be_none, equal, expect, raise_error
 from sqlalchemy.exc import IntegrityError
 
-from authserver.db import Organization, db
+from authserver.db import Organization, User, db
 
 
 class TestOrganizationModel:
@@ -27,7 +27,16 @@ class TestOrganizationModel:
             db.session.add(organization)
             expect(lambda: db.session.commit()).to(raise_error(IntegrityError))
 
-    @pytest.mark.skip(reason='Skipping deprecated test')
-    def test_users_backref(self, organization, user):
-        expect(organization.id).to(equal(user.organization.id))
-        expect(organization.name).to(equal(user.organization.name))
+    def test_users_backref(self, app, organization, user):
+        if user is None:
+            with app.app_context():
+                new_user = User(username='test_user', password='password', firstname='test',
+                                lastname='user', organization_id=organization.id,
+                                email_address='testuser@demo.com')
+                db.session.add(new_user)
+                db.session.commit()
+                expect(organization.id).to(equal(new_user.organization.id))
+                expect(organization.name).to(equal(new_user.organization.name))
+        else:
+            expect(organization.id).to(equal(user.organization.id))
+            expect(organization.name).to(equal(user.organization.name))

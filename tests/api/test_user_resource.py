@@ -89,10 +89,12 @@ class TestUserResource:
 
         # Rename a user with a PUT, providing the entire object
         user_to_update = added_users[0]
+        print(user_to_update)
         user_to_update['firstname'] = new_name
         user_to_update['password'] = 'password'
         user_to_update['organization_id'] = user_to_update['organization']['id']
         user_to_update.pop('organization', None)
+        user_to_update.pop('role', None)
         user_to_update.pop('date_created', None)
         user_to_update.pop('id', None)
         user_to_update.pop('date_last_updated', None)
@@ -100,6 +102,7 @@ class TestUserResource:
             user_to_update['telephone'] = 'N/A'
 
         response = client.put('/users/{}'.format(user_id), data=json.dumps(user_to_update), headers=headers)
+        print(response.json)
         expect(response.status_code).to(equal(200))
 
         # Ensure users have been deleted by the deletion of the data trust associated with them.
