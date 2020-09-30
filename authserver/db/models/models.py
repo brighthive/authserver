@@ -364,6 +364,10 @@ class AuthorizedScope(db.Model):
     __tablename__ = 'authorized_scopes'
     role_id = db.Column(db.String, db.ForeignKey('oauth2_roles.id'), nullable=False, primary_key=True)
     scope_id = db.Column(db.String, db.ForeignKey('oauth2_scopes.id'), nullable=False, primary_key=True)
+    role = db.relationship(
+        'Role', backref='authorized_scopes', lazy='subquery')
+    scope = db.relationship(
+        'Scope', backref='authorized_scopes', lazy='subquery')
     date_created = db.Column(db.TIMESTAMP)
     date_last_updated = db.Column(db.TIMESTAMP)
 
@@ -375,3 +379,21 @@ class AuthorizedScope(db.Model):
 
     def __str__(self):
         return f'{self.role_id} - {self.scope_id}'
+
+
+class AuthorizedScopeSchema(ma.SQLAlchemySchema):
+    """Scope schema
+
+    A marshmallow schema for validating the Scope model.
+    """
+
+    class Meta:
+        ordered = True
+        model = AuthorizedScope
+
+    role_id = ma.auto_field(dump_only=True)
+    scope_id = ma.auto_field(required=True)
+    role = fields.Nested(RoleSchema(), dump_only=True)
+    scope = fields.Nested(ScopeSchema(), dump_only=True)
+    date_created = ma.auto_field(dump_only=True)
+    date_last_updated = ma.auto_field(dump_only=True)
