@@ -24,7 +24,7 @@ class TestOAuth2Flows:
         body = {'token': token}
         headers = {'content-type': 'application/json'}
         response: Response = client.post('/oauth/validate', data=json.dumps(body), headers=headers)
-        
+
         return response.json["messages"]["valid"]
 
     def test_client_credentials_flow(self, client):

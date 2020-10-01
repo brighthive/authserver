@@ -7,15 +7,20 @@ An API for registering users with Auth Server.
 import json
 from datetime import datetime
 
-from flask import Blueprint
+from flask import Blueprint, session
 from flask_restful import Api, Resource, request
 
-from authserver.db import DataTrust, DataTrustSchema, User, UserSchema, db, OAuth2Client, OAuth2Token
+from authserver.db import User, UserSchema, db, OAuth2Client, OAuth2Token, UserSchema
+from authserver.utilities import ResponseBody
 from authserver.utilities import ResponseBody, require_oauth
 
 
 class UserDetailResource(Resource):
     """Details of the currently logged in user."""
+
+    def __init__(self):
+        self.response_handler = ResponseBody()
+        self.user_schema = UserSchema()
 
     @require_oauth()
     def get(self):
@@ -25,31 +30,19 @@ class UserDetailResource(Resource):
             token = None
 
         if token:
-            token_details = OAuth2Token.query.filter_by(access_token=token).first()
-            if token_details:
-                user_id = token_details.user_id
-                user = User.query.filter_by(id=user_id).first()
-                return {
-                    'id': user.id,
-                    'username': user.username,
-                    'firstname': user.firstname,
-                    'lastname': user.lastname,
-                    'organization': {
-                        'id': user.organization.id,
-                        'name': user.organization.name
-                    },
-                    'email_address': user.email_address,
-                    'telephone': user.telephone,
-                    'active': user.active,
-                    'data_trust_id': user.data_trust_id,
-                    'date_created': str(user.date_created),
-                    'date_last_updated': str(user.date_last_updated)
-                }
-
-        return {
-            'firstname': 'Unknown',
-            'lastname': 'Unknown'
-        }
+            try:
+                token_details = OAuth2Token.query.filter_by(access_token=token).first()
+                if token_details:
+                    user_id = token_details.user_id
+                    if not user_id:
+                        if 'id' in session:
+                            user_id = session['id']
+                    user = User.query.filter_by(id=user_id).first()
+                    user_obj = self.user_schema.dump(user)
+                    user_obj.pop('role_id', None)
+                    return self.response_handler.get_one_response(user_obj)
+            except Exception:
+                return self.response_handler.custom_response(messages=[{'error': 'Cannot get an ID for current user.'}])
 
 
 class UserResource(Resource):
@@ -61,8 +54,6 @@ class UserResource(Resource):
     """
 
     def __init__(self):
-        self.data_trust_schema = DataTrustSchema()
-        self.data_trusts_schema = DataTrustSchema(many=True)
         self.user_schema = UserSchema()
         self.users_schema = UserSchema(many=True)
         self.response_handler = ResponseBody()
@@ -71,14 +62,15 @@ class UserResource(Resource):
     def get(self, id: str = None):
         if not id:
             users = User.query.all()
-            users_obj = self.users_schema.dump(users).data
-            users_obj_clean = [{k: v for k, v in user.items() if k != 'organization_id'} for user in users_obj]
+            users_obj = self.users_schema.dump(users)
+            users_obj_clean = [{k: v for k, v in user.items() if k != 'organization_id' and k != 'role_id'} for user in users_obj]
             return self.response_handler.get_all_response(users_obj_clean)
         else:
             user = User.query.filter_by(id=id).first()
             if user:
-                user_obj = self.user_schema.dump(user).data
+                user_obj = self.user_schema.dump(user)
                 user_obj.pop('organization_id')
+                user_obj.pop('role_id')
                 return self.response_handler.get_one_response(user_obj, request={'id': id})
             else:
                 return self.response_handler.not_found_response(id)
@@ -109,13 +101,14 @@ class UserResource(Resource):
                 else:
                     return self.response_handler.custom_response(code=422, messages="Invalid query param! 'action' can only be 'deactivate'.")
 
-        data, errors = self.user_schema.load(request_data)
+        errors = self.user_schema.validate(request_data)
         if errors:
             return self.response_handler.custom_response(code=422, messages=errors)
         try:
             user = User(request_data['username'], request_data['password'], firstname=request_data['firstname'], lastname=request_data['lastname'],
-                        organization_id=request_data['organization_id'], email_address=request_data['email_address'],
-                        data_trust_id=request_data['data_trust_id'])
+                        organization_id=request_data['organization_id'],
+                        role_id=request_data['role_id'] if 'role_id' in request_data.keys() else None,
+                        email_address=request_data['email_address'])
             if 'telephone' in request_data.keys():
                 user.telephone = request_data['telephone']
             db.session.add(user)
@@ -146,7 +139,7 @@ class UserResource(Resource):
         try:
             user = User.query.filter_by(id=id).first()
             if user:
-                user_obj = self.user_schema.dump(user).data
+                user_obj = self.user_schema.dump(user)
                 db.session.delete(user)
                 db.session.commit()
                 return self.response_handler.successful_delete_response('User', id, user_obj)
@@ -171,7 +164,7 @@ class UserResource(Resource):
             return self.response_handler.not_found_response(id)
         if not request_data:
             return self.response_handler.empty_request_body_response()
-        data, errors = self.user_schema.load(request_data, partial=partial)
+        errors = self.user_schema.validate(request_data, partial=partial)
         if errors:
             return self.response_handler.custom_response(code=422, messages=errors)
 

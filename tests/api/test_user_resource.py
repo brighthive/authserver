@@ -3,6 +3,7 @@ import json
 import pytest
 from expects import be, be_above_or_equal, contain, equal, expect, raise_error
 from flask import Response
+from time import sleep
 
 from tests.utils import post_users
 from authserver.db import Organization
@@ -41,20 +42,13 @@ class TestUserResource:
         # Common headers go in this dict
         headers = {'content-type': 'application/json', 'authorization': f'bearer {token_generator.get_token(client)}'}
 
-        # Database should only include data inserted at time of migrations.
-        response: Response = client.get('/data_trusts', headers=headers)
-        response_data = response.json
-        expect(response.status_code).to(be(200))
-        expect(len(response_data['response'])).to(be_above_or_equal(1))
-
         response = client.get('/users', headers=headers)
         response_data = response.json
         expect(response.status_code).to(be(200))
         expect(len(response_data['response'])).to(equal(1))
 
-        # Populate database with a data trust and users
-        data_trust_id = self._post_data_trust(client, token_generator)
-        post_users(USERS, client, data_trust_id, organization.id, token_generator)
+        # Populate database with users
+        post_users(USERS, client, organization.id, token_generator.get_token(client))
 
         # GET all users
         response = client.get('/users', headers=headers)
@@ -62,6 +56,11 @@ class TestUserResource:
         expect(response.status_code).to(be(200))
         expect(len(response_data['response'])).to(be_above_or_equal(3))
         added_users = response_data['response']
+
+        # Store ID for all users since we will break the data.
+        added_user_ids = []
+        for user in added_users:
+            added_user_ids.append(user['id'])
 
         # Attempt to POST an existing user
         response = client.post(
@@ -94,30 +93,25 @@ class TestUserResource:
         user_to_update['password'] = 'password'
         user_to_update['organization_id'] = user_to_update['organization']['id']
         user_to_update.pop('organization', None)
+        user_to_update.pop('role', None)
+        user_to_update.pop('date_created', None)
+        user_to_update.pop('id', None)
+        user_to_update.pop('date_last_updated', None)
         if not user_to_update['telephone']:
             user_to_update['telephone'] = 'N/A'
 
         response = client.put('/users/{}'.format(user_id), data=json.dumps(user_to_update), headers=headers)
         expect(response.status_code).to(equal(200))
 
-        # DELETE the data trusts and by extension delete the users
-        response = client.delete(
-            '/data_trusts/{}'.format(data_trust_id), headers=headers)
-        expect(response.status_code).to(equal(200))
-
         # Ensure users have been deleted by the deletion of the data trust associated with them.
         response = client.get('/users', headers=headers)
         expect(response.status_code).to(be(200))
         response_data = response.json
-        expect(len(response_data['response'])).to(equal(1))
 
-    def test_user_deactivate(self, client, organization, token_generator):
-        # Populate database with a data trust and users
-        data_trust_id = self._post_data_trust(client, token_generator)
-        post_users(USERS, client, data_trust_id, organization.id, token_generator)
-
+        # Deactivate a user
         headers = {'content-type': 'application/json', 'authorization': f'bearer {token_generator.get_token(client)}'}
         response = client.get('/users', headers=headers)
+
         a_user_id = response.json['response'][1]['id']
         associated_client_id = self._post_client(client, a_user_id, token_generator)
 
@@ -149,25 +143,12 @@ class TestUserResource:
             '/clients/{}'.format(associated_client_id), headers=headers)
         expect(response.json['response']['client_secret']).to(be(None))
 
-        # DELETE the data trusts and by extension delete the users and associated client
-        response = client.delete(
-            '/data_trusts/{}'.format(data_trust_id), headers=headers)
+        # Delete users and clients
+        response = client.delete(f'/clients/{associated_client_id}', headers=headers)
         expect(response.status_code).to(be(200))
-
-    def _post_data_trust(self, client, token_generator):
-        '''
-        Helper function that creates (and tests creating) a Data Trust entity.
-        '''
-        request_body = {
-            'data_trust_name': 'BrightHive Test Data Trust'
-        }
-        headers = {'content-type': 'application/json', 'authorization': f'bearer {token_generator.get_token(client)}'}
-        response = client.post(
-            '/data_trusts', data=json.dumps(request_body), headers=headers)
-        expect(response.status_code).to(be(201))
-        data_trust_id = response.json['response'][0]['id']
-
-        return data_trust_id
+        for user_id in added_user_ids:
+            response = client.delete(f"/users/{user_id}", headers=headers)
+            expect(response.status_code).to(be(200))
 
     def _post_client(self, client, user_id, token_generator):
         headers = {'content-type': 'application/json', 'authorization': f'bearer {token_generator.get_token(client)}'}

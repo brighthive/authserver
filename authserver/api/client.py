@@ -13,8 +13,7 @@ from flask import Blueprint
 from flask_restful import Api, Resource, request
 from werkzeug.security import gen_salt
 
-from authserver.db import (DataTrust, DataTrustSchema, OAuth2Client,
-                           OAuth2ClientSchema, Role, User, UserSchema, db)
+from authserver.db import (OAuth2Client, OAuth2ClientSchema, Role, User, UserSchema, db)
 from authserver.utilities import ResponseBody, require_oauth
 
 
@@ -34,12 +33,12 @@ class ClientResource(Resource):
     def get(self, id: str = None):
         if not id:
             clients = OAuth2Client.query.all()
-            clients_obj = self.clients_schema.dump(clients).data
+            clients_obj = self.clients_schema.dump(clients)
             return self.response_handler.get_all_response(clients_obj)
         else:
             client = OAuth2Client.query.filter_by(id=id).first()
             if client:
-                client_obj = self.client_schema.dump(client).data
+                client_obj = self.client_schema.dump(client)
                 return self.response_handler.get_one_response(client_obj, request={'id': id})
             else:
                 return self.response_handler.not_found_response(id)
@@ -80,7 +79,7 @@ class ClientResource(Resource):
         if id is not None:
             return self.response_handler.method_not_allowed_response()
 
-        data, errors = self.client_schema.load(request_data)
+        errors = self.client_schema.validate(request_data)
         if errors:
             return self.response_handler.custom_response(code=422, messages=errors)
 
@@ -139,7 +138,7 @@ class ClientResource(Resource):
         try:
             client = OAuth2Client.query.filter_by(id=id).first()
             if client:
-                client_obj = self.client_schema.dump(client).data
+                client_obj = self.client_schema.dump(client)
                 db.session.delete(client)
                 db.session.commit()
                 return self.response_handler.successful_delete_response('Client', id, client_obj)
@@ -163,7 +162,7 @@ class ClientResource(Resource):
             return self.response_handler.not_found_response(id)
         if not request_data:
             return self.response_handler.empty_request_body_response()
-        data, errors = self.client_schema.load(request_data, partial=partial)
+        errors = self.client_schema.validate(request_data, partial=partial)
         if errors:
             return self.response_handler.custom_response(code=422, messages=errors)
 

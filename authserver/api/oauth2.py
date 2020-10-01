@@ -98,24 +98,25 @@ class ValidateOAuth2TokenResource(Resource):
     """
     This resource determines the validity of an OAuth2Token.
     """
+
     def __init__(self):
         self.response_handler = ResponseBody()
 
     def post(self):
         req_json = request.get_json(force=True)
         access_token = req_json["token"]
-        access_token_in_db = OAuth2Token.query.filter_by(access_token=access_token).first() 
+        access_token_in_db = OAuth2Token.query.filter_by(access_token=access_token).first()
 
         try:
             is_expired = access_token_in_db.is_access_token_expired()
         except AttributeError:
             # Token is not valid, if it does not exist.
-            is_valid=False 
+            is_valid = False
         else:
             # Token is not valid, if the token is expired (and vice versa).
             is_valid = not is_expired
-                
-        return self.response_handler.custom_response(status="OK", code=200, messages= {"valid": is_valid})
+
+        return self.response_handler.custom_response(status="OK", code=200, messages={"valid": is_valid})
 
 
 class CreateOAuth2TokenResource(Resource):

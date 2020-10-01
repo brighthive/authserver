@@ -26,47 +26,6 @@ roles = db.Table('roles',
                  db.Column('role_id', db.String, db.ForeignKey('oauth2_roles.id'), primary_key=True))
 
 
-class DataTrust(db.Model):
-    """Data Trust Model.
-
-    The Data Trust is the highest-level entity of the auth server architecture.
-    It represents a specific data trust that users can be assigned to in order
-    to restrict their access to resources. The Data Trust entity is similar in
-    effect to Auth0's tenant.
-
-    """
-    __tablename__ = 'data_trusts'
-    __table_args__ = (db.UniqueConstraint('data_trust_name'), )
-    id = db.Column(db.String, primary_key=True)
-    data_trust_name = db.Column(db.String)
-    date_created = db.Column(db.TIMESTAMP)
-    date_last_updated = db.Column(db.TIMESTAMP)
-
-    def __init__(self, data_trust_name):
-        self.id = str(uuid4()).replace('-', '')
-        self.data_trust_name = data_trust_name
-        self.date_created = datetime.utcnow()
-        self.date_last_updated = self.date_created
-
-    def __str__(self):
-        return self.data_trust_name
-
-
-class DataTrustSchema(ma.Schema):
-    """Data Trust Schema.
-
-    A marshmallow schema for validating the Data Trust model.
-
-    """
-    class Meta:
-        ordered = True
-
-    id = fields.String(dump_only=True)
-    data_trust_name = fields.String(required=True)
-    date_created = fields.DateTime(dump_only=True)
-    date_last_updated = fields.DateTime(dump_only=True)
-
-
 class Organization(db.Model):
     """Data Trust Organization."""
     __tablename__ = 'organizations'
@@ -88,7 +47,7 @@ class Organization(db.Model):
         return '{} - {}'.format(self.id, self.name)
 
 
-class OrganizationSchema(ma.Schema):
+class OrganizationSchema(ma.SQLAlchemySchema):
     """Organization Schema
 
     A marshmallow schema for validating the Organization model.
@@ -96,12 +55,13 @@ class OrganizationSchema(ma.Schema):
 
     class Meta:
         ordered = True
+        model = Organization
 
-    id = fields.String(dump_only=True)
-    name = fields.String(required=True)
-    url = fields.String()
-    date_created = fields.DateTime(dump_only=True)
-    date_last_updated = fields.DateTime(dump_only=True)
+    id = ma.auto_field(dump_only=True)
+    name = ma.auto_field(required=True)
+    url = ma.auto_field()
+    date_created = ma.auto_field(dump_only=True)
+    date_last_updated = ma.auto_field(dump_only=True)
 
 
 class User(db.Model):
@@ -113,14 +73,15 @@ class User(db.Model):
     username = db.Column(db.String(40), unique=True, nullable=False)
     firstname = db.Column(db.String(40), nullable=False)
     lastname = db.Column(db.String(40), nullable=False)
-    organization = db.relationship('Organization', backref='users', lazy='subquery')
+    organization = db.relationship(
+        'Organization', backref='users', lazy='subquery')
     organization_id = db.Column(
         db.String, db.ForeignKey('organizations.id', ondelete='CASCADE'), nullable=False)
     email_address = db.Column(db.String(40), nullable=False)
     telephone = db.Column(db.String(20), nullable=True)
     active = db.Column(db.Boolean, nullable=False, default=True)
-    data_trust_id = db.Column(db.String, db.ForeignKey(
-        'data_trusts.id', ondelete='CASCADE'), nullable=False)
+    role_id = db.Column(db.String, db.ForeignKey('oauth2_roles.id'), nullable=True)
+    role = db.relationship('Role', backref='users', lazy='subquery')
     password_hash = db.Column(db.String(128), nullable=False)
     date_created = db.Column(db.TIMESTAMP)
     date_last_updated = db.Column(db.TIMESTAMP)
@@ -143,45 +104,21 @@ class User(db.Model):
     def get_user_id(self):
         return self.id
 
-    def __init__(self, username, password, firstname, lastname, organization_id, email_address, data_trust_id, telephone=None):
+    def __init__(self, username, password, firstname, lastname, organization_id, email_address, role_id=None, telephone=None):
         self.id = str(uuid4()).replace('-', '')
         self.username = username
         self.firstname = firstname
         self.lastname = lastname
         self.password = password
         self.organization_id = organization_id
+        self.role_id = role_id
         self.email_address = email_address
         self.telephone = telephone
-        self.data_trust_id = data_trust_id
         self.date_created = datetime.utcnow()
         self.date_last_updated = datetime.utcnow()
 
     def __str__(self):
         return '{} {} {}'.format(self.id, self.firstname, self.lastname)
-
-
-class UserSchema(ma.Schema):
-    """User Schema
-
-    A marshmallow schema for validating the User model.
-    """
-
-    class Meta:
-        ordered = True
-
-    id = fields.String(dump_only=True)
-    username = fields.String(required=True)
-    password = fields.String(required=True)
-    firstname = fields.String(required=True)
-    lastname = fields.String(required=True)
-    organization_id = fields.String(required=True)
-    organization = fields.Nested(OrganizationSchema(), dump_only=True)
-    email_address = fields.Email(required=True)
-    telephone = fields.String()
-    active = fields.Boolean(dump_only=True)
-    data_trust_id = fields.String(required=True)
-    date_created = fields.DateTime(dump_only=True)
-    date_last_updated = fields.DateTime(dump_only=True)
 
 
 class JSONField(fields.Field):
@@ -230,7 +167,7 @@ class Role(db.Model):
         return self.id
 
 
-class RoleSchema(ma.Schema):
+class RoleSchema(ma.SQLAlchemySchema):
     """User Schema
 
     A marshmallow schema for validating the Role model.
@@ -238,14 +175,41 @@ class RoleSchema(ma.Schema):
 
     class Meta:
         ordered = True
+        model = Role
 
-    id = fields.String(dump_only=True)
-    role = fields.String(required=True)
-    description = fields.String(required=True)
-    rules = JSONField()
-    active = fields.Boolean()
-    date_created = fields.DateTime(dump_only=True)
-    date_last_updated = fields.DateTime(dump_only=True)
+    id = ma.auto_field(dump_only=True)
+    role = ma.auto_field(required=True)
+    description = ma.auto_field(required=True)
+    rules = ma.auto_field()
+    active = ma.auto_field()
+    date_created = ma.auto_field(dump_only=True)
+    date_last_updated = ma.auto_field(dump_only=True)
+
+
+class UserSchema(ma.SQLAlchemySchema):
+    """User Schema
+
+    A marshmallow schema for validating the User model.
+    """
+
+    class Meta:
+        ordered = True
+        model = User
+
+    id = ma.auto_field(dump_only=True)
+    username = ma.auto_field(required=True)
+    password = fields.String(required=True)
+    firstname = ma.auto_field(required=True)
+    lastname = ma.auto_field(required=True)
+    organization_id = ma.auto_field(required=True)
+    organization = fields.Nested(OrganizationSchema(), dump_only=True)
+    role_id = ma.auto_field()
+    role = fields.Nested(RoleSchema(), dump_only=True)
+    email_address = ma.auto_field(required=True)
+    telephone = ma.auto_field()
+    active = ma.auto_field()
+    date_created = ma.auto_field(dump_only=True)
+    date_last_updated = ma.auto_field(dump_only=True)
 
 
 class OAuth2Client(db.Model, OAuth2ClientMixin):
@@ -261,17 +225,18 @@ class OAuth2Client(db.Model, OAuth2ClientMixin):
                             backref=db.backref('clients', lazy=True))
 
 
-class OAuth2ClientSchema(ma.Schema):
+class OAuth2ClientSchema(ma.SQLAlchemySchema):
     """Schema for OAuth 2.0 Client."""
 
     class Meta:
         ordered = True
+        model = OAuth2Client
 
-    id = fields.String(dump_only=True)
-    user_id = fields.String(required=True)
-    client_id = fields.String(dump_only=True)
-    client_secret = fields.String(dump_only=True)
-    client_id_issued_at = fields.Integer(dump_only=True)
+    id = ma.auto_field(dump_only=True)
+    user_id = ma.auto_field(required=True)
+    client_id = ma.auto_field(dump_only=True)
+    client_secret = ma.auto_field(dump_only=True)
+    client_id_issued_at = ma.auto_field(dump_only=True)
     expires_at = fields.Integer(dump_only=True)
     redirect_uris = fields.List(fields.String())
     token_endpoint_auth_method = fields.String()
@@ -339,3 +304,96 @@ class AuthorizedClient(db.Model):
     user_id = db.Column(db.String, db.ForeignKey('users.id'), primary_key=True)
     client_id = db.Column(db.String, primary_key=True)
     authorized = db.Column(db.Boolean, nullable=False, default=False)
+
+
+class Scope(db.Model):
+    """OAuth2 scopes associated with users and clients.
+
+    This class provides an abstraction of an OAuth2 scope. The OAuth2Client entity has a scope
+    field provided by its OAuth2ClientMixin class; however this level of abstraction is
+    needed in order to expose this to clients in an easier way as well as to facilitate the linkage
+    of scopes between clients and users.
+
+    """
+
+    __tablename__ = 'oauth2_scopes'
+    __table_args__ = (db.UniqueConstraint('scope'), )
+
+    id = db.Column(db.String, primary_key=True)
+    scope = db.Column(db.String, unique=True, nullable=False)
+    description = db.Column(db.String)
+    date_created = db.Column(db.TIMESTAMP)
+    date_last_updated = db.Column(db.TIMESTAMP)
+
+    def __init__(self, scope, description):
+        self.id = str(uuid4()).replace('-', '')
+        self.scope = scope
+        self.description = description
+        self.date_created = datetime.utcnow()
+        self.date_last_updated = datetime.utcnow()
+
+    def __str__(self):
+        return self.id
+
+
+class ScopeSchema(ma.SQLAlchemySchema):
+    """Scope schema
+
+    A marshmallow schema for validating the Scope model.
+    """
+
+    class Meta:
+        ordered = True
+        model = Scope
+
+    id = ma.auto_field(dump_only=True)
+    scope = ma.auto_field(required=True)
+    description = ma.auto_field(required=True)
+    date_created = ma.auto_field(dump_only=True)
+    date_last_updated = ma.auto_field(dump_only=True)
+
+
+class AuthorizedScope(db.Model):
+    """Map scopes to roles.
+
+    This class links roles to scopes in order to provide a mapping of
+    what scopes should be associated with a given user.
+
+    """
+
+    __tablename__ = 'authorized_scopes'
+    role_id = db.Column(db.String, db.ForeignKey('oauth2_roles.id'), nullable=False, primary_key=True)
+    scope_id = db.Column(db.String, db.ForeignKey('oauth2_scopes.id'), nullable=False, primary_key=True)
+    role = db.relationship(
+        'Role', backref='authorized_scopes', lazy='subquery')
+    scope = db.relationship(
+        'Scope', backref='authorized_scopes', lazy='subquery')
+    date_created = db.Column(db.TIMESTAMP)
+    date_last_updated = db.Column(db.TIMESTAMP)
+
+    def __init__(self, role_id, scope_id):
+        self.role_id = role_id
+        self.scope_id = scope_id
+        self.date_created = datetime.utcnow()
+        self.date_last_updated = datetime.utcnow()
+
+    def __str__(self):
+        return f'{self.role_id} - {self.scope_id}'
+
+
+class AuthorizedScopeSchema(ma.SQLAlchemySchema):
+    """Scope schema
+
+    A marshmallow schema for validating the AuthorizedScope model.
+    """
+
+    class Meta:
+        ordered = True
+        model = AuthorizedScope
+
+    role_id = ma.auto_field(dump_only=True)
+    scope_id = ma.auto_field(required=True)
+    role = fields.Nested(RoleSchema(), dump_only=True)
+    scope = fields.Nested(ScopeSchema(), dump_only=True)
+    date_created = ma.auto_field(dump_only=True)
+    date_last_updated = ma.auto_field(dump_only=True)

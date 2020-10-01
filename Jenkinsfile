@@ -126,13 +126,18 @@ pipeline {
         }
       }
   }
+  post {
+      always {
+          cleanWs()
+      }
+  }
 }
 
 
 def initialize() {
     // Docker Defs
     env.DOCKER_DB_IMAGE_NAME = 'postgres:11.1'
-    env.DOCKER_PYTHON_NAME = 'python:3.7.4-slim'
+    env.DOCKER_PYTHON_NAME = 'python:3.8.3-slim'
     // AWS ERC Parameters / Push Rules
     env.REGISTRY_NAME = 'brighthive/authserver'
     env.REGISTRY_URI = '396527728813.dkr.ecr.us-east-2.amazonaws.com'

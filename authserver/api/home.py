@@ -30,16 +30,15 @@ def login():
         username = form.username.data
         password = form.password.data
         user = User.query.filter_by(username=username).first()
+        error_msg = "You did not enter valid login credentials."
 
         try:
-            if not user.active:
-                errors = "You do not have an active user account."
-            elif not user.verify_password(password):
-                errors = "You did not enter a valid password."
+            if (not user.active) or (not user.verify_password(password)):
+                errors = error_msg
             else:
                 session['id'] = user.id
                 return redirect(return_to)
         except AttributeError:
-            errors = "You did not enter valid login credentials."
+            errors = error_msg
 
         return render_template('login.html', client_id=client_id, return_to=return_to, form=form, errors=errors)
