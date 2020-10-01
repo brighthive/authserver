@@ -128,7 +128,13 @@ class RoleResource(Resource):
 
 
 class AuthorizedScopeResource(Resource):
-    """Authorized scope resource for linking roles to scopes. """
+    """Authorized scope resource for linking roles to scopes.
+
+    This resource enables the notion of an OAuth2 scope to be shared between user roles and
+    OAuth2 clients. This way, the capabilities of specific clients can be restricted to the
+    scopes associated with a user's role.
+
+    """
 
     def __init__(self):
         self.authorized_scope_schema = AuthorizedScopeSchema()
@@ -151,9 +157,9 @@ class AuthorizedScopeResource(Resource):
                 authorized_scope = AuthorizedScope.query.filter(
                     AuthorizedScope.role_id == id, AuthorizedScope.scope_id == sid).first()
                 scope_obj = self.authorized_scope_schema.dump(authorized_scope)
-                scope_obj.pop('role_id', None)
-                scope_obj.pop('scope_id', None)
                 if scope_obj:
+                    scope_obj.pop('role_id', None)
+                    scope_obj.pop('scope_id', None)
                     return self.response_handler.get_one_response(scope_obj)
                 else:
                     return self.response_handler.not_found_response(id=sid)

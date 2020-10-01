@@ -384,7 +384,7 @@ class AuthorizedScope(db.Model):
 class AuthorizedScopeSchema(ma.SQLAlchemySchema):
     """Scope schema
 
-    A marshmallow schema for validating the Scope model.
+    A marshmallow schema for validating the AuthorizedScope model.
     """
 
     class Meta:
