@@ -121,7 +121,7 @@ pipeline {
         steps {
           echo 'Deploying to development server...'
           sshagent([env.K8_SERVER_SSH_KEY_NAME]) {
-            sh 'ssh -o StrictHostKeyChecking=no -T $K8_USERNAME@$K8_HOST kubectl set image deployment $K8_APP_DEPLOYMENT_NAME $K8_APP_SERVICE_NAME=$REGISTRY_URI/$REGISTRY_NAME:$TAGNAME'
+            sh 'ssh -o StrictHostKeyChecking=no -T $K8_USERNAME@$K8_HOST ./deploy_jenkins.sh auth $TAGNAME'
           }
         }
       }
