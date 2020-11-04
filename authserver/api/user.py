@@ -40,6 +40,8 @@ class UserDetailResource(Resource):
                     user = User.query.filter_by(id=user_id).first()
                     user_obj = self.user_schema.dump(user)
                     user_obj.pop('role_id', None)
+                    if not user_obj['can_login']:
+                        user_obj['can_login'] = False
                     return self.response_handler.get_one_response(user_obj)
             except Exception:
                 return self.response_handler.custom_response(messages=[{'error': 'Cannot get an ID for current user.'}])
@@ -63,13 +65,12 @@ class UserResource(Resource):
         if not id:
             users = User.query.all()
             users_obj = self.users_schema.dump(users)
-            users_obj_clean = [{k: v for k, v in user.items() if k != 'organization_id' and k != 'role_id'} for user in users_obj]
+            users_obj_clean = [{k: v for k, v in user.items() if k != 'role_id'} for user in users_obj]
             return self.response_handler.get_all_response(users_obj_clean)
         else:
             user = User.query.filter_by(id=id).first()
             if user:
                 user_obj = self.user_schema.dump(user)
-                user_obj.pop('organization_id')
                 user_obj.pop('role_id')
                 return self.response_handler.get_one_response(user_obj, request={'id': id})
             else:
@@ -105,12 +106,12 @@ class UserResource(Resource):
         if errors:
             return self.response_handler.custom_response(code=422, messages=errors)
         try:
-            user = User(request_data['username'], request_data['password'], firstname=request_data['firstname'], lastname=request_data['lastname'],
-                        organization_id=request_data['organization_id'],
-                        role_id=request_data['role_id'] if 'role_id' in request_data.keys() else None,
-                        email_address=request_data['email_address'])
-            if 'telephone' in request_data.keys():
-                user.telephone = request_data['telephone']
+            user = User(
+                request_data['username'], request_data['password'],
+                role_id=request_data['role_id'] if 'role_id' in request_data.keys() else None,
+                person_id=request_data['person_id'] if 'person_id' in request_data.keys() else None,
+                can_login=request_data['can_login'] if 'can_login' in request_data.keys() else False,
+                active=request_data['active'] if 'active' in request_data.keys() else False)
             db.session.add(user)
             db.session.commit()
         except Exception as e:
@@ -188,6 +189,7 @@ class UserResource(Resource):
             return self.response_handler.not_found_response(user_id)
 
         user.active = False
+        user.can_login = False
         self._db_commit()
 
         clients = OAuth2Client.query.filter_by(user_id=user_id).all()

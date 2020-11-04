@@ -5,15 +5,14 @@ import json
 from uuid import uuid4
 from flask import Response
 from expects import expect, be, equal, raise_error, be_above_or_equal
-from authserver.db import db, User, Role, OAuth2Client, Organization
+from authserver.db import db, User, Role, OAuth2Client
 
 
 class TestRoleModel:
-    def test_role_model(self, app, organization):
+    def test_role_model(self, app):
         with app.app_context():
             # Create a new user
-            new_user = User(username='demo', password='passw0rd', firstname='Demonstration', lastname='User',
-                            organization_id=organization.id, email_address='demo@me.com', telephone='304-555-1234')
+            new_user = User(username='demo', password='passw0rd', person_id='c0ffee-c0ffee')
             db.session.add(new_user)
             db.session.commit()
             user_id = new_user.id

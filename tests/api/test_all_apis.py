@@ -15,10 +15,6 @@ from flask import Response
 from tests.utils import post_users
 from authserver.db import User, db
 
-ORGANIZATION = {
-    'name': 'Sample Organization'
-}
-
 ROLES = [
     {
         'role': 'get:programs',
@@ -58,66 +54,44 @@ ROLES = [
 
 USERS = [
     {
-        'firstname': 'Regina',
-        'lastname': 'Wolfgang',
-        'email_address': 'user1@brighthive.me',
         'username': 'user1',
         'password': 'password',
-        'telephone': '304-555-1234'
+        'person_id': 'c0ffee-c0ffee-1'
     },
     {
-        'firstname': 'Kwame',
-        'lastname': 'Anderson',
-        'email_address': 'user2@brighthive.me',
         'username': 'user2',
         'password': 'password',
-        'telephone': '304-555-5678'
+        'person_id': 'c0ffee-c0ffee-2'
     },
     {
-        'firstname': 'Logan',
-        'lastname': 'Williams',
-        'email_address': 'user3@brighthive.me',
         'username': 'user3',
         'password': 'password',
-        'telephone': '301-555-1234'
+        'person_id': 'c0ffee-c0ffee-3'
     },
     {
-        'firstname': 'Amanda',
-        'lastname': 'Stewart',
-        'email_address': 'user4@brighthive.me',
         'username': 'user4',
         'password': 'password',
-        'telephone': '412-555-4567'
+        'person_id': 'c0ffee-c0ffee-4'
     },
     {
-        'firstname': 'Greg',
-        'lastname': 'Henry',
-        'email_address': 'user5@brighthive.me',
         'username': 'user5',
         'password': 'password',
-        'telephone': '812-555-1234'
+        'person_id': 'c0ffee-c0ffee-5'
     },
     {
-        'firstname': 'Tom',
-        'lastname': 'Jones',
-        'email_address': 'user6@brighthive.me',
         'username': 'user6',
         'password': 'password',
-        'telephone': '912-555-1234'
+        'person_id': 'c0ffee-c0ffee-6'
     },
     {
-        'firstname': 'Vyki',
-        'lastname': 'Bennett',
-        'email_address': 'user7@brighthive.me',
         'username': 'user7',
-        'password': 'password'
+        'password': 'password',
+        'person_id': 'c0ffee-c0ffee-7'
     },
     {
-        'firstname': 'Danielle',
-        'lastname': 'Bevins',
-        'email_address': 'user8@brighthive.me',
         'username': 'user8',
-        'password': 'password'
+        'password': 'password',
+        'person_id': 'c0ffee-c0ffee-8'
     }
 ]
 
@@ -162,9 +136,8 @@ class TestAllAPIs(object):
         # Common headers go in this dict
         headers = {'content-type': 'application/json', 'authorization': f'bearer {token_generator.get_token(client)}'}
 
-        # Create a data trust, organization, users, and clients
-        organization_id = self._post_organization(client, token_generator)
-        user_ids = post_users(USERS, client, organization_id, token_generator.get_token(client))
+        # Create users, and clients
+        user_ids = post_users(USERS, client, token_generator.get_token(client))
         client_ids = self._post_clients(client, user_ids, token_generator)
 
         # Create roles
@@ -196,11 +169,11 @@ class TestAllAPIs(object):
             expect(len(result['roles'])).to(equal(len(role_ids)))
 
         self._cleanup(client, token_generator,
-                      user_ids=user_ids, role_ids=role_ids, organization_id=None)
+                      user_ids=user_ids, role_ids=role_ids)
 
-    def test_client_secret_delete_rotate(self, client, organization, token_generator):
+    def test_client_secret_delete_rotate(self, client, token_generator):
         headers = {'content-type': 'application/json', 'authorization': f'bearer {token_generator.get_token(client)}'}
-        user_ids = post_users(USERS, client, organization.id, token_generator.get_token(client))
+        user_ids = post_users(USERS, client, token_generator.get_token(client))
         client_ids = self._post_clients(client, user_ids, token_generator)
 
         client_to_patch = client_ids[0]
@@ -219,9 +192,9 @@ class TestAllAPIs(object):
 
         self._cleanup(client, token_generator, user_ids=user_ids)
 
-    def test_client_post_invalid_action(self, client, organization, token_generator):
+    def test_client_post_invalid_action(self, client, token_generator):
         headers = {'content-type': 'application/json', 'authorization': f'bearer {token_generator.get_token(client)}'}
-        user_ids = post_users(USERS, client, organization.id, token_generator.get_token(client))
+        user_ids = post_users(USERS, client, token_generator.get_token(client))
         client_ids = self._post_clients(client, user_ids, token_generator)
 
         client_to_patch = client_ids[0]
@@ -232,19 +205,6 @@ class TestAllAPIs(object):
         expect(response.json['messages']).to(contain("Invalid query param!"))
 
         self._cleanup(client, token_generator, user_ids=user_ids)
-
-    def _post_organization(self, client, token_generator):
-        '''
-        Helper function that creates (and tests creating) an Organization entity.
-        '''
-        headers = {'content-type': 'application/json', 'authorization': f'bearer {token_generator.get_token(client)}'}
-        response: Response = client.post(
-            '/organizations', data=json.dumps(ORGANIZATION), headers=headers)
-        expect(response.status_code).to(equal(201))
-
-        organization_id = response.json['response'][0]['id']
-
-        return organization_id
 
     def _post_clients(self, client, user_ids, token_generator):
         '''
@@ -262,7 +222,7 @@ class TestAllAPIs(object):
 
         return client_ids
 
-    def _cleanup(self, client, token_generator, role_ids=[], user_ids=[], organization_id=None):
+    def _cleanup(self, client, token_generator, role_ids=[], user_ids=[]):
         headers = {'content-type': 'application/json', 'authorization': f'bearer {token_generator.get_token(client)}'}
         for role_id in role_ids:
             response = client.delete(
@@ -274,27 +234,15 @@ class TestAllAPIs(object):
                 '/users/{}'.format(user_id), headers=headers)
             expect(response.status_code).to(equal(200))
 
-        if organization_id:
-            response = client.delete(
-                '/organizations/{}'.format(organization_id), headers)
-            expect(response.status_code).to(equal(200))
-
     def test_assign_scope_to_user(self, client, token_generator):
-        ORGANIZATION = {
-            'name': 'Data Trust Organization'
-        }
-
         CLIENT = {
 
         }
 
         USER = {
             'username': 'test_user_scope',
-            'firstname': 'test',
-            'lastname': 'testtest',
-            'organization_id': '',
-            'email_address': 'test@demo.com',
             'password': 'secret',
+            'person_id': 'c0ffee-c0ffee-c0ffee-99',
             'role_id': ''
         }
 
@@ -310,11 +258,6 @@ class TestAllAPIs(object):
 
         headers = {'content-type': 'application/json', 'authorization': f'bearer {token_generator.get_token(client)}'}
 
-        # Create an organization
-        response = client.post('/organizations', data=json.dumps(ORGANIZATION), headers=headers)
-        expect(response.status_code).to(be(201))
-        organization_id = response.json['response'][0]['id']
-
         # Create a role
         response = client.post('/roles', data=json.dumps(ROLE), headers=headers)
         expect(response.status_code).to(be(201))
@@ -329,8 +272,7 @@ class TestAllAPIs(object):
         response = client.post(f'/roles/{role_id}/scopes', data=json.dumps({'scope_id': scope_id}), headers=headers)
         expect(response.status_code).to(be(201))
 
-        # Create a user, assign to organization, and make the user an administrator
-        USER['organization_id'] = organization_id
+        # Create a user and make the user an administrator
         USER['role_id'] = role_id
         response = client.post('/users', data=json.dumps(USER), headers=headers)
         expect(response.status_code).to(be(201))
@@ -338,8 +280,6 @@ class TestAllAPIs(object):
 
         # Cleanup
         response = client.delete(f'/users/{user_id}', headers=headers)
-        expect(response.status_code).to(be(200))
-        response = client.delete(f'/organizations/{organization_id}', headers=headers)
         expect(response.status_code).to(be(200))
         response = client.delete(f'/roles/{role_id}/scopes/{scope_id}', headers=headers)
         expect(response.status_code).to(be(200))

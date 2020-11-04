@@ -3,7 +3,7 @@ import json
 from expects import expect, equal, be_above_or_equal
 
 
-def post_users(users, client, organization_id, token):
+def post_users(users, client, token):
     # def post_users(users, client, organization_id, token_generator):
     '''
     Helper function that creates (and tests creating) a collection of Users.
@@ -12,7 +12,6 @@ def post_users(users, client, organization_id, token):
     headers = {'content-type': 'application/json', 'authorization': f'bearer {token}'}
     user_ids = []
     for user in users:
-        user['organization_id'] = organization_id
         user['active'] = True
         response = client.post(
             '/users', data=json.dumps(user), headers=headers)
