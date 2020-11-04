@@ -63,6 +63,7 @@ class User(db.Model):
         self.id = str(uuid4()).replace('-', '')
         self.username = username
         self.password = password
+        self.person_id = person_id
         self.role_id = role_id
         self.date_created = datetime.utcnow()
         self.date_last_updated = datetime.utcnow()

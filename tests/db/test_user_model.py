@@ -4,15 +4,14 @@ import pytest
 from expects import be, be_above_or_equal, equal, expect, raise_error
 from flask import Response
 
-from authserver.db import Organization, User, db
+from authserver.db import User, db
 
 
 class TestUserModel:
-    def test_user_model(self, app, organization):
+    def test_user_model(self, app):
         with app.app_context():
             # Create a new user
-            new_user = User(username='demo', password='password', firstname='Demonstration', lastname='User',
-                            organization_id=organization.id, email_address='demo@me.com', telephone='304-555-1234')
+            new_user = User(username='demo', password='password', person_id='c0ffee-c0ffee')
             db.session.add(new_user)
             db.session.commit()
             user_id = new_user.id
@@ -20,23 +19,19 @@ class TestUserModel:
             expect(found_user.id).to(equal(user_id))
 
             # Do not allow creation of users with the same username
-            duplicate_user = User(username='demo', password='password', firstname='Demonstration', lastname='User',
-                                  organization_id=organization.id, email_address='demo@me.com', telephone='304-555-1234')
+            duplicate_user = User(username='demo', password='password', person_id='c0ffee-c0ffee')
             duplicate_user_id = duplicate_user.id
             db.session.add(duplicate_user)
             expect(lambda: db.session.commit()).to(raise_error)
             db.session.rollback()
 
             # Update the user record
-            new_first_name = str(reversed(found_user.firstname))
-            new_last_name = str((reversed(found_user.lastname)))
-            found_user.firstname = new_first_name
-            found_user.lastname = new_last_name
+            new_person_id = str(reversed(found_user.person_id))
+            found_user.person_id = new_person_id
             db.session.commit()
             found_user = User.query.filter_by(id=user_id).first()
             expect(found_user.id).to(equal(user_id))
-            expect(found_user.firstname).to(equal(new_first_name))
-            expect(found_user.lastname).to(equal(new_last_name))
+            expect(found_user.person_id).to(equal(new_person_id))
 
             # Delete all users
             User.query.delete()

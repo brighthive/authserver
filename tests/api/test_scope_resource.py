@@ -29,6 +29,7 @@ class TestScopeResource:
         response = client.get('/scopes', headers=headers)
         response_data = response.json
         expect(response.status_code).to(be(200))
+        print(f'******** {response.json}')
         expect(len(response_data['response'])).to(equal(0))
 
         # POST some new scoeps
