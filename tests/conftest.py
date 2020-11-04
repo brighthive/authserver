@@ -11,7 +11,7 @@ from flask_migrate import upgrade
 
 from authserver import create_app
 from authserver.config import ConfigurationFactory
-from authserver.db import Organization, User, db
+from authserver.db import User, db
 from authserver.utilities import PostgreSQLContainer
 
 
@@ -69,25 +69,6 @@ def app():
 
     if not is_jenkins:
         postgres.stop_container()
-
-
-@pytest.fixture
-def organization(client):
-    '''
-    The migrations insert an instance of an Organization with name "BrightHive."
-    This fixture simply finds and returns this organization.
-    '''
-    organization = Organization.query.filter_by(name="BrightHive").first()
-
-    return organization
-
-
-@pytest.fixture
-def organization_hh(client):
-    organization = Organization(**{'name': 'Helping Hands'})
-    db.session.add(organization)
-
-    return organization
 
 
 @pytest.fixture

@@ -26,59 +26,14 @@ roles = db.Table('roles',
                  db.Column('role_id', db.String, db.ForeignKey('oauth2_roles.id'), primary_key=True))
 
 
-class Organization(db.Model):
-    """Data Trust Organization."""
-    __tablename__ = 'organizations'
-
-    id = db.Column(db.String, primary_key=True)
-    name = db.Column(db.String(40), unique=True, nullable=False)
-    url = db.Column(db.String)
-    date_created = db.Column(db.TIMESTAMP)
-    date_last_updated = db.Column(db.TIMESTAMP)
-
-    def __init__(self, name, url=None):
-        self.id = str(uuid4()).replace('-', '')
-        self.name = name
-        self.url = url
-        self.date_created = datetime.utcnow()
-        self.date_last_updated = datetime.utcnow()
-
-    def __str__(self):
-        return '{} - {}'.format(self.id, self.name)
-
-
-class OrganizationSchema(ma.SQLAlchemySchema):
-    """Organization Schema
-
-    A marshmallow schema for validating the Organization model.
-    """
-
-    class Meta:
-        ordered = True
-        model = Organization
-
-    id = ma.auto_field(dump_only=True)
-    name = ma.auto_field(required=True)
-    url = ma.auto_field()
-    date_created = ma.auto_field(dump_only=True)
-    date_last_updated = ma.auto_field(dump_only=True)
-
-
 class User(db.Model):
     """Data Trust User."""
     __tablename__ = 'users'
     __table_args__ = (db.UniqueConstraint('username'), )
 
     id = db.Column(db.String, primary_key=True)
+    person_id = db.Column(db.String)
     username = db.Column(db.String(40), unique=True, nullable=False)
-    firstname = db.Column(db.String(40), nullable=False)
-    lastname = db.Column(db.String(40), nullable=False)
-    organization = db.relationship(
-        'Organization', backref='users', lazy='subquery')
-    organization_id = db.Column(
-        db.String, db.ForeignKey('organizations.id', ondelete='CASCADE'), nullable=False)
-    email_address = db.Column(db.String(40), nullable=False)
-    telephone = db.Column(db.String(20), nullable=True)
     active = db.Column(db.Boolean, nullable=False, default=True)
     role_id = db.Column(db.String, db.ForeignKey('oauth2_roles.id'), nullable=True)
     role = db.relationship('Role', backref='users', lazy='subquery')
@@ -104,16 +59,11 @@ class User(db.Model):
     def get_user_id(self):
         return self.id
 
-    def __init__(self, username, password, firstname, lastname, organization_id, email_address, role_id=None, telephone=None):
+    def __init__(self, username, password, person_id=None, role_id=None):
         self.id = str(uuid4()).replace('-', '')
         self.username = username
-        self.firstname = firstname
-        self.lastname = lastname
         self.password = password
-        self.organization_id = organization_id
         self.role_id = role_id
-        self.email_address = email_address
-        self.telephone = telephone
         self.date_created = datetime.utcnow()
         self.date_last_updated = datetime.utcnow()
 
@@ -199,14 +149,9 @@ class UserSchema(ma.SQLAlchemySchema):
     id = ma.auto_field(dump_only=True)
     username = ma.auto_field(required=True)
     password = fields.String(required=True)
-    firstname = ma.auto_field(required=True)
-    lastname = ma.auto_field(required=True)
-    organization_id = ma.auto_field(required=True)
-    organization = fields.Nested(OrganizationSchema(), dump_only=True)
+    person_id = ma.auto_field()
     role_id = ma.auto_field()
     role = fields.Nested(RoleSchema(), dump_only=True)
-    email_address = ma.auto_field(required=True)
-    telephone = ma.auto_field()
     active = ma.auto_field()
     date_created = ma.auto_field(dump_only=True)
     date_last_updated = ma.auto_field(dump_only=True)
