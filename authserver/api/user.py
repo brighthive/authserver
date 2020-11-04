@@ -40,6 +40,8 @@ class UserDetailResource(Resource):
                     user = User.query.filter_by(id=user_id).first()
                     user_obj = self.user_schema.dump(user)
                     user_obj.pop('role_id', None)
+                    if not user_obj['can_login']:
+                        user_obj['can_login'] = False
                     return self.response_handler.get_one_response(user_obj)
             except Exception:
                 return self.response_handler.custom_response(messages=[{'error': 'Cannot get an ID for current user.'}])
