@@ -71,17 +71,6 @@ def app():
         postgres.stop_container()
 
 
-# @pytest.fixture
-# def user(client, organization):
-#     '''
-#     The migrations insert a User ("brighthive_admin") that relates to the "BrightHive" Organization.
-#     This fixture simply finds and returns this user.
-#     '''
-#     user = User.query.filter_by(organization_id=organization.id).first()
-
-#     return user
-
-
 @pytest.fixture
 def environments():
     return [

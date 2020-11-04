@@ -12,17 +12,20 @@ USERS = [
     {
         'username': 'test-user-1',
         'password': 'password',
-        'person_id': 'c0ffee-c0ffee-1'
+        'person_id': 'c0ffee-c0ffee-1',
+        'can_login': True
     },
     {
         'username': 'test-user-2',
         'password': 'password',
-        'person_id': 'c0ffee-c0ffee-2'
+        'person_id': 'c0ffee-c0ffee-2',
+        'can_login': True
     },
     {
         'username': 'test-user-3',
         'password': 'password',
-        'person_id': 'c0ffee-c0ffee-3'
+        'person_id': 'c0ffee-c0ffee-3',
+        'can_login': True
     }
 ]
 
@@ -46,7 +49,6 @@ class TestUserResource:
         expect(response.status_code).to(be(200))
         expect(len(response_data['response'])).to(be_above_or_equal(3))
         added_users = response_data['response']
-        print(added_users)
 
         # Store ID for all users since we will break the data.
         added_user_ids = []
@@ -124,6 +126,7 @@ class TestUserResource:
 
         response = client.get('/users/{}'.format(a_user_id), headers=headers)
         expect(response.json['response']['active']).to(be(False))
+        expect(response.json['response']['can_login']).to(be(False))
 
         response = client.get(
             '/clients/{}'.format(associated_client_id), headers=headers)

@@ -34,7 +34,8 @@ class User(db.Model):
     id = db.Column(db.String, primary_key=True)
     person_id = db.Column(db.String)
     username = db.Column(db.String(40), unique=True, nullable=False)
-    active = db.Column(db.Boolean, nullable=False, default=True)
+    active = db.Column(db.Boolean, nullable=False, default=False)
+    can_login = db.Column(db.Boolean, nullable=True, default=False)
     role_id = db.Column(db.String, db.ForeignKey('oauth2_roles.id'), nullable=True)
     role = db.relationship('Role', backref='users', lazy='subquery')
     password_hash = db.Column(db.String(128), nullable=False)
@@ -59,12 +60,14 @@ class User(db.Model):
     def get_user_id(self):
         return self.id
 
-    def __init__(self, username, password, person_id=None, role_id=None):
+    def __init__(self, username, password, person_id=None, role_id=None, active=False, can_login=False):
         self.id = str(uuid4()).replace('-', '')
         self.username = username
         self.password = password
         self.person_id = person_id
         self.role_id = role_id
+        self.active = active
+        self.can_login = can_login
         self.date_created = datetime.utcnow()
         self.date_last_updated = datetime.utcnow()
 
@@ -154,6 +157,7 @@ class UserSchema(ma.SQLAlchemySchema):
     role_id = ma.auto_field()
     role = fields.Nested(RoleSchema(), dump_only=True)
     active = ma.auto_field()
+    can_login = ma.auto_field()
     date_created = ma.auto_field(dump_only=True)
     date_last_updated = ma.auto_field(dump_only=True)
 

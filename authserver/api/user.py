@@ -104,9 +104,12 @@ class UserResource(Resource):
         if errors:
             return self.response_handler.custom_response(code=422, messages=errors)
         try:
-            user = User(request_data['username'], request_data['password'],
-                        role_id=request_data['role_id'] if 'role_id' in request_data.keys() else None,
-                        person_id=request_data['person_id'] if 'person_id' in request_data.keys() else None)
+            user = User(
+                request_data['username'], request_data['password'],
+                role_id=request_data['role_id'] if 'role_id' in request_data.keys() else None,
+                person_id=request_data['person_id'] if 'person_id' in request_data.keys() else None,
+                can_login=request_data['can_login'] if 'can_login' in request_data.keys() else False,
+                active=request_data['active'] if 'active' in request_data.keys() else False)
             db.session.add(user)
             db.session.commit()
         except Exception as e:
@@ -184,6 +187,7 @@ class UserResource(Resource):
             return self.response_handler.not_found_response(user_id)
 
         user.active = False
+        user.can_login = False
         self._db_commit()
 
         clients = OAuth2Client.query.filter_by(user_id=user_id).all()
