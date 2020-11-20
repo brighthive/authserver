@@ -28,7 +28,8 @@ class TokenGenerator:
             'client_secret': self.client_secret,
             'grant_type': self.grant_type
         }
-        response: Response = client.post('/oauth/token', data=json.dumps(body), headers=self.headers)
+        response: Response = client.post(
+            '/oauth/token', data=json.dumps(body), headers=self.headers)
         return response.json['access_token']
 
 

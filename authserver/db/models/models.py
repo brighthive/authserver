@@ -36,7 +36,8 @@ class User(db.Model):
     username = db.Column(db.String(40), unique=True, nullable=False)
     active = db.Column(db.Boolean, nullable=False, default=False)
     can_login = db.Column(db.Boolean, nullable=True, default=False)
-    role_id = db.Column(db.String, db.ForeignKey('oauth2_roles.id'), nullable=True)
+    role_id = db.Column(db.String, db.ForeignKey(
+        'oauth2_roles.id'), nullable=True)
     role = db.relationship('Role', backref='users', lazy='subquery')
     password_hash = db.Column(db.String(128), nullable=False)
     date_created = db.Column(db.TIMESTAMP)
@@ -72,7 +73,7 @@ class User(db.Model):
         self.date_last_updated = datetime.utcnow()
 
     def __str__(self):
-        return '{} {} {}'.format(self.id, self.firstname, self.lastname)
+        return f"{self.id} {self.username}"
 
 
 class JSONField(fields.Field):
@@ -312,8 +313,10 @@ class AuthorizedScope(db.Model):
     """
 
     __tablename__ = 'authorized_scopes'
-    role_id = db.Column(db.String, db.ForeignKey('oauth2_roles.id'), nullable=False, primary_key=True)
-    scope_id = db.Column(db.String, db.ForeignKey('oauth2_scopes.id'), nullable=False, primary_key=True)
+    role_id = db.Column(db.String, db.ForeignKey(
+        'oauth2_roles.id'), nullable=False, primary_key=True)
+    scope_id = db.Column(db.String, db.ForeignKey(
+        'oauth2_scopes.id'), nullable=False, primary_key=True)
     role = db.relationship(
         'Role', backref='authorized_scopes', lazy='subquery')
     scope = db.relationship(

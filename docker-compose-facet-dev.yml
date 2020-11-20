@@ -15,8 +15,9 @@ services:
         - SECRET_KEY=supersecretkey
       ports:
         - "8000:8000"
+      # Mount volumes to auto-load changes in the Flask app
       volumes:
-        - ../:/authserver
+        - ./authserver:/authserver/authserver
       stdin_open: true
       tty: true
     postgres:

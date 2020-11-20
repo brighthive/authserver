@@ -5,11 +5,13 @@ from wtforms import Form, StringField, PasswordField, validators
 
 from authserver.db import db, User, OAuth2Client
 
-home_bp = Blueprint('home_ep', __name__, static_folder='static', template_folder='templates', url_prefix='/')
+home_bp = Blueprint('home_ep', __name__, static_folder='static',
+                    template_folder='templates', url_prefix='/')
 
 
 class LoginForm(Form):
-    username = StringField('Username', [validators.DataRequired(), validators.length(min=4, max=40)])
+    username = StringField(
+        'Username', [validators.DataRequired(), validators.length(min=4, max=40)])
     password = PasswordField('Password', [validators.DataRequired()])
 
 
@@ -33,7 +35,7 @@ def login():
         error_msg = "You did not enter valid login credentials."
 
         try:
-            if (not user.active) or (not user.verify_password(password)):
+            if (not user.active) or (not user.can_login) or (not user.verify_password(password)):
                 errors = error_msg
             else:
                 session['id'] = user.id
