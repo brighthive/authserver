@@ -1,51 +1,68 @@
-html,
-body {
-  height: 100%;
+:root {
+  --blue: #0fbaa8;
+  --light-blue: #0fbaa8b3;
+  --gray20: #333333;
 }
 
 body {
-  display: -ms-flexbox;
-  display: -webkit-box;
+  font-family: "Montserrat", sans-serif;
+  font-size: 18px;
+}
+
+.login {
   display: flex;
-  padding-bottom: 40px;
-  background-color: #333333;
-  font-family: "Raleway", sans-serif;
+  /* "column" – major axis is vertical */
+  flex-direction: column;
+  /* controls layout of the major axis (vertical) */
+  justify-content: center;
+  /* centers all the children on the minor axis (horizontal) */
+  align-items: center;
+  height: 100vh;
 }
 
 label {
-  color: #ffffff;
+  color: #000000;
   text-align: left;
-  padding-top: 25px;
-  font-size: larger;
+  margin-top: 1rem;
+  margin-bottom: 0.4rem;
+  float: left;
 }
 
 label.form-check-label {
   padding-top: 0;
   color: inherit;
-  font-size: large;
 }
 
-.form-control {
-  border-radius: 0;
-  border: 0;
+.form-signin {
+  margin-top: 3rem;
+  text-align: center;
+  width: 50vw;
 }
+
 .form-signin .form-control:focus {
   z-index: 2;
 }
+
 .form-signin input[type="email"] {
   margin-bottom: -1px;
   border-bottom-right-radius: 0;
   border-bottom-left-radius: 0;
 }
+
 .form-signin input[type="password"] {
   margin-bottom: 10px;
   border-top-left-radius: 0;
   border-top-right-radius: 0;
 }
 
+.form-control {
+  border-radius: 0;
+  border: solid 0.5px #b0b0b0;
+  height: 44px;
+}
+
 .form-consent {
   color: #fff;
-  font-size: large;
 }
 
 .alert {
@@ -54,52 +71,50 @@ label.form-check-label {
 
 .alert-danger {
   color: #f00000;
-  background-color: #ffb3b3;
-  border-color: #ff7a7a;
+  background-color: rgba(255, 0, 0, 0.15);
+  border: solid 0.5px #ff0000;
   font-weight: 500;
 }
 
 /* Buttons */
+.btn {
+  border-radius: 4px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: 0.2px;
+  font-stretch: normal;
+  font-style: normal;
+  box-sizing: border-box;
+  white-space: nowrap;
+  border: none;
+}
+
 .btn-primary {
-  background-color: #0097a7;
-  border: 3px solid #0097a7;
-  border-radius: 0;
+  background-color: var(--blue);
 }
 
-.btn-primary:hover,
-.btn-primary:disabled {
-  background-color: #66c1ca;
-  border: 3px solid #66c1ca;
+.btn-primary:hover {
+  background-color: var(--blue);
+  box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.25) !important;
+}
+
+.btn-primary:active {
+  background-color: var(--blue) !important;
 }
 
 .btn-primary:disabled {
+  background-color: var(--light-blue);
   cursor: not-allowed;
 }
 
-.btn-secondary {
-  background-color: #333333;
-  border: 3px solid #0097a7;
-  border-radius: 0;
-}
-
 .btn-lg {
-  font-size: 18px;
-}
-
-.btn-link {
-  display: block;
-  padding: 0;
-  border: none;
-  color: inherit;
-}
-
-.btn-link:hover {
-  text-decoration: none;
-  color: #0097a7;
-}
-
-.btn-link:focus {
-  text-decoration: none;
+  height: 50px;
+  font-size: 1rem;
+  padding: 0 25px;
+  width: 238px;
+  max-width: 100%;
 }
 
 /* Bootstrap/Atomic Classes */
