@@ -20,11 +20,26 @@ body {
   height: 100vh;
 }
 
+/* Forms */
 label {
   color: #000000;
   text-align: left;
   margin-bottom: 0.4rem;
+  margin-top: 1.2rem;
   float: left;
+}
+
+.form-signin,
+.form-consent {
+  margin-top: 3rem;
+  text-align: center;
+  width: 50vw;
+}
+
+.form-control {
+  border-radius: 0;
+  border: solid 0.5px #b0b0b0;
+  height: 44px;
 }
 
 label.form-check-label {
@@ -41,40 +56,6 @@ label.form-check-label {
   padding-left: 0;
   margin-right: 0.75rem;
   align-items: flex-start;
-}
-
-.form-consent {
-  margin-top: 3rem;
-  text-align: center;
-  width: 50vw;
-}
-
-.form-signin {
-  margin-top: 3rem;
-  text-align: center;
-  width: 50vw;
-}
-
-.form-signin .form-control:focus {
-  z-index: 2;
-}
-
-.form-signin input[type="email"] {
-  margin-bottom: -1px;
-  border-bottom-right-radius: 0;
-  border-bottom-left-radius: 0;
-}
-
-.form-signin input[type="password"] {
-  margin-bottom: 10px;
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
-}
-
-.form-control {
-  border-radius: 0;
-  border: solid 0.5px #b0b0b0;
-  height: 44px;
 }
 
 .alert {
@@ -129,24 +110,7 @@ label.form-check-label {
   max-width: 100%;
 }
 
-/* Bootstrap/Atomic Classes */
-.pr-6 {
-  padding-right: 4.25rem;
-}
-
-.mt-6 {
-  margin-top: 4.25rem;
-}
-
-.mb-6 {
-  margin-bottom: 4.25rem;
-}
-
-.navbar {
-  display: block;
-  color: #fff;
-}
-
+/* Responsive Image */
 .img-max {
   max-width: 400px;
   width: 100%;
