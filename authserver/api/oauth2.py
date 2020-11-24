@@ -82,7 +82,7 @@ def authorize():
         _store_client_authorization(client_id, user.id)
     except KeyError:
         grant = authorization.validate_consent_request(end_user=user)
-        errors = "Please read and agree to the below statement to continue."
+        errors = "Please review and agree to continue."
         return render_template('authorize.html', user=user, grant=grant, errors=errors)
 
     if not user and 'username' in request.form:
@@ -105,7 +105,8 @@ class ValidateOAuth2TokenResource(Resource):
     def post(self):
         req_json = request.get_json(force=True)
         access_token = req_json["token"]
-        access_token_in_db = OAuth2Token.query.filter_by(access_token=access_token).first()
+        access_token_in_db = OAuth2Token.query.filter_by(
+            access_token=access_token).first()
 
         try:
             is_expired = access_token_in_db.is_access_token_expired()

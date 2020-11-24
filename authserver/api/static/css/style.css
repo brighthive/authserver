@@ -23,7 +23,6 @@ body {
 label {
   color: #000000;
   text-align: left;
-  margin-top: 1rem;
   margin-bottom: 0.4rem;
   float: left;
 }
@@ -31,6 +30,23 @@ label {
 label.form-check-label {
   padding-top: 0;
   color: inherit;
+}
+
+.form-check-inline .form-check-input {
+  margin-top: 0.3rem;
+}
+
+.form-check-inline {
+  display: flex;
+  padding-left: 0;
+  margin-right: 0.75rem;
+  align-items: flex-start;
+}
+
+.form-consent {
+  margin-top: 3rem;
+  text-align: center;
+  width: 50vw;
 }
 
 .form-signin {
@@ -59,10 +75,6 @@ label.form-check-label {
   border-radius: 0;
   border: solid 0.5px #b0b0b0;
   height: 44px;
-}
-
-.form-consent {
-  color: #fff;
 }
 
 .alert {
