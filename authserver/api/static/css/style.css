@@ -11,11 +11,8 @@ body {
 
 .login {
   display: flex;
-  /* "column" – major axis is vertical */
   flex-direction: column;
-  /* controls layout of the major axis (vertical) */
   justify-content: center;
-  /* centers all the children on the minor axis (horizontal) */
   align-items: center;
   height: 100vh;
 }
