@@ -1,5 +1,5 @@
 {
-    "api_name": "BrightHive Auth Server",
+    "api_name": "Brighthive Auth Server",
     "api_description": "An OAuth 2.0 server with an added mechanism for providing fine-grain access control to Data Trust assets.",
     "api_version": "1.0.0"
 }
