@@ -23,12 +23,13 @@ from authlib.oauth2.rfc6749 import grants
 from authlib.oauth2.rfc7636 import CodeChallenge
 from authlib.integrations.flask_oauth2 import AuthorizationServer
 from werkzeug.security import gen_salt
-from authserver.oauth2 import BrightHiveAuthorizationServer, authenticate_client_secret_json
+from authserver.oauth2 import BrighthiveAuthorizationServer, authenticate_client_secret_json
 from authserver.db import db, User, OAuth2Client, OAuth2AuthorizationCode, OAuth2Token
 
 
 class AuthorizationCodeGrant(grants.AuthorizationCodeGrant):
-    TOKEN_ENDPOINT_AUTH_METHODS = ['client_secret_basic', 'client_secret_post', 'none']
+    TOKEN_ENDPOINT_AUTH_METHODS = [
+        'client_secret_basic', 'client_secret_post', 'none']
 
     def create_authorization_code(self, client, grant_user, request):
         code = gen_salt(48)
@@ -87,7 +88,7 @@ class ClientCredentialsGrant(grants.ClientCredentialsGrant):
 
 query_client = create_query_client_func(db.session, OAuth2Client)
 save_token = create_save_token_func(db.session, OAuth2Token)
-authorization = BrightHiveAuthorizationServer(
+authorization = BrighthiveAuthorizationServer(
     query_client=query_client,
     save_token=save_token,
 )
@@ -101,7 +102,8 @@ def config_oauth(app):
 
     # supported grant types
     authorization.register_grant(ClientCredentialsGrant)
-    authorization.register_grant(AuthorizationCodeGrant, [CodeChallenge(required=False)])
+    authorization.register_grant(AuthorizationCodeGrant, [
+                                 CodeChallenge(required=False)])
 
     # support revocation
     revocation_cls = create_revocation_endpoint(db.session, OAuth2Token)

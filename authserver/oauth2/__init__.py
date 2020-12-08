@@ -1,1 +1,1 @@
-from authserver.oauth2.rfc6749 import BrightHiveAuthorizationServer, authenticate_client_secret_json
+from authserver.oauth2.rfc6749 import BrighthiveAuthorizationServer, authenticate_client_secret_json

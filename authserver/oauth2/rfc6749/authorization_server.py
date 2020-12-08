@@ -1,4 +1,4 @@
-"""BrightHive OAuth 2.0 Authorization Server.
+"""Brighthive OAuth 2.0 Authorization Server.
 
 """
 
@@ -9,8 +9,8 @@ from authlib.common.encoding import to_unicode
 from authlib.oauth2.rfc6749 import InvalidGrantError, OAuth2Error
 
 
-class BrightHiveAuthorizationServer(AuthorizationServer):
-    """BrightHive Authorization Server.
+class BrighthiveAuthorizationServer(AuthorizationServer):
+    """Brighthive Authorization Server.
 
     Overrides the base Authlib AuthorizationServer class to provide a custom method
     for passing the OAuth 2.0 grant type as a field in the JSON request body, but still

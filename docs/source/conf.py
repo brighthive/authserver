@@ -17,8 +17,8 @@
 
 # -- Project information -----------------------------------------------------
 
-project = 'BrightHive Auth Server'
-copyright = '2019, BrightHive'
+project = 'Brighthive Auth Server'
+copyright = '2019, Brighthive'
 author = 'Gregory Mundy'
 
 # The full version, including alpha/beta/rc tags
