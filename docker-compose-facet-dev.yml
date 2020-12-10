@@ -1,30 +1,30 @@
 
 version: '3'
 services:
-    # authserver:
-    #   image: brighthive/authserver:latest
-    #   depends_on:
-    #     - postgres
-    #   environment:
-    #     - APP_ENV=PRODUCTION
-    #     - PG_USER=brighthive_admin
-    #     - PG_PASSWORD=password
-    #     - PG_HOSTNAME=postgres
-    #     - PG_DB=authserver
-    #     - FACET_REDIRECT_URI=http://localhost:3000/auth/redirect
-    #     - SECRET_KEY=supersecretkey
-    #   ports:
-    #     - "8000:8000"
-    #   # Mount volumes to auto-load changes in the Flask app
-    #   volumes:
-    #     - ./authserver:/authserver/authserver
-    #   stdin_open: true
-    #   tty: true
+    authserver:
+      image: brighthive/authserver:latest
+      depends_on:
+        - postgres
+      environment:
+        - APP_ENV=PRODUCTION
+        - PG_USER=brighthive_admin
+        - PG_PASSWORD=passw0rd
+        - PG_HOSTNAME=postgres
+        - PG_DB=authserver
+        - FACET_REDIRECT_URI=http://localhost:3000/auth/redirect
+        - SECRET_KEY=supersecretkey
+      ports:
+        - "9000:8000"
+      # Mount volumes to auto-load changes in the Flask app
+      volumes:
+        - ./authserver:/authserver/authserver
+      stdin_open: true
+      tty: true
     postgres:
       image: postgres:11.2
       environment:
         - POSTGRES_USER=brighthive_admin
-        - POSTGRES_PASSWORD=password
+        - POSTGRES_PASSWORD=passw0rd
         - POSTGRES_DB=authserver
       ports:
         - "5432:5432"
