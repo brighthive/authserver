@@ -125,3 +125,14 @@ label.form-check-label {
   max-width: 50px;
   width: 100%;
 }
+
+.forgot-password-link {
+  width:100%;
+  text-align: right;
+  padding: 1.25rem;
+}
+
+.forgot-password-link a {
+  color: var(--blue);
+  padding-top: 0.5px;
+}
