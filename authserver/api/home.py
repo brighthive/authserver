@@ -15,6 +15,11 @@ class LoginForm(Form):
     password = PasswordField('Password', [validators.DataRequired()])
 
 
+class RecoverPasswordForm(Form):
+    username = StringField(
+        'Username', [validators.DataRequired(), validators.length(min=4, max=40)])
+
+
 @home_bp.route('/', methods=['GET', 'POST'])
 def login():
     errors = None
@@ -44,3 +49,9 @@ def login():
             errors = error_msg
 
         return render_template('login.html', client_id=client_id, return_to=return_to, form=form, errors=errors)
+
+
+@home_bp.route('/recover', methods=['GET', 'POST'])
+def recover_password():
+    form = RecoverPasswordForm(request.form)
+    return render_template('recover.html', form=form)
