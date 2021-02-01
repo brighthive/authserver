@@ -127,7 +127,7 @@ label.form-check-label {
 }
 
 .forgot-password-link {
-  width:100%;
+  width: 100%;
   text-align: right;
   padding: 1.25rem;
 }
@@ -135,4 +135,12 @@ label.form-check-label {
 .forgot-password-link a {
   color: var(--blue);
   padding-top: 0.5px;
+}
+
+.recover-password-form {
+  width: 100%;
+}
+
+.recover-password-form p {
+  font-size: 1.5rem;
 }

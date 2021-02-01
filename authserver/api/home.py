@@ -53,5 +53,9 @@ def login():
 
 @home_bp.route('/recover', methods=['GET', 'POST'])
 def recover_password():
+    errors = None
     form = RecoverPasswordForm(request.form)
-    return render_template('recover.html', form=form)
+    if request.method == 'GET':
+        return render_template('recover.html', form=form)
+    else:
+        return render_template('recover.html', form=form, errors=errors)

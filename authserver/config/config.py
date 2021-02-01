@@ -77,6 +77,13 @@ class DevelopmentConfiguration(Configuration):
             self.postgres_database
         )
 
+        # Graph database configuration
+        self.graph_db_user = os.getenv('GRAPH_DB_USER', 'neo4j')
+        self.graph_db_password = os.getenv('GRAPH_DB_PASSWORD', 'passw0rd')
+        self.graph_db_hostname = os.getenv('GRAPH_DB_HOSTNAME', 'localhost')
+        self.graph_db_port = os.getenv('GRAPH_DB_PORT', '7687')
+        self.graph_db_encrypted = os.getenv('GRAPH_DB_ENCRYPTED').upper() == 'TRUE'
+
 
 class TestingConfiguration(Configuration):
     """Testing environment configuration."""
