@@ -1,7 +1,7 @@
 """Unit tests for application configuration."""
 
-from expects import expect, be, equal, raise_error
-from authserver.config import ConfigurationFactory, Configuration, ConfigurationEnvironmentNotFoundError
+from expects import expect, equal, raise_error
+from authserver.config import ConfigurationFactory, ConfigurationEnvironmentNotFoundError
 
 
 class TestApplicationConfigurationFactory():

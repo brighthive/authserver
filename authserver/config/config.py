@@ -9,13 +9,14 @@ objects based on the determined environment.
 import os
 import json
 from datetime import datetime
+from abc import ABC
 
 
 class ConfigurationEnvironmentNotFoundError(Exception):
     pass
 
 
-class Configuration(object):
+class AbstractConfiguration(ABC):
     """Base configuration class.
 
     This is the base configuration class. It should be extended by other configuration classes on a per
@@ -42,7 +43,7 @@ class Configuration(object):
 
         """
         try:
-            with open(Configuration.SETTINGS_FILE, 'r') as fh:
+            with open(AbstractConfiguration.SETTINGS_FILE, 'r') as fh:
                 settings = json.load(fh)
         except Exception:
             settings = {}
@@ -52,7 +53,7 @@ class Configuration(object):
         return settings
 
 
-class DevelopmentConfiguration(Configuration):
+class DevelopmentConfiguration(AbstractConfiguration):
     """Development environment configuration."""
 
     SQLALCHEMY_TRACK_MODIFICATIONS = True
@@ -82,10 +83,18 @@ class DevelopmentConfiguration(Configuration):
         self.graph_db_password = os.getenv('GRAPH_DB_PASSWORD', 'passw0rd')
         self.graph_db_hostname = os.getenv('GRAPH_DB_HOSTNAME', 'localhost')
         self.graph_db_port = os.getenv('GRAPH_DB_PORT', '7687')
-        self.graph_db_encrypted = os.getenv('GRAPH_DB_ENCRYPTED').upper() == 'TRUE'
+        self.graph_db_encrypted = os.getenv('GRAPH_DB_ENCRYPTED', 'false').upper() == 'TRUE'
+
+        # SendGrid configuration
+        self.sendgrid_api_key = os.getenv('SENDGRID_API_KEY', 'apikey')
+        self.sendgrid_from_email = os.getenv('SENDGRID_FROM_EMAIL', 'user@example.com')
+        self.sendgrid_recovery_template_id = os.getenv('SENDGRID_RECOVERY_TEMPLATE_ID', 'recovery-id')
+
+        # Default app url
+        self.default_app_url = os.getenv('DEFAULT_APP_URL', 'http://localhost:8001')
 
 
-class TestingConfiguration(Configuration):
+class TestingConfiguration(AbstractConfiguration):
     """Testing environment configuration."""
 
     SQLALCHEMY_TRACK_MODIFICATIONS = True
@@ -118,7 +127,7 @@ class TestingConfiguration(Configuration):
         return '{}:{}'.format(self.image_name, self.image_version)
 
 
-class JenkinsConfiguration(Configuration):
+class JenkinsConfiguration(AbstractConfiguration):
     """Testing environment configuration."""
 
     SQLALCHEMY_TRACK_MODIFICATIONS = True
@@ -148,7 +157,7 @@ class JenkinsConfiguration(Configuration):
         )
 
 
-class StagingConfiguration(Configuration):
+class StagingConfiguration(AbstractConfiguration):
     """Staging environment configuration."""
 
     def __init__(self):
@@ -156,7 +165,7 @@ class StagingConfiguration(Configuration):
         self.configuration_name = 'STAGING'
 
 
-class SandboxConfiguration(Configuration):
+class SandboxConfiguration(AbstractConfiguration):
     """Sandbox environment configuration."""
 
     def __init__(self):
@@ -164,7 +173,7 @@ class SandboxConfiguration(Configuration):
         self.configuration_name = 'SANDBOX'
 
 
-class ProductionConfiguration(Configuration):
+class ProductionConfiguration(AbstractConfiguration):
     """Production environment configuration."""
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False

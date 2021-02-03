@@ -1,19 +1,24 @@
 """Flask Application."""
 
+from operator import mod
 from _pytest.mark.structures import MarkDecorator
-from flask import Flask, request
+from flask import Flask, g, request
 from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_restful import Api
 from flask_sqlalchemy import SQLAlchemy
+from flask_injector import FlaskInjector
+
+from datetime import datetime as dt
 
 from authserver.api import (client_bp, health_api_bp, oauth2_bp,
                             role_bp, user_bp, home_bp,
                             scope_bp)
+
+from authserver.modules import ConfigurationModule
 from authserver.config import ConfigurationFactory
 from authserver.db import db
 from authserver.utilities import config_oauth
-from datetime import datetime as dt
 
 import json
 import os
@@ -89,5 +94,7 @@ def create_app(environment: str = None):
     app.register_blueprint(oauth2_bp)
     app.register_blueprint(role_bp)
     app.register_blueprint(scope_bp)
+
+    FlaskInjector(app=app, modules=[ConfigurationModule])
 
     return app

@@ -1,0 +1,1 @@
+from authserver.modules.configuration_module import ConfigurationModule
