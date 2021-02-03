@@ -2,7 +2,7 @@
 
 import json
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 from uuid import uuid4
 
 import bcrypt
@@ -350,3 +350,23 @@ class AuthorizedScopeSchema(ma.SQLAlchemySchema):
     scope = fields.Nested(ScopeSchema(), dump_only=True)
     date_created = ma.auto_field(dump_only=True)
     date_last_updated = ma.auto_field(dump_only=True)
+
+
+class PasswordRecovery(db.Model):
+    """Password recovery nonce."""
+
+    __tablename__ = 'password_recovery'
+    nonce = db.Column(db.String, unique=True, nullable=False, primary_key=True)
+    user_id = db.Column(db.String, db.ForeignKey('users.id'), primary_key=True)
+    date_created = db.Column(db.TIMESTAMP)
+    expiration_date = db.Column(db.TIMESTAMP)
+    date_recovered = db.Column(db.TIMESTAMP)
+
+    def __init__(self, nonce, user_id):
+        self.nonce = nonce
+        self.user_id = user_id
+        self.date_created = datetime.utcnow()
+        self.expiration_date = self.date_created + timedelta(hours=1)
+
+    def is_expired(self):
+        return datetime.utcnow() > self.expiration_date

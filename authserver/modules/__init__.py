@@ -1,2 +1,3 @@
 from authserver.modules.configuration_module import ConfigurationModule
 from authserver.modules.graph_database_module import GraphDatabaseModule
+from authserver.modules.mail_service_module import MailServiceModule

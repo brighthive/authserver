@@ -1,10 +1,6 @@
-import json
-import requests
-import string
-import random
-from flask import Blueprint, render_template, request, redirect, url_for, session, g
+from flask import Blueprint, render_template, request, redirect, session
 from wtforms import Form, StringField, PasswordField, validators
-from authserver.db import db, User, OAuth2Client
+from authserver.db import User
 
 home_bp = Blueprint('home_ep', __name__, static_folder='static',
                     template_folder='templates', url_prefix='/')
@@ -22,7 +18,6 @@ def login():
     form = LoginForm(request.form)
     client_id = request.args.get('client_id')
     return_to = request.args.get('return_to')
-    g.location = request.args.get('return_to')
 
     if request.method == 'GET':
         if not client_id or not return_to:

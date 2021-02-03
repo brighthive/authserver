@@ -14,7 +14,7 @@ from authserver.api import (client_bp, health_api_bp, oauth2_bp,
                             role_bp, user_bp, home_bp,
                             scope_bp, password_recovery_bp)
 
-from authserver.modules import ConfigurationModule, GraphDatabaseModule
+from authserver.modules import (ConfigurationModule, GraphDatabaseModule, MailServiceModule)
 from authserver.config import ConfigurationFactory
 from authserver.db import db
 from authserver.utilities import config_oauth
@@ -24,6 +24,13 @@ import os
 import logging
 from pprint import pformat
 from elasticapm.contrib.flask import ElasticAPM
+
+
+def teardown_appcontext(_):
+    """Helper function for tearing down database connections at the end of the app context."""
+
+    if hasattr(g, 'graph_db'):
+        g.graph_db.close()
 
 
 def create_app(environment: str = None):
@@ -95,6 +102,8 @@ def create_app(environment: str = None):
     app.register_blueprint(scope_bp)
     app.register_blueprint(password_recovery_bp)
 
-    FlaskInjector(app=app, modules=[ConfigurationModule, GraphDatabaseModule])
+    app.teardown_appcontext(teardown_appcontext)
+
+    FlaskInjector(app=app, modules=[ConfigurationModule, GraphDatabaseModule, MailServiceModule])
 
     return app

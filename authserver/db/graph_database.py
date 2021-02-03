@@ -39,7 +39,7 @@ class Neo4jGraphDatabase(AbstractGraphDatabase):
     def connect(self):
         """Establish a connection to the Graph database."""
         if self._driver is None:
-            self._driver = GraphDatabase.driver(uri=self._config.connection_uri,
+            self._driver = GraphDatabase.driver(uri=self._config.graph_db_connection_uri,
                                                 auth=basic_auth(self._config.graph_db_user, self._config.graph_db_password),
                                                 encrypted=self._config.graph_db_encrypted)
 

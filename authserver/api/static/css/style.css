@@ -33,7 +33,8 @@ label {
 }
 
 .form-signin,
-.form-consent {
+.form-consent,
+.form-recovery {
   margin-top: 5rem;
   text-align: center;
   width: 50vw;
