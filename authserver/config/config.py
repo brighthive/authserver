@@ -36,6 +36,32 @@ class AbstractConfiguration(ABC):
 
     def __init__(self):
         self.configuration_name = 'BASE'
+        os.environ['AUTHLIB_INSECURE_TRANSPORT'] = '1'
+
+        self.postgres_user = os.getenv('PG_USER', 'brighthive_admin')
+        self.postgres_password = os.getenv('PG_PASSWORD', 'password')
+        self.postgres_hostname = os.getenv('PG_HOSTNAME', 'localhost')
+        self.postgres_database = os.getenv('PG_DB', 'authserver')
+        self.postgres_port = os.getenv('PG_PORT', 5432)
+        self.sqlalchemy_database_uri = 'postgresql://{}:{}@{}:{}/{}'.format(
+            self.postgres_user,
+            self.postgres_password,
+            self.postgres_hostname,
+            self.postgres_port,
+            self.postgres_database
+        )
+
+        self.graph_db_user = os.getenv('GRAPH_DB_USER', 'neo4j')
+        self.graph_db_password = os.getenv('GRAPH_DB_PASSWORD', 'passw0rd')
+        self.graph_db_hostname = os.getenv('GRAPH_DB_HOSTNAME', 'localhost')
+        self.graph_db_port = os.getenv('GRAPH_DB_PORT', '7687')
+        self.graph_db_encrypted = os.getenv('GRAPH_DB_ENCRYPTED', 'false').upper() == 'TRUE'
+
+        self.sendgrid_api_key = os.getenv('SENDGRID_API_KEY', 'apikey')
+        self.sendgrid_from_email = os.getenv('SENDGRID_FROM_EMAIL', 'user@example.com')
+        self.sendgrid_recovery_template_id = os.getenv('SENDGRID_RECOVERY_TEMPLATE_ID', 'recovery-id')
+
+        self.default_app_url = os.getenv('DEFAULT_APP_URL', 'http://localhost:8001')
 
     @staticmethod
     def get_app_status():
@@ -52,6 +78,10 @@ class AbstractConfiguration(ABC):
         settings['timestamp'] = str(datetime.utcnow())
         return settings
 
+    @property
+    def graph_db_connection_uri(self):
+        return f'bolt://{self.graph_db_hostname}:{self.graph_db_port}'
+
 
 class DevelopmentConfiguration(AbstractConfiguration):
     """Development environment configuration."""
@@ -63,35 +93,7 @@ class DevelopmentConfiguration(AbstractConfiguration):
 
     def __init__(self):
         super().__init__()
-        os.environ['AUTHLIB_INSECURE_TRANSPORT'] = '1'
         self.configuration_name = 'DEVELOPMENT'
-        self.postgres_user = os.getenv('PG_USER', 'brighthive_admin')
-        self.postgres_password = os.getenv('PG_PASSWORD', 'password')
-        self.postgres_hostname = os.getenv('PG_HOSTNAME', 'localhost')
-        self.postgres_database = os.getenv('PG_DB', 'authserver')
-        self.postgres_port = os.getenv('PG_PORT', 5432)
-        self.sqlalchemy_database_uri = 'postgresql://{}:{}@{}:{}/{}'.format(
-            self.postgres_user,
-            self.postgres_password,
-            self.postgres_hostname,
-            self.postgres_port,
-            self.postgres_database
-        )
-
-        # Graph database configuration
-        self.graph_db_user = os.getenv('GRAPH_DB_USER', 'neo4j')
-        self.graph_db_password = os.getenv('GRAPH_DB_PASSWORD', 'passw0rd')
-        self.graph_db_hostname = os.getenv('GRAPH_DB_HOSTNAME', 'localhost')
-        self.graph_db_port = os.getenv('GRAPH_DB_PORT', '7687')
-        self.graph_db_encrypted = os.getenv('GRAPH_DB_ENCRYPTED', 'false').upper() == 'TRUE'
-
-        # SendGrid configuration
-        self.sendgrid_api_key = os.getenv('SENDGRID_API_KEY', 'apikey')
-        self.sendgrid_from_email = os.getenv('SENDGRID_FROM_EMAIL', 'user@example.com')
-        self.sendgrid_recovery_template_id = os.getenv('SENDGRID_RECOVERY_TEMPLATE_ID', 'recovery-id')
-
-        # Default app url
-        self.default_app_url = os.getenv('DEFAULT_APP_URL', 'http://localhost:8001')
 
 
 class TestingConfiguration(AbstractConfiguration):
@@ -197,6 +199,18 @@ class ProductionConfiguration(AbstractConfiguration):
             self.postgres_port,
             self.postgres_database
         )
+
+        self.graph_db_user = os.getenv('GRAPH_DB_USER')
+        self.graph_db_password = os.getenv('GRAPH_DB_PASSWORD')
+        self.graph_db_hostname = os.getenv('GRAPH_DB_HOSTNAME')
+        self.graph_db_port = os.getenv('GRAPH_DB_PORT')
+        self.graph_db_encrypted = os.getenv('GRAPH_DB_ENCRYPTED', 'false').upper() == 'TRUE'
+
+        self.sendgrid_api_key = os.getenv('SENDGRID_API_KEY')
+        self.sendgrid_from_email = os.getenv('SENDGRID_FROM_EMAIL')
+        self.sendgrid_recovery_template_id = os.getenv('SENDGRID_RECOVERY_TEMPLATE_ID')
+
+        self.default_app_url = os.getenv('DEFAULT_APP_URL')
 
 
 class ConfigurationFactory(object):

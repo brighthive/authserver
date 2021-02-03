@@ -1,7 +1,6 @@
 """Flask Application."""
 
 from operator import mod
-from _pytest.mark.structures import MarkDecorator
 from flask import Flask, g, request
 from flask_cors import CORS
 from flask_migrate import Migrate
@@ -15,7 +14,7 @@ from authserver.api import (client_bp, health_api_bp, oauth2_bp,
                             role_bp, user_bp, home_bp,
                             scope_bp)
 
-from authserver.modules import ConfigurationModule
+from authserver.modules import ConfigurationModule, GraphDatabaseModule
 from authserver.config import ConfigurationFactory
 from authserver.db import db
 from authserver.utilities import config_oauth
@@ -95,6 +94,6 @@ def create_app(environment: str = None):
     app.register_blueprint(role_bp)
     app.register_blueprint(scope_bp)
 
-    FlaskInjector(app=app, modules=[ConfigurationModule])
+    FlaskInjector(app=app, modules=[ConfigurationModule, GraphDatabaseModule])
 
     return app
