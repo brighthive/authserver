@@ -12,7 +12,7 @@ from datetime import datetime as dt
 
 from authserver.api import (client_bp, health_api_bp, oauth2_bp,
                             role_bp, user_bp, home_bp,
-                            scope_bp)
+                            scope_bp, password_recovery_bp)
 
 from authserver.modules import ConfigurationModule, GraphDatabaseModule
 from authserver.config import ConfigurationFactory
@@ -93,6 +93,7 @@ def create_app(environment: str = None):
     app.register_blueprint(oauth2_bp)
     app.register_blueprint(role_bp)
     app.register_blueprint(scope_bp)
+    app.register_blueprint(password_recovery_bp)
 
     FlaskInjector(app=app, modules=[ConfigurationModule, GraphDatabaseModule])
 
