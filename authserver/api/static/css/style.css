@@ -144,3 +144,23 @@ label.form-check-label {
 .recover-password-form p {
   font-size: 1.5rem;
 }
+
+.success-container {
+  margin: 0px auto;
+  /* text-align: center; */
+  /* width: 50%; */
+  padding: 25px;
+}
+
+.success-link {
+  color: white;
+}
+
+.cancel-link,
+.cancel-link:hover {
+  background-color: white;
+  color: var(--blue);
+  border-width: 2px;
+  border-style: solid;
+  border-color: var(--blue);
+}
