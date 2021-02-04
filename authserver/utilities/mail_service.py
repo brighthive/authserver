@@ -1,5 +1,5 @@
 from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Email, To, Content, Mail, template_id
+from sendgrid.helpers.mail import Email, To, Mail
 from abc import ABC, abstractmethod
 from injector import inject
 from authserver.config import AbstractConfiguration
