@@ -368,5 +368,6 @@ class PasswordRecovery(db.Model):
         self.date_created = datetime.utcnow()
         self.expiration_date = self.date_created + timedelta(hours=1)
 
+    @property
     def is_expired(self):
         return datetime.utcnow() > self.expiration_date

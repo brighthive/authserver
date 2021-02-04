@@ -10,11 +10,11 @@ class AbstractMailService(ABC):
         pass
 
     @abstractmethod
-    def send_password_recovery_email(self, to: str, firstname: str, username: str, reset_url: str):
+    def send_password_recovery_email(self, to: str, firstname: str, username: str, reset_url: str) -> bool:
         pass
 
     @abstractmethod
-    def send_password_reset_email(self, to: str, firstname: str, username: str):
+    def send_password_reset_email(self, to: str, firstname: str, username: str) -> bool:
         pass
 
 
@@ -35,10 +35,11 @@ class SendGridMailService(AbstractMailService):
             'username': username,
             'recovery_url': recovery_url
         }
-        response = self.sg_client.send(mail)
-        print(response.status_code)
-        print(response.body)
-        print(response.headers)
+        try:
+            response = self.sg_client.send(mail)
+            return (response.status_code >= 200 and response.status_code < 300)
+        except Exception:
+            return False
 
     def send_password_reset_email(self, to: str, firstname: str, username: str):
         pass
