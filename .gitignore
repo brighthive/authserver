@@ -12,6 +12,9 @@
 # sphinx artifacts
 **/docs/build
 
+# miscellaneous
 **.DS_Store
-
 .env
+
+# neo4j artifacts
+**/neo4j-dev
