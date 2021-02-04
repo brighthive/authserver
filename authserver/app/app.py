@@ -1,25 +1,36 @@
 """Flask Application."""
 
-from _pytest.mark.structures import MarkDecorator
-from flask import Flask, request
+from operator import mod
+from flask import Flask, g, request
 from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_restful import Api
 from flask_sqlalchemy import SQLAlchemy
+from flask_injector import FlaskInjector
+
+from datetime import datetime as dt
 
 from authserver.api import (client_bp, health_api_bp, oauth2_bp,
                             role_bp, user_bp, home_bp,
-                            scope_bp)
+                            scope_bp, password_recovery_bp)
+
+from authserver.modules import (ConfigurationModule, GraphDatabaseModule, MailServiceModule)
 from authserver.config import ConfigurationFactory
 from authserver.db import db
 from authserver.utilities import config_oauth
-from datetime import datetime as dt
 
 import json
 import os
 import logging
 from pprint import pformat
 from elasticapm.contrib.flask import ElasticAPM
+
+
+def teardown_appcontext(_):
+    """Helper function for tearing down database connections at the end of the app context."""
+
+    if hasattr(g, 'graph_db'):
+        g.graph_db.close()
 
 
 def create_app(environment: str = None):
@@ -89,5 +100,10 @@ def create_app(environment: str = None):
     app.register_blueprint(oauth2_bp)
     app.register_blueprint(role_bp)
     app.register_blueprint(scope_bp)
+    app.register_blueprint(password_recovery_bp)
+
+    app.teardown_appcontext(teardown_appcontext)
+
+    FlaskInjector(app=app, modules=[ConfigurationModule, GraphDatabaseModule, MailServiceModule])
 
     return app

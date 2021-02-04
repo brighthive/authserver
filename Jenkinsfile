@@ -2,7 +2,7 @@ pipeline {
   agent any
   options {
       // Will set the build timeout at 5 minutes and disable concurrent builds.
-      timeout(time: 5, unit: 'MINUTES')
+      timeout(time: 10, unit: 'MINUTES')
       disableConcurrentBuilds()
   }
   triggers {

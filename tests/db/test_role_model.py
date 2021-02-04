@@ -29,7 +29,7 @@ class TestRoleModel:
             new_client.user_id = user_id
             new_client.id = str(uuid4()).replace('-', '')
             new_client_metadata['roles'].append(new_role)
-            new_client.client_metadata = new_client_metadata
+            # new_client.client_metadata = new_client_metadata
             db.session.add(new_client)
             db.session.commit()
             client_id = new_client.id

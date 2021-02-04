@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block content %}
+    <form class="form-recovery" method="post">
+        {% if errors %}
+            <div class="alert alert-danger mt-4">{{errors}}</div>
+        {% endif %}
+        <div class="recover-password-form">
+            <p>To reset your password, please enter your username below.
+            <br/>A password reset email will be sent to the email address associated with the entered username.</p>
+        </div>
+        {% from '_formhelpers.html' import render_field %}
+        {{ render_field(form.username, class='form-control', autofocus='true') }}
+        <button class="mt-5 btn btn-primary btn-lg" type="submit">Submit</button>
+    </form>
+{% endblock %}

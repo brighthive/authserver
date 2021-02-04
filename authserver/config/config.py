@@ -9,13 +9,14 @@ objects based on the determined environment.
 import os
 import json
 from datetime import datetime
+from abc import ABC
 
 
 class ConfigurationEnvironmentNotFoundError(Exception):
     pass
 
 
-class Configuration(object):
+class AbstractConfiguration(ABC):
     """Base configuration class.
 
     This is the base configuration class. It should be extended by other configuration classes on a per
@@ -35,35 +36,8 @@ class Configuration(object):
 
     def __init__(self):
         self.configuration_name = 'BASE'
-
-    @staticmethod
-    def get_app_status():
-        """Retrieves information about the API for health check.
-
-        """
-        try:
-            with open(Configuration.SETTINGS_FILE, 'r') as fh:
-                settings = json.load(fh)
-        except Exception:
-            settings = {}
-
-        settings['api_status'] = 'OK'
-        settings['timestamp'] = str(datetime.utcnow())
-        return settings
-
-
-class DevelopmentConfiguration(Configuration):
-    """Development environment configuration."""
-
-    SQLALCHEMY_TRACK_MODIFICATIONS = True
-    ENV = 'development'
-    DEBUG = True
-    TESTING = False
-
-    def __init__(self):
-        super().__init__()
         os.environ['AUTHLIB_INSECURE_TRANSPORT'] = '1'
-        self.configuration_name = 'DEVELOPMENT'
+
         self.postgres_user = os.getenv('PG_USER', 'brighthive_admin')
         self.postgres_password = os.getenv('PG_PASSWORD', 'password')
         self.postgres_hostname = os.getenv('PG_HOSTNAME', 'localhost')
@@ -77,8 +51,52 @@ class DevelopmentConfiguration(Configuration):
             self.postgres_database
         )
 
+        self.graph_db_user = os.getenv('GRAPH_DB_USER', 'neo4j')
+        self.graph_db_password = os.getenv('GRAPH_DB_PASSWORD', 'passw0rd')
+        self.graph_db_hostname = os.getenv('GRAPH_DB_HOSTNAME', 'localhost')
+        self.graph_db_port = os.getenv('GRAPH_DB_PORT', '7687')
+        self.graph_db_encrypted = os.getenv('GRAPH_DB_ENCRYPTED', 'false').upper() == 'TRUE'
 
-class TestingConfiguration(Configuration):
+        self.sendgrid_api_key = os.getenv('SENDGRID_API_KEY', 'apikey')
+        self.sendgrid_from_email = os.getenv('SENDGRID_FROM_EMAIL', 'user@example.com')
+        self.sendgrid_recovery_template_id = os.getenv('SENDGRID_RECOVERY_TEMPLATE_ID', 'recovery-id')
+        self.sendgrid_reset_template_id = os.getenv('SENDGRID_RESET_TEMPLATE_ID', 'recovery-id')
+        self.default_app_url = os.getenv('DEFAULT_APP_URL', 'http://localhost:8001')
+
+    @staticmethod
+    def get_app_status():
+        """Retrieves information about the API for health check.
+
+        """
+        try:
+            with open(AbstractConfiguration.SETTINGS_FILE, 'r') as fh:
+                settings = json.load(fh)
+        except Exception:
+            settings = {}
+
+        settings['api_status'] = 'OK'
+        settings['timestamp'] = str(datetime.utcnow())
+        return settings
+
+    @property
+    def graph_db_connection_uri(self):
+        return f'bolt://{self.graph_db_hostname}:{self.graph_db_port}'
+
+
+class DevelopmentConfiguration(AbstractConfiguration):
+    """Development environment configuration."""
+
+    SQLALCHEMY_TRACK_MODIFICATIONS = True
+    ENV = 'development'
+    DEBUG = True
+    TESTING = False
+
+    def __init__(self):
+        super().__init__()
+        self.configuration_name = 'DEVELOPMENT'
+
+
+class TestingConfiguration(AbstractConfiguration):
     """Testing environment configuration."""
 
     SQLALCHEMY_TRACK_MODIFICATIONS = True
@@ -111,7 +129,7 @@ class TestingConfiguration(Configuration):
         return '{}:{}'.format(self.image_name, self.image_version)
 
 
-class JenkinsConfiguration(Configuration):
+class JenkinsConfiguration(AbstractConfiguration):
     """Testing environment configuration."""
 
     SQLALCHEMY_TRACK_MODIFICATIONS = True
@@ -141,7 +159,7 @@ class JenkinsConfiguration(Configuration):
         )
 
 
-class StagingConfiguration(Configuration):
+class StagingConfiguration(AbstractConfiguration):
     """Staging environment configuration."""
 
     def __init__(self):
@@ -149,7 +167,7 @@ class StagingConfiguration(Configuration):
         self.configuration_name = 'STAGING'
 
 
-class SandboxConfiguration(Configuration):
+class SandboxConfiguration(AbstractConfiguration):
     """Sandbox environment configuration."""
 
     def __init__(self):
@@ -157,7 +175,7 @@ class SandboxConfiguration(Configuration):
         self.configuration_name = 'SANDBOX'
 
 
-class ProductionConfiguration(Configuration):
+class ProductionConfiguration(AbstractConfiguration):
     """Production environment configuration."""
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
@@ -181,6 +199,18 @@ class ProductionConfiguration(Configuration):
             self.postgres_port,
             self.postgres_database
         )
+
+        self.graph_db_user = os.getenv('GRAPH_DB_USER')
+        self.graph_db_password = os.getenv('GRAPH_DB_PASSWORD')
+        self.graph_db_hostname = os.getenv('GRAPH_DB_HOSTNAME')
+        self.graph_db_port = os.getenv('GRAPH_DB_PORT')
+        self.graph_db_encrypted = os.getenv('GRAPH_DB_ENCRYPTED', 'false').upper() == 'TRUE'
+
+        self.sendgrid_api_key = os.getenv('SENDGRID_API_KEY')
+        self.sendgrid_from_email = os.getenv('SENDGRID_FROM_EMAIL')
+        self.sendgrid_recovery_template_id = os.getenv('SENDGRID_RECOVERY_TEMPLATE_ID')
+
+        self.default_app_url = os.getenv('DEFAULT_APP_URL')
 
 
 class ConfigurationFactory(object):

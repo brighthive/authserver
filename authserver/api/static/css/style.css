@@ -33,7 +33,8 @@ label {
 }
 
 .form-signin,
-.form-consent {
+.form-consent,
+.form-recovery {
   margin-top: 5rem;
   text-align: center;
   width: 50vw;
@@ -124,4 +125,43 @@ label.form-check-label {
 .img-xs-max {
   max-width: 50px;
   width: 100%;
+}
+
+.forgot-password-link {
+  width: 100%;
+  text-align: right;
+  padding: 1.25rem;
+}
+
+.forgot-password-link a {
+  color: var(--blue);
+  padding-top: 0.5px;
+}
+
+.recover-password-form {
+  width: 100%;
+}
+
+.recover-password-form p {
+  font-size: 1.5rem;
+}
+
+.success-container {
+  margin: 0px auto;
+  /* text-align: center; */
+  /* width: 50%; */
+  padding: 25px;
+}
+
+.success-link {
+  color: white;
+}
+
+.cancel-link,
+.cancel-link:hover {
+  background-color: white;
+  color: var(--blue);
+  border-width: 2px;
+  border-style: solid;
+  border-color: var(--blue);
 }

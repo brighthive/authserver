@@ -1,1 +1,1 @@
-from authserver.config.config import Configuration, ConfigurationFactory, ConfigurationEnvironmentNotFoundError
+from authserver.config.config import AbstractConfiguration, ConfigurationFactory, ConfigurationEnvironmentNotFoundError

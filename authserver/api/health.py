@@ -6,7 +6,8 @@ A simple API for returning health check information to clients.
 
 from flask import Blueprint, request
 from flask_restful import Resource, Api
-from authserver.config import Configuration
+from injector import inject
+from authserver.config import AbstractConfiguration
 
 from authserver.utilities import require_oauth
 
@@ -14,8 +15,12 @@ from authserver.utilities import require_oauth
 class HealthCheckResource(Resource):
     """A simple health check resource."""
 
+    @inject
+    def __init__(self, config: AbstractConfiguration):
+        self.config = config
+
     def get(self):
-        return Configuration.get_app_status(), 200
+        return self.config.get_app_status(), 200
 
 
 health_api_bp = Blueprint('health_ep', __name__)

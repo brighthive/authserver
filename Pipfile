@@ -33,6 +33,9 @@ flask-script = "*"
 elastic-apm = "*"
 blinker = "*"
 psutil = "*"
+neo4j = "*"
+flask-injector = "*"
+sendgrid = "*"
 
 [requires]
 python_version = "3.8"

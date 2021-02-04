@@ -1,9 +1,6 @@
-import json
-import requests
-from flask import Blueprint, render_template, request, redirect, url_for, session
+from flask import Blueprint, render_template, request, redirect, session
 from wtforms import Form, StringField, PasswordField, validators
-
-from authserver.db import db, User, OAuth2Client
+from authserver.db import User
 
 home_bp = Blueprint('home_ep', __name__, static_folder='static',
                     template_folder='templates', url_prefix='/')

@@ -1,0 +1,30 @@
+{% extends 'base.html' %} {% block content %}
+<div class="success-container">
+  <h1>Reset Your Password</h1>
+  <p>
+    You are about to change your Brighthive password. Are you sure? You cannot
+    undo this action.
+  </p>
+  <form class="form-signin" style="margin-top: 0px" method="post">
+    {% if errors %}
+    <div class="alert alert-danger mt-4">{{errors}}</div>
+    {% endif %} {% from '_formhelpers.html' import render_field %} {{
+    render_field(form.password, class='form-control', autofocus='true') }}
+    <p style="text-align:left;font-size:1.5rem;padding-top:0.25rem">Passwords must have 9 or more characters. Think about something fun and known only to you, like the items on your counter.</p>
+    {{ render_field(form.confirm_password, class='form-control') }}
+    <div style="text-align: right;">
+      <a
+        class="cancel-link mt-5 btn btn-primary btn-lg"
+        href="{{ default_app_url }}"
+        >Cancel</a
+      >
+      <button
+        class="success-link mt-5 btn btn-primary btn-lg"
+        type="submit"
+      >
+        Reset Password
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}
