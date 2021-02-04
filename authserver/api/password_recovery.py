@@ -55,7 +55,7 @@ def recover_password(config: AbstractConfiguration, graph_db: AbstractGraphDatab
 
 
 @password_recovery_bp.route('/password-reset', methods=['GET', 'POST'])
-def reset_password(config: AbstractConfiguration):
+def reset_password(config: AbstractConfiguration, graph_db: AbstractGraphDatabase, mailer: AbstractMailService):
     errors = None
     nonce = request.args.get('n', None)
     if not nonce:
@@ -81,6 +81,14 @@ def reset_password(config: AbstractConfiguration):
                     user.date_last_updated = datetime.utcnow()
                     password_recovery.date_recovered = datetime.utcnow()
                     db.session.commit()
+
+                    person_query = f"MATCH (p:Person{{id:'{user.person_id}'}}) RETURN p"
+                    try:
+                        person = graph_db.query(person_query).single()[0]
+                        mailer.send_password_reset_email(to=person['email'], firstname=person['givenName'])
+                    except Exception as e:
+                        pass
+
                     return render_template('success.html', default_app_url=config.default_app_url, heading='Update Successful!', body='Please log in with your new credentials.')
                 except Exception:
                     db.session.rollback()

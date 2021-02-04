@@ -60,7 +60,7 @@ class AbstractConfiguration(ABC):
         self.sendgrid_api_key = os.getenv('SENDGRID_API_KEY', 'apikey')
         self.sendgrid_from_email = os.getenv('SENDGRID_FROM_EMAIL', 'user@example.com')
         self.sendgrid_recovery_template_id = os.getenv('SENDGRID_RECOVERY_TEMPLATE_ID', 'recovery-id')
-
+        self.sendgrid_reset_template_id = os.getenv('SENDGRID_RESET_TEMPLATE_ID', 'recovery-id')
         self.default_app_url = os.getenv('DEFAULT_APP_URL', 'http://localhost:8001')
 
     @staticmethod
