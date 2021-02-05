@@ -56,6 +56,7 @@ class AbstractConfiguration(ABC):
         self.graph_db_hostname = os.getenv('GRAPH_DB_HOSTNAME', 'localhost')
         self.graph_db_port = os.getenv('GRAPH_DB_PORT', '7687')
         self.graph_db_encrypted = os.getenv('GRAPH_DB_ENCRYPTED', 'false').upper() == 'TRUE'
+        self.neo4j_production = os.getenv("NEO4J_PRODUCTION", "False").upper() == 'TRUE'
 
         self.sendgrid_api_key = os.getenv('SENDGRID_API_KEY', 'apikey')
         self.sendgrid_from_email = os.getenv('SENDGRID_FROM_EMAIL', 'user@example.com')
@@ -80,6 +81,8 @@ class AbstractConfiguration(ABC):
 
     @property
     def graph_db_connection_uri(self):
+        if self.neo4j_production:
+            return f'neo4j+s://{self.graph_db_hostname}'
         return f'bolt://{self.graph_db_hostname}:{self.graph_db_port}'
 
 
