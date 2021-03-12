@@ -1,7 +1,7 @@
 :root {
   --blue: #0fbaa8;
   --light-blue: #0fbaa8b3;
-  --gray20: #333333;
+  --gray20: #54575a;
 }
 
 html {
@@ -11,7 +11,7 @@ html {
 
 body {
   height: 100%;
-  font-family: "Montserrat", sans-serif;
+  font-family: "Roboto", sans-serif;
   font-size: 1.8rem;
 }
 
