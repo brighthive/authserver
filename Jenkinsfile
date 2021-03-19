@@ -147,7 +147,7 @@ def initialize() {
     env.IS_JENKINS_TEST = '1'
     env.AWS_REGION = 'us-east-2'
     env.MAX_ENVIRONMENTNAME_LENGTH = 32
-    env.BUILD_VERSION = '1.2.0'
+    env.BUILD_VERSION = '1.5.1'
     env.TAGNAME = env.BUILD_VERSION + '-' + env.GIT_COMMIT.substring(0,5)
     // DB Configs
     env.POSTGRES_HOST = 'localhost'
