@@ -10,6 +10,7 @@ html {
 }
 
 body {
+  color: var(--gray20);
   height: 100%;
   font-family: "Roboto", sans-serif;
   font-size: 1.8rem;
@@ -48,9 +49,9 @@ label {
 }
 
 label.form-check-label {
+  color: var(--gray20);
   padding-top: 0;
   margin-top: 0 !important;
-  color: inherit;
 }
 
 .form-check-inline .form-check-input {
@@ -143,6 +144,7 @@ label.form-check-label {
 }
 
 .recover-password-form p {
+  color: var(--gray20);
   font-size: 1.5rem;
 }
 
