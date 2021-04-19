@@ -146,8 +146,8 @@ class UserResource(Resource):
                 return self.response_handler.successful_delete_response('User', id, user_obj)
             else:
                 return self.response_handler.not_found_response(id)
-        except Exception:
-            return self.response_handler.not_found_response(id)
+        except Exception as e:
+            return self.response_handler.exception_response(exception_name=type(e).__name__)
 
     def _update(self, id: str, partial=True):
         """General update function for PUT and PATCH.
