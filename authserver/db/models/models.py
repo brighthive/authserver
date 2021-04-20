@@ -252,7 +252,8 @@ class AuthorizedClient(db.Model):
 
     __tablename__ = 'authorized_clients'
 
-    user_id = db.Column(db.String, db.ForeignKey('users.id'), primary_key=True)
+    user_id = db.Column(db.String, db.ForeignKey('users.id', ondelete='CASCADE'),
+                        primary_key=True)
     client_id = db.Column(db.String, primary_key=True)
     authorized = db.Column(db.Boolean, nullable=False, default=False)
 
