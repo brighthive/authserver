@@ -137,17 +137,14 @@ class UserResource(Resource):
     def delete(self, id: str = None):
         if id is None:
             return self.response_handler.method_not_allowed_response()
-        try:
-            user = User.query.filter_by(id=id).first()
-            if user:
-                user_obj = self.user_schema.dump(user)
-                db.session.delete(user)
-                db.session.commit()
-                return self.response_handler.successful_delete_response('User', id, user_obj)
-            else:
-                return self.response_handler.not_found_response(id)
-        except Exception as e:
-            return self.response_handler.exception_response(exception_name=type(e).__name__)
+        user = User.query.filter_by(id=id).first()
+        if user:
+            user_obj = self.user_schema.dump(user)
+            db.session.delete(user)
+            db.session.commit()
+            return self.response_handler.successful_delete_response('User', id, user_obj)
+        else:
+            return self.response_handler.not_found_response(id)
 
     def _update(self, id: str, partial=True):
         """General update function for PUT and PATCH.

@@ -81,10 +81,10 @@ def create_app(environment: str = None):
         return response
 
     def handle_errors(e):
-        print(f"""{e}, app.py, line 83""")
+        logging.info(f"""{e}, app.py, line 83""")
         response_body = ResponseBody()
         if isinstance(e, ValidationError):
-            print("ValidationError:")
+            logging.info("ValidationError:")
             return response_body.custom_response(status="Error", messages=[e.messages])
         else:
             try:
