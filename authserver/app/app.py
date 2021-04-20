@@ -7,6 +7,7 @@ from flask_migrate import Migrate
 from flask_restful import Api
 from flask_sqlalchemy import SQLAlchemy
 from flask_injector import FlaskInjector
+from marshmallow.exceptions import ValidationError
 
 from datetime import datetime as dt
 
@@ -17,7 +18,7 @@ from authserver.api import (client_bp, health_api_bp, oauth2_bp,
 from authserver.modules import (ConfigurationModule, GraphDatabaseModule, MailServiceModule)
 from authserver.config import ConfigurationFactory
 from authserver.db import db
-from authserver.utilities import config_oauth
+from authserver.utilities import config_oauth, ResponseBody
 
 import json
 import os
@@ -79,6 +80,23 @@ def create_app(environment: str = None):
             logging.info(jsonstr)
         return response
 
+    def handle_errors(e):
+        print(f"""{e}, app.py, line 83""")
+        response_body = ResponseBody()
+        if isinstance(e, ValidationError):
+            print("ValidationError:")
+            return response_body.custom_response(status="Error", messages=[e.messages])
+        else:
+            try:
+                error_code = str(e).split(':')[0][:3].strip()
+                error_text = str(e).split(':')[0][3:].strip()
+                if isinstance(error_code, int):
+                    return response_body.custom_response(code=error_code, messages={'error': error_text})
+                else:
+                    raise Exception
+            except Exception as e:
+                return response_body.exception_response(str(e))
+
     if not is_testing:
         apm_enabled = bool(int(os.getenv('APM_ENABLED', '0')))
         if apm_enabled:
@@ -101,6 +119,8 @@ def create_app(environment: str = None):
     app.register_blueprint(role_bp)
     app.register_blueprint(scope_bp)
     app.register_blueprint(password_recovery_bp)
+
+    app.register_error_handler(handle_errors)
 
     app.teardown_appcontext(teardown_appcontext)
 
