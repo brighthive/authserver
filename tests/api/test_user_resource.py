@@ -5,6 +5,7 @@ from expects import be, be_above_or_equal, contain, equal, expect, raise_error
 from flask import Response
 from time import sleep
 
+from authserver.api.oauth2 import _store_client_authorization
 from tests.utils import post_users
 
 
@@ -33,7 +34,8 @@ USERS = [
 class TestUserResource:
     def test_user_api(self, client, token_generator):
         # Common headers go in this dict
-        headers = {'content-type': 'application/json', 'authorization': f'bearer {token_generator.get_token(client)}'}
+        headers = {'content-type': 'application/json',
+                   'authorization': f'bearer {token_generator.get_token(client)}'}
 
         response = client.get('/users', headers=headers)
         response_data = response.json
@@ -62,12 +64,14 @@ class TestUserResource:
 
         # Get all users by ID
         for user in added_users:
-            response = client.get('/users/{}'.format(user['id']), headers=headers)
+            response = client.get(
+                '/users/{}'.format(user['id']), headers=headers)
             expect(response.status_code).to(be(200))
 
         # Update a user with a PATCH
         user_id = added_users[len(added_users) - 1]['id']
-        new_person_id = str(reversed(added_users[len(added_users) - 1]['person_id']))
+        new_person_id = str(
+            reversed(added_users[len(added_users) - 1]['person_id']))
         single_field_update = {
             'person_id': new_person_id
         }
@@ -88,7 +92,8 @@ class TestUserResource:
         user_to_update.pop('id', None)
         user_to_update.pop('date_last_updated', None)
 
-        response = client.put('/users/{}'.format(user_id), data=json.dumps(user_to_update), headers=headers)
+        response = client.put('/users/{}'.format(user_id),
+                              data=json.dumps(user_to_update), headers=headers)
         expect(response.status_code).to(equal(200))
 
         # Ensure users have been deleted by the deletion of the data trust associated with them.
@@ -97,11 +102,13 @@ class TestUserResource:
         response_data = response.json
 
         # Deactivate a user
-        headers = {'content-type': 'application/json', 'authorization': f'bearer {token_generator.get_token(client)}'}
+        headers = {'content-type': 'application/json',
+                   'authorization': f'bearer {token_generator.get_token(client)}'}
         response = client.get('/users', headers=headers)
 
         a_user_id = response.json['response'][1]['id']
-        associated_client_id = self._post_client(client, a_user_id, token_generator)
+        associated_client_id = self._post_client(
+            client, a_user_id, token_generator)
 
         user_to_deactivate = {
             'id': a_user_id
@@ -133,14 +140,16 @@ class TestUserResource:
         expect(response.json['response']['client_secret']).to(be(None))
 
         # Delete users and clients
-        response = client.delete(f'/clients/{associated_client_id}', headers=headers)
+        response = client.delete(
+            f'/clients/{associated_client_id}', headers=headers)
         expect(response.status_code).to(be(200))
         for user_id in added_user_ids:
             response = client.delete(f"/users/{user_id}", headers=headers)
             expect(response.status_code).to(be(200))
 
     def _post_client(self, client, user_id, token_generator):
-        headers = {'content-type': 'application/json', 'authorization': f'bearer {token_generator.get_token(client)}'}
+        headers = {'content-type': 'application/json',
+                   'authorization': f'bearer {token_generator.get_token(client)}'}
         client_data = {
             'client_name': 'test client 1',
             'user_id': user_id
@@ -150,3 +159,39 @@ class TestUserResource:
         expect(response.status_code).to(equal(201))
 
         return response.json['response'][0]['id']
+
+
+class TestDELETEUserResource:
+    def test_delete_user_with_client(self, mocker, client, token_generator):
+        # Common headers go in this dict
+        mocker.patch(
+            "authlib.integrations.flask_oauth2.ResourceProtector.acquire_token",
+            return_value=True,
+        )
+
+        # Populate database with user
+        user_data = USERS[0]
+        user_data['active'] = True
+        response = client.post(
+            '/users', data=json.dumps(user_data), headers={})
+        user_id = response.json['response'][0]['id']
+
+        # Populate database with client
+        client_data = {
+            'client_name': 'test client 1',
+            'user_id': user_id
+        }
+        response = client.post(
+            '/clients', data=json.dumps(client_data), headers={})
+        client_id = response.json['response'][0]['id']
+
+        # Add entity to authorized_client
+        _store_client_authorization(client_id=client_id, user_id=user_id)
+
+        # DELETE the user (without 'ForeignKeyViolation' error)
+        response = client.delete(f"/users/{user_id}", headers={})
+        expect(response.status_code).to(be(200))
+
+        # Assert that user no longer exists
+        response = client.get(f"/users/{user_id}", headers={})
+        expect(response.status_code).to(equal(404))
