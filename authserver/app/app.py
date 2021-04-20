@@ -120,7 +120,7 @@ def create_app(environment: str = None):
     app.register_blueprint(scope_bp)
     app.register_blueprint(password_recovery_bp)
 
-    app.register_error_handler(handle_errors)
+    app.register_error_handler(Exception, handle_errors)
 
     app.teardown_appcontext(teardown_appcontext)
 
