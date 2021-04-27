@@ -9,10 +9,11 @@ from datetime import datetime
 
 from flask import Blueprint, session
 from flask_restful import Api, Resource, request
+from werkzeug.security import gen_salt
 
 from authserver.db import User, UserSchema, db, OAuth2Client, OAuth2Token, UserSchema
-from authserver.utilities import ResponseBody
 from authserver.utilities import ResponseBody, require_oauth
+from authserver.utilities.errors import RecordNotFoundError
 
 
 class UserDetailResource(Resource):
@@ -31,7 +32,8 @@ class UserDetailResource(Resource):
 
         if token:
             try:
-                token_details = OAuth2Token.query.filter_by(access_token=token).first()
+                token_details = OAuth2Token.query.filter_by(
+                    access_token=token).first()
                 if token_details:
                     user_id = token_details.user_id
                     if not user_id:
@@ -65,7 +67,8 @@ class UserResource(Resource):
         if not id:
             users = User.query.all()
             users_obj = self.users_schema.dump(users)
-            users_obj_clean = [{k: v for k, v in user.items() if k != 'role_id'} for user in users_obj]
+            users_obj_clean = [{k: v for k, v in user.items() if k != 'role_id'}
+                               for user in users_obj]
             return self.response_handler.get_all_response(users_obj_clean)
         else:
             user = User.query.filter_by(id=id).first()
@@ -99,6 +102,8 @@ class UserResource(Resource):
             else:
                 if action == "deactivate":
                     return self._deactivate(user_id)
+                elif action == "activate":
+                    return self._activate(user_id)
                 else:
                     return self.response_handler.custom_response(code=422, messages="Invalid query param! 'action' can only be 'deactivate'.")
 
@@ -108,9 +113,12 @@ class UserResource(Resource):
         try:
             user = User(
                 request_data['username'], request_data['password'],
-                role_id=request_data['role_id'] if 'role_id' in request_data.keys() else None,
-                person_id=request_data['person_id'] if 'person_id' in request_data.keys() else None,
-                can_login=request_data['can_login'] if 'can_login' in request_data.keys() else False,
+                role_id=request_data['role_id'] if 'role_id' in request_data.keys(
+                ) else None,
+                person_id=request_data['person_id'] if 'person_id' in request_data.keys(
+                ) else None,
+                can_login=request_data['can_login'] if 'can_login' in request_data.keys(
+                ) else False,
                 active=request_data['active'] if 'active' in request_data.keys() else False)
             db.session.add(user)
             db.session.commit()
@@ -187,12 +195,28 @@ class UserResource(Resource):
 
         user.active = False
         user.can_login = False
-        self._db_commit()
 
         clients = OAuth2Client.query.filter_by(user_id=user_id).all()
         for client in clients:
             client.client_secret = None
-            self._db_commit()
+
+        self._db_commit()
+
+        return self.response_handler.successful_update_response('User', user_id)
+
+    def _activate(self, user_id: str):
+        user = User.query.filter_by(id=user_id).first()
+        if not user:
+            raise RecordNotFoundError(record_id=user_id)
+
+        user.active = True
+        user.can_login = True
+
+        clients = OAuth2Client.query.filter_by(user_id=user_id).all()
+        for client in clients:
+            client.client_secret = gen_salt(48)
+
+        self._db_commit()
 
         return self.response_handler.successful_update_response('User', user_id)
 
