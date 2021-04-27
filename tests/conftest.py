@@ -3,15 +3,17 @@
 import json
 import os
 from time import sleep
+from uuid import uuid4
 
 import pytest
 import requests
 from flask import Response
 from flask_migrate import upgrade
+from werkzeug.security import gen_salt
 
 from authserver import create_app
 from authserver.config import ConfigurationFactory
-from authserver.db import User, db
+from authserver.db import db, User, OAuth2Client
 from authserver.utilities import PostgreSQLContainer
 
 
@@ -81,3 +83,33 @@ def environments():
         'SANDBOX',
         'PRODUCTION'
     ]
+
+
+@pytest.fixture
+def user():
+    data = {
+        "username": "greg_henry",
+        "password": "passw0rd!",
+        "can_login": True,
+        "active": True
+    }
+    user = User(**data)
+
+    db.session.add(user)
+
+    return user
+
+
+@pytest.fixture
+def oauth_client(user):
+    data = {
+        "id": str(uuid4()).replace('-', ''),
+        "user_id": user.id,
+        "client_id": gen_salt(24),
+        "client_secret": gen_salt(48)
+    }
+    oauth_client = OAuth2Client(**data)
+
+    db.session.add(oauth_client)
+
+    return oauth_client
