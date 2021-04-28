@@ -154,7 +154,7 @@ class TestPOSTUserResource:
             equal("No resource with identifier '123bad' found.")
         )
 
-    def test_post_user_deactivate(self, mocker, client, user, oauth_client):
+    def test_post_user_deactivate(self, mocker, client, user, oauth_client, oauth_token):
         mocker.patch(
             "authlib.integrations.flask_oauth2.ResourceProtector.acquire_token",
             return_value=True,
@@ -174,6 +174,10 @@ class TestPOSTUserResource:
         response = client.get(
             "/clients/{}".format(oauth_client.id), headers={})
         expect(response.json["response"]["client_secret"]).to(be(None))
+
+        # Assert that the user's token has been revoked and expired
+        expect(oauth_token.revoked).to(be(True))
+        expect(oauth_token.is_access_token_expired()).to(be(True))
 
         # Clean up (n.b., clean up should happen in the conftest – between each test.)
         client.delete(f"/users/{user.id}", headers={})

@@ -197,6 +197,11 @@ class UserResource(Resource):
         user.can_login = False
         user.date_last_updated = datetime.utcnow()
 
+        token = OAuth2Token.query.filter_by(user_id=user.id).first()
+        if token:
+            token.revoked = True
+            token.expires_in = 0
+
         clients = OAuth2Client.query.filter_by(user_id=user_id).all()
         for client in clients:
             client.client_secret = None
