@@ -195,6 +195,7 @@ class UserResource(Resource):
 
         user.active = False
         user.can_login = False
+        user.date_last_updated = datetime.utcnow()
 
         clients = OAuth2Client.query.filter_by(user_id=user_id).all()
         for client in clients:
@@ -211,6 +212,7 @@ class UserResource(Resource):
 
         user.active = True
         user.can_login = True
+        user.date_last_updated = datetime.utcnow()
 
         clients = OAuth2Client.query.filter_by(user_id=user_id).all()
         for client in clients:
