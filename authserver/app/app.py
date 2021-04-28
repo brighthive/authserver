@@ -1,5 +1,11 @@
 """Flask Application."""
 
+import json
+import os
+import logging
+from datetime import datetime as dt
+from pprint import pformat
+from elasticapm.contrib.flask import ElasticAPM
 from operator import mod
 from flask import Flask, g, request
 from flask_cors import CORS
@@ -9,22 +15,15 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_injector import FlaskInjector
 from marshmallow.exceptions import ValidationError
 
-from datetime import datetime as dt
-
 from authserver.api import (client_bp, health_api_bp, oauth2_bp,
                             role_bp, user_bp, home_bp,
                             scope_bp, password_recovery_bp)
-
-from authserver.modules import (ConfigurationModule, GraphDatabaseModule, MailServiceModule)
+from authserver.modules import (
+    ConfigurationModule, GraphDatabaseModule, MailServiceModule)
 from authserver.config import ConfigurationFactory
 from authserver.db import db
 from authserver.utilities import config_oauth, ResponseBody
-
-import json
-import os
-import logging
-from pprint import pformat
-from elasticapm.contrib.flask import ElasticAPM
+from authserver.utilities.errors import RecordNotFoundError
 
 
 def teardown_appcontext(_):
@@ -84,8 +83,9 @@ def create_app(environment: str = None):
         logging.info(f"""{e}, app.py, line 83""")
         response_body = ResponseBody()
         if isinstance(e, ValidationError):
-            logging.info("ValidationError:")
             return response_body.custom_response(status="Error", messages=[e.messages])
+        elif isinstance(e, RecordNotFoundError):
+            return response_body.not_found_response(e.record_id)
         else:
             try:
                 error_code = str(e).split(':')[0][:3].strip()
@@ -124,6 +124,7 @@ def create_app(environment: str = None):
 
     app.teardown_appcontext(teardown_appcontext)
 
-    FlaskInjector(app=app, modules=[ConfigurationModule, GraphDatabaseModule, MailServiceModule])
+    FlaskInjector(app=app, modules=[
+                  ConfigurationModule, GraphDatabaseModule, MailServiceModule])
 
     return app

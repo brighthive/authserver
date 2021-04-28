@@ -6,7 +6,7 @@ services:
     environment: 
       - POSTGRES_DB=authserver
       - POSTGRES_USER=brighthive_admin
-      - POSTGRES_PASSWORD=password
+      - POSTGRES_PASSWORD=passw0rd
     ports:
       - 5432:5432
   neo4j:
