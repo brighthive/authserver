@@ -2,7 +2,7 @@
 
 import json
 import os
-from time import sleep
+from time import sleep, time
 from uuid import uuid4
 
 import pytest
@@ -13,7 +13,7 @@ from werkzeug.security import gen_salt
 
 from authserver import create_app
 from authserver.config import ConfigurationFactory
-from authserver.db import db, User, OAuth2Client
+from authserver.db import db, User, OAuth2Client, OAuth2Token
 from authserver.utilities import PostgreSQLContainer
 
 
@@ -113,3 +113,18 @@ def oauth_client(user):
     db.session.add(oauth_client)
 
     return oauth_client
+
+
+@pytest.fixture
+def oauth_token(user):
+    data = {
+        "access_token": str(uuid4()).replace("-", ""),
+        "issued_at": int(time()) - 865000,
+        "expires_in": 965000,
+        "user_id": user.id
+    }
+    token = OAuth2Token(**data)
+
+    db.session.add(token)
+
+    return token
