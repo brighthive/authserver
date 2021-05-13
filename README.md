@@ -2,7 +2,37 @@
 
 An OAuth 2.0 server with added services for providing fine-grain access control to Data Trust assets.
 
-## For Developers
+# Getting Started
+
+### Run the App Locally
+
+Authserver is a Flask app with a REST interface supported by a Postgres database. Follow these steps to run the app locally:
+
+**1. (first terminal) Stand up the Postgres database with `docker-compose`.**
+
+```
+docker-compose -f docker-compose-devel.yml up postgres
+```
+
+**2. (second terminal) Configure the app.** Authserver configures itself with environment variables. Copy `.env.development` to get started with local development:
+
+```
+cp .env.development .env
+```
+
+**3. (second terminal) Install dependencies.**
+
+```
+pipenv install --dev
+```
+
+**4. (second terminal)Run the Flask app!**
+
+```
+pipenv run ./entrypoint.sh
+```
+
+Hurrah! Check the app status here: `http://0.0.0.0:10001/health`
 
 ### Visual Studio Code Configuration
 

@@ -1,9 +1,9 @@
-version: '3'
+version: "3"
 services:
   postgres:
-    image: postgres:latest
+    image: postgres:12
     container_name: postgres-authserver
-    environment: 
+    environment:
       - POSTGRES_DB=authserver
       - POSTGRES_USER=brighthive_admin
       - POSTGRES_PASSWORD=passw0rd
@@ -23,5 +23,3 @@ services:
       - ./neo4j-dev/plugins:/plugins
     environment:
       - NEO4J_AUTH=neo4j/passw0rd
-
-

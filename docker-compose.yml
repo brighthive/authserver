@@ -1,17 +1,17 @@
-version: '3'
+version: "3"
 services:
   postgres_service:
-      image: postgres:12
-      environment:
-        - POSTGRES_USER=bh_authserver
-        - POSTGRES_PASSWORD=1qaz@WSX3edc
-        - POSTGRES_DB=authserver
-      ports:
-        - "5432:5432"
+    image: postgres:12
+    environment:
+      - POSTGRES_USER=bh_authserver
+      - POSTGRES_PASSWORD=1qaz@WSX3edc
+      - POSTGRES_DB=authserver
+    ports:
+      - "5432:5432"
   authserver:
     image: brighthive/authserver:latest
     depends_on:
-        - postgres_service
+      - postgres_service
     environment:
       - APP_ENV=PRODUCTION
       - PG_USER=bh_authserver
