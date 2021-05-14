@@ -26,10 +26,17 @@ cp .env.development .env
 pipenv install --dev
 ```
 
-**4. (second terminal)Run the Flask app!**
+**4. (second terminal) Run the Flask app!**
 
 ```
-pipenv run ./entrypoint.sh
+# Run migrations
+pipenv run flask db upgrade
+
+# Run the app
+pipenv run gunicorn -w 4 -b 0.0.0.0:10001 wsgi:app --reload --worker-class gevent --timeout 600
+
+# Conversely, you can run the app with flask
+pipenv run flask run -p 10001
 ```
 
 Hurrah! Check the app status here: `http://0.0.0.0:10001/health`
