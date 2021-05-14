@@ -36,6 +36,7 @@ psutil = "*"
 neo4j = "*"
 flask-injector = "*"
 sendgrid = "*"
+pyjwt = "*"
 
 [requires]
 python_version = "3.8"
