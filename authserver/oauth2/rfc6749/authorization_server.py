@@ -8,6 +8,10 @@ from authlib.oauth2 import OAuth2Request
 from authlib.common.encoding import to_unicode
 from authlib.oauth2.rfc6749 import InvalidGrantError, OAuth2Error
 
+from Crypto.PublicKey import DSA
+from Crypto.Signature import DSS
+from Crypto.Hash import SHA256
+import base64
 
 class BrighthiveAuthorizationServer(AuthorizationServer):
     """Brighthive Authorization Server.
@@ -73,6 +77,15 @@ class BrighthiveAuthorizationServer(AuthorizationServer):
         try:
             grant.validate_token_request()
             args = grant.create_token_response()
+
+            print(request.user)
+
+            #message = b'''{"isSuperAdmin":true,"organizationRoles":{"org-1":"admin"},"collaborationRoles":{"collab-1":"admin","collab-2":"user"},"dataResourcePermissions":{"dataResource-1":["read","update"],"dataResource-2":["delete"]}}'''
+            #hash_obj = SHA256.new(message)
+            #signer = DSS.new(key, 'fips-186-3') # key = self.signature_key from ConfigurationModule
+            #signature = signer.sign(hash_obj)
+            #sigstr = base64.urlsafe_b64encode(signature).decode("utf-8")
+
             return self.handle_response(*args)
         except OAuth2Error as error:
             return self.handle_error_response(request, error)

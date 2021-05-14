@@ -10,7 +10,7 @@ import os
 import json
 from datetime import datetime
 from abc import ABC
-
+from Crypto.PublicKey import DSA
 
 class ConfigurationEnvironmentNotFoundError(Exception):
     pass
@@ -63,6 +63,16 @@ class AbstractConfiguration(ABC):
         self.sendgrid_recovery_template_id = os.getenv('SENDGRID_RECOVERY_TEMPLATE_ID', 'recovery-id')
         self.sendgrid_reset_template_id = os.getenv('SENDGRID_RESET_TEMPLATE_ID', 'recovery-id')
         self.default_app_url = os.getenv('DEFAULT_APP_URL', 'http://localhost:8001')
+
+        self.permission_service_url = os.getenv('PERMISSION_URL', 'http://localhost:2001')
+        self.signature_private_path = os.getenv('SIGNATURE_PRIVATE_PATH', None)
+
+        if self.signature_private_path == None:
+             raise Exception("Key pair path are not defined.")
+
+        privatefile = open(self.signature_private_path, "r")
+        self.signature_key = DSA.import_key(privatefile.read())
+
 
     @staticmethod
     def get_app_status():
