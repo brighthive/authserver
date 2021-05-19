@@ -7,34 +7,6 @@ from flask import request as flask_req
 from authlib.oauth2 import OAuth2Request
 from authlib.common.encoding import to_unicode
 from authlib.oauth2.rfc6749 import InvalidGrantError, OAuth2Error
-from datetime import datetime, timedelta
-import jwt
-
-
-class BrighthiveJWT(object):
-    def __init__(self, private_key):
-        self.private_key = private_key
-
-    def generated_claims(self) -> object:
-        return {
-            "iss": "brighthive-authserver",
-            "aud": "brighthive-platform-apis",
-            "iat": datetime.utcnow(),
-            "exp": datetime.utcnow() + timedelta(24)
-        }
-
-    def make_jwt(self, json_claims: object) -> object:
-        claims = self.generated_claims()
-        claims.update(json_claims)
-
-        print(claims)
-
-        jwt_token = jwt.encode(claims, self.private_key, algorithm='RS256')
-
-        print(f'data {claims}')
-        print(f'jwt_token {jwt_token}')
-
-        return jwt_token
 
 
 class BrighthiveAuthorizationServer(AuthorizationServer):
@@ -102,11 +74,7 @@ class BrighthiveAuthorizationServer(AuthorizationServer):
             grant.validate_token_request()
             args = grant.create_token_response()
 
-            import pdb;
-            pdb.set_trace()
-            print("whatt")
-
-            # jwt_lol = BrighthiveJWT(self.config.signature_key).make_jwt(json_claims)
+            # import pdb; pdb.set_trace()
 
             return self.handle_response(*args)
         except OAuth2Error as error:
