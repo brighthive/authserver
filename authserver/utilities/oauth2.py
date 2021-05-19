@@ -94,13 +94,13 @@ authorization = BrighthiveAuthorizationServer(
 )
 require_oauth = ResourceProtector()
 
-
+# TODO: Verify: None of these need to be modified?
 def config_oauth(app):
     authorization.init_app(app)
     authorization.register_client_auth_method(
         'client_secret_json', authenticate_client_secret_json)
 
-    # supported grant types
+    # supported grant types # TODO: grant.create_token_response() is calling this
     authorization.register_grant(ClientCredentialsGrant)
     authorization.register_grant(AuthorizationCodeGrant, [
                                  CodeChallenge(required=False)])

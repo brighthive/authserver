@@ -71,11 +71,14 @@ class BrighthiveAuthorizationServer(AuthorizationServer):
             return self.handle_error_response(request, error)
 
         try:
-            grant.validate_token_request()
-            args = grant.create_token_response()
+            grant.validate_token_request()  # How is this generating an access token??? Wheres the code???
+            args = grant.create_token_response()  # How is this generating an access token??? Wheres the code???
 
             # import pdb; pdb.set_trace()
 
             return self.handle_response(*args)
         except OAuth2Error as error:
             return self.handle_error_response(request, error)
+
+    def save_token():
+        pass

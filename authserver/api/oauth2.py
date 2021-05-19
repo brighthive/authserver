@@ -94,7 +94,7 @@ def authorize():
     return authorization.create_authorization_response(grant_user=user)
 
 
-class ValidateOAuth2TokenResource(Resource):
+class ValidateOAuth2TokenResource(Resource): # TODO: update
     """
     This resource determines the validity of an OAuth2Token.
     """
