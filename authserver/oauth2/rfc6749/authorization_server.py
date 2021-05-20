@@ -48,7 +48,8 @@ def generate_jwt(access_token):
         json_claims = {"brighthive-access-token": access_token, "brighthive-org-role": "???"}
         a_jwt = BrighthiveJWT().make_jwt(json_claims)
     except Exception as e:
-        print('JWT exception', e)
+        print('JWT generation exception:', e)
+        return 'none'
 
     return a_jwt
 

@@ -69,9 +69,11 @@ class AbstractConfiguration(ABC):
         if signature_private_path is None:
             print("Private key for JWT signature not defined.")
         
-        else:
+        try:
             with open(signature_private_path, "rb") as key_file:
                 self.signature_key = key_file.read()
+        except (FileNotFoundError, TypeError) as e:
+            print(e)
 
 
     @staticmethod
