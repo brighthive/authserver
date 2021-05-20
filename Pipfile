@@ -16,7 +16,7 @@ pytest-flask = "*"
 pytest-mock = "*"
 
 [packages]
-flask = "*"
+flask = "<2"
 flask-restful = "*"
 flask-migrate = "*"
 flask-sqlalchemy = "*"

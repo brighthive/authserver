@@ -33,52 +33,6 @@ def teardown_appcontext(_):
         g.graph_db.close()
 
 
-# # TODO: Move into another file
-
-# # JWT STUFF
-
-# # MY STUFF
-
-# import jwt
-
-# from authserver.config import ConfigurationFactory
-# from datetime import datetime, timedelta
-# class BrighthiveJWT(object):
-#     def __init__(self):
-#         self.private_key = ConfigurationFactory.from_env().signature_key
-
-#     def generated_claims(self) -> object:
-#         return {
-#             "iss": "brighthive-authserver",
-#             "aud": "brighthive-platform-apis",
-#             "iat": datetime.utcnow(),
-#             "exp": datetime.utcnow() + timedelta(24)
-#         }
-
-#     def make_jwt(self, json_claims: object) -> object:
-#         claims = self.generated_claims()
-#         claims.update(json_claims)
-
-#         jwt_token = jwt.encode(claims, self.private_key, algorithm='RS256')
-
-#         print(f'data {claims}')
-#         print(f'jwt_token {jwt_token}')
-
-#         return jwt_token
-
-# # INTEGRATION STUFF
-
-# def gen_access_token(client, grant_type, user, scope):
-#     # print('Not used yet in the JWT:: {} \n{} \n{} \n{}'.format( client, grant_type, user, scope))
-#     try:
-#         json_claims = {"brighthive-access-token": "???", "brighthive-org-role": "???"}
-#         s = BrighthiveJWT().make_jwt(json_claims)
-#     except Exception as e:
-#         print('JWT exception', e)
-
-#     return s
-
-
 
 def create_app(environment: str = None):
     """Create the Flask application.
