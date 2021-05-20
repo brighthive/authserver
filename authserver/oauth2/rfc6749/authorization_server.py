@@ -19,9 +19,16 @@ class BrighthiveJWT(object):
     def generated_claims(self) -> object:
         return {
             "iss": "brighthive-authserver",
-            "aud": "brighthive-platform-apis",
+            "aud": [
+                "brighthive-data-trust-manager",
+                "brighthive-data-catalog-manager",
+                "brighthive-governance-api",
+                "brighthive-permissions-service",
+                "brighthive-data-uploader-service"
+                "brighthive-authserver"
+            ],
             "iat": datetime.utcnow(),
-            "exp": datetime.utcnow() + timedelta(24)
+            "exp": datetime.utcnow() + timedelta(24) # TODO: Set to now + 15 minutes
         }
 
     def make_jwt(self, json_claims: object) -> object:
@@ -110,6 +117,7 @@ class BrighthiveAuthorizationServer(AuthorizationServer):
             grant.validate_token_request()
             status, body, headers = grant.create_token_response()
 
+            # TODO: Call permissions service with user id
             bh_jwt = generate_jwt(body['access_token'])
             body['jwt'] = bh_jwt
 
