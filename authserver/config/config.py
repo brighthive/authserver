@@ -67,10 +67,11 @@ class AbstractConfiguration(ABC):
         signature_private_path = os.getenv('SIGNATURE_PRIVATE_PATH', None)
 
         if signature_private_path is None:
-            raise Exception("Private key for JWT signature not defined.")
-
-        with open(signature_private_path, "rb") as key_file:
-            self.signature_key = key_file.read()
+            print("Private key for JWT signature not defined.")
+        
+        else:
+            with open(signature_private_path, "rb") as key_file:
+                self.signature_key = key_file.read()
 
 
     @staticmethod
