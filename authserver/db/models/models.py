@@ -224,7 +224,7 @@ class OAuth2AuthorizationCode(db.Model, OAuth2AuthorizationCodeMixin):
     code_challenge_method = db.Column(db.VARCHAR())
 
 
-class OAuth2Token(db.Model, OAuth2TokenMixin): # TODO: this needs to be updated? OAuth2TokenMixin makes that more complicated.
+class OAuth2Token(db.Model, OAuth2TokenMixin):
     """OAuth 2.0 Token"""
 
     __tablename__ = 'oauth2_tokens'
