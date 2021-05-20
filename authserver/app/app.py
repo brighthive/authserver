@@ -33,7 +33,6 @@ def teardown_appcontext(_):
         g.graph_db.close()
 
 
-
 def create_app(environment: str = None):
     """Create the Flask application.
 
