@@ -18,3 +18,9 @@
 
 # neo4j artifacts
 **/neo4j-dev
+
+private
+public
+
+# .idea files
+.idea

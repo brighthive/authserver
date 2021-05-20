@@ -10,13 +10,12 @@ docker = "*"
 pytest = "*"
 pytest-cov = "*"
 expects = "*"
-sphinx = "*"
 doc8 = "*"
 pytest-flask = "*"
 pytest-mock = "*"
 
 [packages]
-flask = "*"
+flask = "<2"
 flask-restful = "*"
 flask-migrate = "*"
 flask-sqlalchemy = "*"
@@ -36,6 +35,7 @@ psutil = "*"
 neo4j = "*"
 flask-injector = "*"
 sendgrid = "*"
+pyjwt = "*"
 
 [requires]
 python_version = "3.8"

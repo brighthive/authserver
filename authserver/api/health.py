@@ -8,7 +8,6 @@ from flask import Blueprint, request
 from flask_restful import Resource, Api
 from injector import inject
 from authserver.config import AbstractConfiguration
-
 from authserver.utilities import require_oauth
 
 

@@ -11,7 +11,6 @@ import json
 from datetime import datetime
 from abc import ABC
 
-
 class ConfigurationEnvironmentNotFoundError(Exception):
     pass
 
@@ -63,6 +62,19 @@ class AbstractConfiguration(ABC):
         self.sendgrid_recovery_template_id = os.getenv('SENDGRID_RECOVERY_TEMPLATE_ID', 'recovery-id')
         self.sendgrid_reset_template_id = os.getenv('SENDGRID_RESET_TEMPLATE_ID', 'recovery-id')
         self.default_app_url = os.getenv('DEFAULT_APP_URL', 'http://localhost:8001')
+
+        self.permission_service_url = os.getenv('PERMISSION_URL', 'http://localhost:2001')
+        signature_private_path = os.getenv('SIGNATURE_PRIVATE_PATH', None)
+
+        if signature_private_path is None:
+            print("Private key for JWT signature not defined.")
+        
+        try:
+            with open(signature_private_path, "rb") as key_file:
+                self.signature_key = key_file.read()
+        except (FileNotFoundError, TypeError) as e:
+            print(e)
+
 
     @staticmethod
     def get_app_status():

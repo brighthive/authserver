@@ -94,7 +94,6 @@ authorization = BrighthiveAuthorizationServer(
 )
 require_oauth = ResourceProtector()
 
-
 def config_oauth(app):
     authorization.init_app(app)
     authorization.register_client_auth_method(
