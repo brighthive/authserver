@@ -32,6 +32,9 @@ pipenv install --dev
 # Run migrations
 pipenv run flask db upgrade
 
+# Optionally, run the sql file 'run-locally.sql' to allow locally logging in to facet
+docker exec -it postgres-authserver psql -U brighthive_admin -d authserver
+
 # Run the app
 pipenv run gunicorn -w 4 -b 0.0.0.0:10001 wsgi:app --reload --worker-class gevent --timeout 600
 
