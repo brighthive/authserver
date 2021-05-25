@@ -16,6 +16,7 @@ from datetime import datetime, timedelta
 import requests
 from requests.structures import CaseInsensitiveDict
 import os
+import logging
 
 class BrighthiveJWT(object):
     def __init__(self):
@@ -62,6 +63,11 @@ def get_perms_for_user(person_id: str):
     perm_headers["Accept"] = "application/json"
     perm_headers["Authorization"] = f"Bearer {super_admin_jwt}"
 
+    print("print test")
+    logging.debug("debug log test")
+    logging.info("info log test")
+    logging.warn("warn log test")
+
     try:
         perms_response = requests.get(
             get_user_perms_by_id,
@@ -72,7 +78,8 @@ def get_perms_for_user(person_id: str):
     except Exception as err:
         print(f'Other error occurred: {err}')
     else:
-        print('Success!')
+        print('Perms API call success!')
+        
 
     # TODO: handle the following errors
     # not enough permissions to make this request
