@@ -165,11 +165,8 @@ class BrighthiveAuthorizationServer(AuthorizationServer):
             # expired credentials
             # no user found
 
-
             # Extract user perms
             perms_for_user = perms_response.json()['response'].get('brighthive-platform-permissions')
-
-            import pdb; pdb.set_trace()
 
             bh_jwt = generate_jwt(body['access_token'], perms_for_user)
             body['jwt'] = bh_jwt
