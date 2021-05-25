@@ -4,7 +4,7 @@ An OAuth 2.0 server with added services for providing fine-grain access control 
 
 # Getting Started
 
-### Run the App Locally
+## Run the App Locally
 
 Authserver is a Flask app with a REST interface supported by a Postgres database. Follow these steps to run the app locally:
 
@@ -43,6 +43,12 @@ pipenv run flask run -p 10001
 ```
 
 Hurrah! Check the app status here: `http://0.0.0.0:10001/health`
+
+## Run tests
+
+```
+APP_ENV=test pipenv run pytest
+```
 
 ### Visual Studio Code Configuration
 

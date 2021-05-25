@@ -47,6 +47,42 @@ class BrighthiveJWT(object):
 
         return jwt_token
 
+def get_perms_for_user(person_id: str):
+    # Get user perms
+    permissions_api = os.getenv('BH_PERMISSIONS_SERVICE_URI')
+
+    # get_user_perms_by_id = f'{permissions_api}/permissions/{person_id}'
+    get_user_perms_by_id = f'{permissions_api}/permissions/d11a870c-688b-4575-8e01-77658f756bbc'  # FIXME: just for testing
+
+    # Generate a token for Perms API
+    super_admin_jwt = generate_jwt({"brighthive-super-admin": True})
+
+    # Make perms api call
+    perm_headers = CaseInsensitiveDict()
+    perm_headers["Accept"] = "application/json"
+    perm_headers["Authorization"] = f"Bearer {super_admin_jwt}"
+
+    try:
+        perms_response = requests.get(
+            get_user_perms_by_id,
+            headers=perm_headers)
+        perms_response.raise_for_status()
+    except requests.exceptions.HTTPError as http_err:
+        print(f'HTTP error occurred: {http_err}')
+    except Exception as err:
+        print(f'Other error occurred: {err}')
+    else:
+        print('Success!')
+
+    # TODO: handle the following errors
+    # not enough permissions to make this request
+    # invalid access token
+    # invalid credentials
+    # expired credentials
+    # no user found
+
+    # Extract user perms
+    return perms_response.json()['response'].get('brighthive-platform-permissions')
 
 def generate_jwt(access_token: str, claims: dict = {}):
     if type(claims) is not dict:
@@ -127,46 +163,15 @@ class BrighthiveAuthorizationServer(AuthorizationServer):
             grant.validate_token_request()
             status, body, headers = grant.create_token_response()
 
-            # Get user perms
-            permissions_api = os.getenv('BH_PERMISSIONS_SERVICE_URI')
-
             person_id = grant.client.user.person_id
             if not person_id:
                 print('person_id not found!')
                 person_id = 'error'
 
-            # get_user_perms_by_id = f'{permissions_api}/permissions/{person_id}'
-            get_user_perms_by_id = f'{permissions_api}/permissions/d11a870c-688b-4575-8e01-77658f756bbc'  # FIXME: just for testing
-
-            # Generate a token for Perms API
-            super_admin_jwt = generate_jwt({"brighthive-super-admin": True})
-
-            # Make perms api call
-            perm_headers = CaseInsensitiveDict()
-            perm_headers["Accept"] = "application/json"
-            perm_headers["Authorization"] = f"Bearer {super_admin_jwt}"
-
-            try:
-                perms_response = requests.get(
-                    get_user_perms_by_id,
-                    headers=perm_headers)
-                perms_response.raise_for_status()
-            except requests.exceptions.HTTPError as http_err:
-                print(f'HTTP error occurred: {http_err}')
-            except Exception as err:
-                print(f'Other error occurred: {err}')
-            else:
-                print('Success!')
-
-            # TODO: handle the following errors
-            # not enough permissions to make this request
-            # invalid access token
-            # invalid credentials
-            # expired credentials
-            # no user found
-
-            # Extract user perms
-            perms_for_user = perms_response.json()['response'].get('brighthive-platform-permissions')
+            perms_for_user = {}
+            
+            if os.getenv('APP_ENV') != 'test' and person_id != 'error':
+                perms_for_user = get_perms_for_user(person_id)
 
             bh_jwt = generate_jwt(body['access_token'], perms_for_user)
             body['jwt'] = bh_jwt
