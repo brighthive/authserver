@@ -65,6 +65,8 @@ def get_perms_for_user(person_id: str):
 
     logging.info('Authserver -> PermsAPI: Contacting...')
 
+    perms_response = {}
+
     try:
         perms_response = requests.get(
             get_user_perms_by_id,
@@ -76,7 +78,6 @@ def get_perms_for_user(person_id: str):
         logging.exception(f'Authserver -> PermsAPI: Uncaught error: {err}')
     else:
         logging.info('Authserver -> PermsAPI: Perms API call succeeded!')
-        
 
     # TODO: handle the following errors
     # not enough permissions to make this request
@@ -86,10 +87,7 @@ def get_perms_for_user(person_id: str):
     # no user found
 
     # Extract user perms
-    if not perms_response:
-        logging.warn("Unable to get a response from Permissions Service.")
-
-    return perms_response.json()['response'].get('brighthive-platform-permissions') if perms_response else {}
+    return perms_response.json()['response'].get('brighthive-platform-permissions')
 
 def generate_jwt(access_token: str, claims: dict = {}):
     if type(claims) is not dict:
