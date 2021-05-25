@@ -43,8 +43,8 @@ class BrighthiveJWT(object):
 
         jwt_token = jwt.encode(claims, self.private_key, algorithm='RS256')
 
-        # print(f'data {claims}')
-        # print(f'jwt_token: {jwt_token}')
+        # logging.info(f'data {claims}')
+        # logging.info(f'jwt_token: {jwt_token}')
 
         return jwt_token
 
@@ -63,10 +63,7 @@ def get_perms_for_user(person_id: str):
     perm_headers["Accept"] = "application/json"
     perm_headers["Authorization"] = f"Bearer {super_admin_jwt}"
 
-    print("print test")
-    logging.debug("debug log test")
-    logging.info("info log test")
-    logging.warn("warn log test")
+    logging.info('Authserver -> PermsAPI: Contacting...')
 
     try:
         perms_response = requests.get(
@@ -74,11 +71,11 @@ def get_perms_for_user(person_id: str):
             headers=perm_headers)
         perms_response.raise_for_status()
     except requests.exceptions.HTTPError as http_err:
-        print(f'HTTP error occurred: {http_err}')
+        logging.error(f'Authserver -> PermsAPI: HTTP Error: {http_err}')
     except Exception as err:
-        print(f'Other error occurred: {err}')
+        logging.error(f'Authserver -> PermsAPI: Uncaught error: {err}')
     else:
-        print('Perms API call success!')
+        logging.info('Authserver -> PermsAPI: Perms API call succeeded!')
         
 
     # TODO: handle the following errors
@@ -89,18 +86,21 @@ def get_perms_for_user(person_id: str):
     # no user found
 
     # Extract user perms
-    return perms_response.json()['response'].get('brighthive-platform-permissions')
+    if not perms_response:
+        logging.warn("Unable to get a response from Permissions Service.")
+
+    return perms_response.json()['response'].get('brighthive-platform-permissions') if perms_response else {}
 
 def generate_jwt(access_token: str, claims: dict = {}):
     if type(claims) is not dict:
-        print('raise typeerror("claims are not a dict")')
+        logging.warn('While trying to generate a JWT, the claims given were not a dict.')
 
     try:
         claims.update({"brighthive-access-token": access_token})
 
         a_jwt = BrighthiveJWT().make_jwt(claims)
     except Exception as e:
-        print('JWT generation exception:', e)
+        logging.error('JWT generation exception:', e)
         return 'none'
 
     return a_jwt
@@ -172,7 +172,7 @@ class BrighthiveAuthorizationServer(AuthorizationServer):
 
             person_id = grant.client.user.person_id
             if not person_id:
-                print('person_id not found!')
+                logging.warn(f"person_id '{person_id}' not found!")
                 person_id = 'error'
 
             perms_for_user = {}

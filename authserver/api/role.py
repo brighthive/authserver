@@ -11,7 +11,7 @@ from flask_restful import Resource, Api, request
 from werkzeug.security import gen_salt
 from authserver.db import db, Role, RoleSchema, AuthorizedScope, AuthorizedScopeSchema
 from authserver.utilities import ResponseBody, require_oauth
-
+import logging
 
 class RoleResource(Resource):
     """Role Resource
@@ -92,7 +92,7 @@ class RoleResource(Resource):
             else:
                 return self.response_handler.not_found_response(id)
         except Exception as e:
-            print(e)
+            logging.error(e)
             return self.response_handler.not_found_response(id)
 
     def update(self, id: str, partial=True):

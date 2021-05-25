@@ -10,6 +10,7 @@ import os
 import json
 from datetime import datetime
 from abc import ABC
+import logging
 
 class ConfigurationEnvironmentNotFoundError(Exception):
     pass
@@ -67,13 +68,13 @@ class AbstractConfiguration(ABC):
         signature_private_path = os.getenv('SIGNATURE_PRIVATE_PATH', None)
 
         if signature_private_path is None:
-            print("Private key for JWT signature not defined.")
+            logging.warn("Private key for JWT signature not defined.")
         
         try:
             with open(signature_private_path, "rb") as key_file:
                 self.signature_key = key_file.read()
         except (FileNotFoundError, TypeError) as e:
-            print(e)
+            logging.error("Failed to find or open JWT private key.")
 
 
     @staticmethod
