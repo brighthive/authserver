@@ -74,7 +74,7 @@ class AbstractConfiguration(ABC):
             with open(signature_private_path, "rb") as key_file:
                 self.signature_key = key_file.read()
         except (FileNotFoundError, TypeError) as e:
-            logging.error("Failed to find or open JWT private key.")
+            logging.exception("Failed to find or open JWT private key.")
 
 
     @staticmethod

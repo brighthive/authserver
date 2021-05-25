@@ -71,9 +71,9 @@ def get_perms_for_user(person_id: str):
             headers=perm_headers)
         perms_response.raise_for_status()
     except requests.exceptions.HTTPError as http_err:
-        logging.error(f'Authserver -> PermsAPI: HTTP Error: {http_err}')
+        logging.exception(f'Authserver -> PermsAPI: HTTP Error: {http_err}')
     except Exception as err:
-        logging.error(f'Authserver -> PermsAPI: Uncaught error: {err}')
+        logging.exception(f'Authserver -> PermsAPI: Uncaught error: {err}')
     else:
         logging.info('Authserver -> PermsAPI: Perms API call succeeded!')
         
@@ -99,8 +99,8 @@ def generate_jwt(access_token: str, claims: dict = {}):
         claims.update({"brighthive-access-token": access_token})
 
         a_jwt = BrighthiveJWT().make_jwt(claims)
-    except Exception as e:
-        logging.error('JWT generation exception:', e)
+    except Exception:
+        logging.exception('Uncaught exception when generating JWT.')
         return 'none'
 
     return a_jwt

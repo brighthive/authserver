@@ -92,7 +92,7 @@ class RoleResource(Resource):
             else:
                 return self.response_handler.not_found_response(id)
         except Exception as e:
-            logging.error(e)
+            logging.exception(e)
             return self.response_handler.not_found_response(id)
 
     def update(self, id: str, partial=True):
