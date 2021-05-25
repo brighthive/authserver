@@ -29,7 +29,7 @@
     "collaboration-uuid": "admin",
     "collaboration-uuid": "user",
     "collaboration-uuid": "third-party"
-  ]
+  ],
 
   "brighthive-data-resource-permissions": [
     "data-resource-uuid": [
