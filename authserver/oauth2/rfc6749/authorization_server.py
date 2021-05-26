@@ -52,8 +52,7 @@ def get_perms_for_user(person_id: str):
     # Get user perms
     permissions_api = ConfigurationFactory.from_env().permission_service_url
 
-    # get_user_perms_by_id = f'{permissions_api}/permissions/{person_id}'
-    get_user_perms_by_id = f'{permissions_api}/permissions/d11a870c-688b-4575-8e01-77658f756bbc'  # FIXME: just for testing
+    get_user_perms_by_id = f'{permissions_api}/users/{person_id}/permissions'
 
     # Generate a token for Perms API
     super_admin_jwt = generate_jwt({"brighthive-super-admin": True})
