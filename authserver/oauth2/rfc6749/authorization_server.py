@@ -55,7 +55,7 @@ def get_perms_for_user(person_id: str):
     get_user_perms_by_id = f'{permissions_api}/users/{person_id}/permissions'
 
     # Generate a token for Perms API
-    super_admin_jwt = generate_jwt({"brighthive-super-admin": True})
+    super_admin_jwt = generate_jwt("none", {"brighthive-super-admin": True})
 
     # Make perms api call
     perm_headers = CaseInsensitiveDict()
@@ -88,12 +88,12 @@ def get_perms_for_user(person_id: str):
     # Extract user perms
     return perms_response.json()['response'].get('brighthive-platform-permissions')
 
-def generate_jwt(access_token: str, claims: dict = {}):
+def generate_jwt(access_token: str, claims: dict = {}, person_id: str='non provided'):
     if type(claims) is not dict:
         logging.warn('While trying to generate a JWT, the claims given were not a dict.')
 
     try:
-        claims.update({"brighthive-access-token": access_token})
+        claims.update({"brighthive-access-token": access_token, "person-id": person_id})
 
         a_jwt = BrighthiveJWT().make_jwt(claims)
     except Exception:
@@ -168,9 +168,10 @@ class BrighthiveAuthorizationServer(AuthorizationServer):
             status, body, headers = grant.create_token_response()
 
             person_id = grant.client.user.person_id
+            logging.info(f'person_id: {person_id}')
             if not person_id:
                 logging.warn(f"person_id '{person_id}' not found!")
-                person_id = 'error'
+                person_id = 'error' #FIXME!
 
             perms_for_user = {}
             
