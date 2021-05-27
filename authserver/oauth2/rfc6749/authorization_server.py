@@ -12,6 +12,7 @@ import jwt
 
 from authserver.config import ConfigurationFactory
 from datetime import datetime, timedelta
+from authserver.db import OAuth2Token
 
 import requests
 from requests.structures import CaseInsensitiveDict
@@ -145,6 +146,7 @@ class BrighthiveAuthorizationServer(AuthorizationServer):
         url = request.base_url
         if request.query_string:
             url = url + '?' + to_unicode(request.query_string)
+
         return request_cls(request.method, url, body, request.headers)
 
     def create_token_response(self, request=None):
@@ -167,8 +169,11 @@ class BrighthiveAuthorizationServer(AuthorizationServer):
             grant.validate_token_request()
             status, body, headers = grant.create_token_response()
 
-            person_id = grant.client.user.person_id
-            logging.info(f'person_id: {person_id}')
+            access_token = body['access_token']
+            db_token = OAuth2Token.query.filter_by(access_token=access_token).first()
+            user = db_token.user
+            
+            person_id = user.person_id
             if not person_id:
                 logging.warn(f"person_id '{person_id}' not found!")
                 person_id = 'error' #FIXME!
@@ -178,7 +183,8 @@ class BrighthiveAuthorizationServer(AuthorizationServer):
             if os.getenv('APP_ENV') != 'test' and person_id != 'error':
                 perms_for_user = get_perms_for_user(person_id)
 
-            bh_jwt = generate_jwt(body['access_token'], perms_for_user, person_id)
+            logging.info(f"{person_id}, {user.username}")
+            bh_jwt = generate_jwt(body['access_token'], perms_for_user)
             body['jwt'] = bh_jwt
 
             # del body['access_token']
