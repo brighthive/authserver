@@ -31,7 +31,7 @@ class BrighthiveJWT(object):
                 "brighthive-data-catalog-manager",
                 "brighthive-governance-api",
                 "brighthive-permissions-service",
-                "brighthive-data-uploader-service"
+                "brighthive-data-uploader-service",
                 "brighthive-authserver"
             ],
             "iat": datetime.utcnow(),
