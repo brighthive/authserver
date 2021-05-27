@@ -35,7 +35,7 @@ class BrighthiveJWT(object):
                 "brighthive-authserver"
             ],
             "iat": datetime.utcnow(),
-            "exp": datetime.utcnow() + timedelta(24) # TODO: timedelta(minutes=15)
+            "exp": datetime.utcnow() + timedelta(minutes=15)
         }
 
     def make_jwt(self, json_claims: object) -> object:
@@ -43,9 +43,6 @@ class BrighthiveJWT(object):
         claims.update(json_claims)
 
         jwt_token = jwt.encode(claims, self.private_key, algorithm='RS256')
-
-        # logging.info(f'data {claims}')
-        # logging.info(f'jwt_token: {jwt_token}')
 
         return jwt_token
 
@@ -89,12 +86,12 @@ def get_perms_for_user(person_id: str):
     # Extract user perms
     return perms_response.json()['response'].get('brighthive-platform-permissions') if perms_response else {}
 
-def generate_jwt(access_token: str, claims: dict = {}, person_id: str='non provided'):
+def generate_jwt(access_token: str, claims: dict = {}):
     if type(claims) is not dict:
         logging.warn('While trying to generate a JWT, the claims given were not a dict.')
 
     try:
-        claims.update({"brighthive-access-token": access_token, "person-id": person_id})
+        claims.update({"brighthive-access-token": access_token)
 
         a_jwt = BrighthiveJWT().make_jwt(claims)
     except Exception:
