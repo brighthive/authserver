@@ -168,22 +168,21 @@ class BrighthiveAuthorizationServer(AuthorizationServer):
         try:
             grant.validate_token_request()
             status, body, headers = grant.create_token_response()
-
-            access_token = body['access_token']
-            db_token = OAuth2Token.query.filter_by(access_token=access_token).first()
-            user = db_token.user
             
-            person_id = user.person_id
-            if not person_id:
-                logging.warn(f"person_id '{person_id}' not found!")
-                person_id = 'error' #FIXME!
-
             perms_for_user = {}
-            
-            if os.getenv('APP_ENV') != 'test' and person_id != 'error':
-                perms_for_user = get_perms_for_user(person_id)
 
-            logging.info(f"{person_id}, {user.username}")
+            if os.getenv('APP_ENV') == 'PRODUCTION':
+                access_token = body['access_token']
+
+                db_token = OAuth2Token.query.filter_by(access_token=access_token).first()
+                user = db_token.user
+
+                try:
+                    person_id = user.person_id
+                    perms_for_user = get_perms_for_user(person_id)
+                except Exception as e:
+                    logging.exception(f"person_id not found on user {user.username}!")
+
             bh_jwt = generate_jwt(body['access_token'], perms_for_user)
             body['jwt'] = bh_jwt
 
