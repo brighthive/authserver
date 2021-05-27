@@ -86,7 +86,7 @@ def get_perms_for_user(person_id: str):
     # no user found
 
     # Extract user perms
-    return perms_response.json()['response'].get('brighthive-platform-permissions')
+    return perms_response.json()['response'].get('brighthive-platform-permissions') if perms_response else {}
 
 def generate_jwt(access_token: str, claims: dict = {}, person_id: str='non provided'):
     if type(claims) is not dict:
@@ -178,7 +178,7 @@ class BrighthiveAuthorizationServer(AuthorizationServer):
             if os.getenv('APP_ENV') != 'test' and person_id != 'error':
                 perms_for_user = get_perms_for_user(person_id)
 
-            bh_jwt = generate_jwt(body['access_token'], perms_for_user)
+            bh_jwt = generate_jwt(body['access_token'], perms_for_user, person_id)
             body['jwt'] = bh_jwt
 
             # del body['access_token']
