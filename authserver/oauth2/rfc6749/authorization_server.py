@@ -91,7 +91,7 @@ def generate_jwt(access_token: str, claims: dict = {}):
         logging.warn('While trying to generate a JWT, the claims given were not a dict.')
 
     try:
-        claims.update({"brighthive-access-token": access_token)
+        claims.update({"brighthive-access-token": access_token})
 
         a_jwt = BrighthiveJWT().make_jwt(claims)
     except Exception:
