@@ -50,7 +50,7 @@ def get_perms_for_user(person_id: str):
     # Get user perms
     permissions_api = ConfigurationFactory.from_env().permission_service_url
 
-    get_user_perms_by_id = f'{permissions_api}/users/{person_id}/permissions'
+    get_user_perms_by_id = f'{permissions_api}/people/{person_id}/permissions'
 
     # Generate a token for Perms API
     super_admin_jwt = generate_jwt("none", {"brighthive-super-admin": True})
@@ -84,7 +84,7 @@ def get_perms_for_user(person_id: str):
     # no user found
 
     # Extract user perms
-    return perms_response.json()['response'].get('brighthive-platform-permissions') if perms_response else {}
+    return perms_response.json()['response'] if perms_response else {}
 
 def generate_jwt(access_token: str, claims: dict = {}):
     if type(claims) is not dict:
