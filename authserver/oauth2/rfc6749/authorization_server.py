@@ -35,7 +35,7 @@ class BrighthiveJWT(object):
                 "brighthive-authserver"
             ],
             "iat": datetime.utcnow(),
-            "exp": datetime.utcnow() + timedelta(minutes=15)
+            "exp": datetime.utcnow() + timedelta(hours=24) # timedelta(minutes=15)
         }
 
     def make_jwt(self, json_claims: object) -> object:
