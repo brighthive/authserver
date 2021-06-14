@@ -100,6 +100,23 @@ def generate_jwt(access_token: str, claims: dict = {}):
 
     return a_jwt
 
+
+def generate_jwt_based_on_token(token: OAuth2Token) -> {}:
+    """Checks if token was generated for a client with grant_super_admin and if not then gets the permissions for the associated user."""
+    # Machine to machine cred! Bypass permissions and give super admin
+    if token.client.grant_super_admin:
+        return generate_jwt(token.access_token, {"brighthive-super-admin": True})
+
+    # Regular user; get their perms from permission service
+    user = token.user
+
+    try:
+        perms_for_user = get_perms_for_user(user.person_id)
+    except Exception as e:
+        logging.exception(f"person_id not found on user {user.username}!")
+
+    return generate_jwt(token.access_token, perms_for_user)
+
 class BrighthiveAuthorizationServer(AuthorizationServer):
     """Brighthive Authorization Server.
 
@@ -165,23 +182,21 @@ class BrighthiveAuthorizationServer(AuthorizationServer):
         try:
             grant.validate_token_request()
             status, body, headers = grant.create_token_response()
-            
+
+            # status: WARNING:root:200
+            # body: WARNING:root:{'token_type': 'Bearer', 'access_token': 'aaaaaaaa', 'expires_in': 300}
+            # headers: WARNING:root:[('Content-Type', 'application/json'), ('Cache-Control', 'no-store'), ('Pragma', 'no-cache')]
+
             perms_for_user = {}
 
             if os.getenv('APP_ENV') == 'PRODUCTION':
                 access_token = body['access_token']
 
                 db_token = OAuth2Token.query.filter_by(access_token=access_token).first()
-                user = db_token.user
 
-                try:
-                    person_id = user.person_id
-                    perms_for_user = get_perms_for_user(person_id)
-                except Exception as e:
-                    logging.exception(f"person_id not found on user {user.username}!")
-
-            bh_jwt = generate_jwt(body['access_token'], perms_for_user)
-            body['jwt'] = bh_jwt
+                bh_jwt = generate_jwt_based_on_token(db_token)
+                
+                body['jwt'] = bh_jwt
 
             # del body['access_token']
 

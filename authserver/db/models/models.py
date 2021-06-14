@@ -172,6 +172,7 @@ class OAuth2Client(db.Model, OAuth2ClientMixin):
     user_id = db.Column(
         db.String, db.ForeignKey('users.id', ondelete='CASCADE'))
     user = db.relationship('User')
+    grant_super_admin = db.Column(db.Boolean)
     roles = db.relationship('Role', secondary=roles, lazy='subquery',
                             backref=db.backref('clients', lazy=True))
 
@@ -233,6 +234,10 @@ class OAuth2Token(db.Model, OAuth2TokenMixin):
     user_id = db.Column(
         db.String, db.ForeignKey('users.id', ondelete='CASCADE'))
     user = db.relationship('User')
+    client_id = db.Column(
+        db.String(48), db.ForeignKey('oauth2_clients.client_id', ondelete='CASCADE'))
+    client = db.relationship('OAuth2Client')
+    
 
     def is_access_token_expired(self):
         expires_at = self.get_expires_at()

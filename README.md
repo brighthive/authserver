@@ -50,6 +50,10 @@ Hurrah! Check the app status here: `http://0.0.0.0:10001/health`
 APP_ENV=test pipenv run pytest
 ```
 
+## Machine to machine admin credentials
+
+To give a machine to machine credentials admin rights, you must manually enable it. There are no endpoints. This was done because super admin credentials are dangerous. In the `oauth2_clients` table you will find a `grant_super_admin` column. Set this to `True`.
+
 ### Visual Studio Code Configuration
 
 Most Brighthive engineers use [Visual Studio Code](https://code.visualstudio.com/) as their primary IDE. Below is a basic configuration that will work for this application.
