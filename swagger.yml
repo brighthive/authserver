@@ -1,0 +1,500 @@
+openapi: 3.0.3
+info:
+  title: Brighthive Platform Authentication Service
+  version: 1.0.0
+  description: >-
+    A microservice for Brighthive's platform's authentication services.
+  license:
+    name: Apache 2.0
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+# servers:
+#   - url: "https://auth.devtest.brighthive.io"
+#     variables:
+#       environment:
+#         default: devtest
+#         enum:
+#           - devtest
+#         description: Different environments!
+security:
+  - bearerAuthPythonWorkaround: []
+  - bearerAuth: []
+paths:
+  # "/health":
+  #   get:
+  #     operationId: health
+  #     responses:
+  #       "204":
+  #         description: OK!
+  #       "401":
+  #         $ref: "#/components/responses/Unauthorized"
+  #       default:
+  #         description: Default error sample response
+  #     tags:
+  #       - Health
+  
+  # Accessible via web browser
+  "/":
+    summary: Login form
+    get:
+      responses:
+        501:
+          description: Undocumented
+    post:
+      responses:
+        501:
+          description: Undocumented
+          
+  "/authorize":
+    summary: OAuth redirect flow? Does something with a cookie!
+    get:
+      responses:
+        501:
+          description: Undocumented
+    post:
+      responses:
+        501:
+          description: Undocumented
+          
+  "/password-recovery":
+    summary: password recovery form
+    get:
+      responses:
+        501:
+          description: Undocumented
+    post:
+      responses:
+        501:
+          description: Undocumented
+    
+  "/password-reset":
+    summary: password reset form
+    get:
+      responses:
+        501:
+          description: Undocumented
+    post:
+      responses:
+        501:
+          description: Undocumented
+          
+  # Platform APIs
+  "/clients":
+    summary: Get clients
+    get:
+      responses:
+        501:
+          description: Undocumented
+    post:
+      summary: Create new client
+      responses:
+        501:
+          description: Undocumented
+
+  "/clients/{id}":
+    summary: password reset form
+    get:
+      summary: Get a client
+      responses:
+        501:
+          description: Undocumented
+    post:
+      # TODO: query params
+      # request body has id??, user_id, roles?, ????
+      summary: >-
+        (2) deletion or rotatation of the secret of an existing client – accomplished by POSTing with 
+        query params (?action=delete_secret, or ?action=rotate_secret).
+      responses:
+        501:
+          description: Undocumented
+    put:
+      summary: Create / overwrite a client
+      responses:
+        501:
+          description: Undocumented
+    patch:
+      summary: Update a client
+      responses:
+        501:
+          description: Undocumented
+    delete:
+      summary: Update a client
+      responses:
+        501:
+          description: Undocumented
+    
+  # ------
+  "/health":
+    get:
+      responses:
+        200:
+          description: I am alive!
+          
+  # OAuth ------
+  "/validate":
+    summary: This resource determines the validity of an OAuth2Token.
+    post:
+      # token in body
+      responses:
+        501:
+          description: Undocumented
+      
+  "/token":
+    summary: ??? authorization.create_token_response()
+    post:
+      responses:
+        501:
+          description: Undocumented
+
+  "/revoke":
+    summary: ??? authorization.create_endpoint_response('revocation')
+    post:
+      responses:
+        501:
+          description: Undocumented
+    
+  "/roles":
+    summary: This resource represents a role associated with a client.
+    get:
+      summary: Get all roles
+      responses:
+        501:
+          description: Undocumented
+    post:
+      summary: Create new role
+      responses:
+        501:
+          description: Undocumented
+
+  "/roles/{id}":
+    summary: This resource represents a role associated with a client.
+    get:
+      summary: Get a specific role
+      responses:
+        501:
+          description: Undocumented
+    put:
+      summary: Create / overwrite a role
+      responses:
+        501:
+          description: Undocumented
+    patch:
+      summary: Update a role
+      responses:
+        501:
+          description: Undocumented
+    delete:
+      summary: Update a role
+      responses:
+        501:
+          description: Undocumented
+  
+  "/roles/{id}/scopes":
+    summary: >-
+      Authorized scope resource for linking roles to scopes.
+  
+      This resource enables the notion of an OAuth2 scope to be shared between user roles and
+      OAuth2 clients. This way, the capabilities of specific clients can be restricted to the
+      scopes associated with a user's role.
+    get:
+      summary: ???
+      responses:
+        501:
+          description: Undocumented
+    post:
+      summary: ???
+      responses:
+        501:
+          description: Undocumented
+
+  "/roles/{id}/scopes/{sid}":
+    summary: >-
+      Authorized scope resource for linking roles to scopes.
+  
+      This resource enables the notion of an OAuth2 scope to be shared between user roles and
+      OAuth2 clients. This way, the capabilities of specific clients can be restricted to the
+      scopes associated with a user's role.
+    get:
+      summary: Get a specific role
+      responses:
+        501:
+          description: Undocumented
+    delete:
+      summary: Update a role
+      responses:
+        501:
+          description: Undocumented
+          
+  "/scopes":
+    summary: This resource represents a scope associated with a client.
+    get:
+      responses:
+        501:
+          description: Undocumented
+    post:
+      responses:
+        501:
+          description: Undocumented
+    
+  "/scopes/{id}":
+    summary: This resource represents a scope associated with a client.
+    get:
+      responses:
+        501:
+          description: Undocumented
+    put:
+      responses:
+        501:
+          description: Undocumented
+    patch:
+      responses:
+        501:
+          description: Undocumented
+    delete:
+      responses:
+        501:
+          description: Undocumented
+          
+  "/user":
+    summary: Details of the currently logged in user (looking at the auth header).
+    get:
+      responses:
+        501:
+          description: Undocumented
+    
+  "/users":
+    summary: >-
+      A User Resource.
+
+      This resource defines an Auth Service user who may have zero or more OAuth 2.0 clients
+      associated with their accounts.
+    get:
+      responses:
+        501:
+          description: Undocumented
+    post:
+      # TODO request data
+      responses:
+        501:
+          description: Undocumented
+    
+  "/users/{id}":
+    summary: >-
+      A User Resource.
+
+      This resource defines an Auth Service user who may have zero or more OAuth 2.0 clients
+      associated with their accounts.
+    get:
+      responses:
+        501:
+          description: Undocumented
+    put:
+      responses:
+        501:
+          description: Undocumented
+    patch:
+      responses:
+        501:
+          description: Undocumented
+    delete:
+      responses:
+        501:
+          description: Undocumented
+  
+  
+
+components:
+  parameters: {}
+    # PersonId:
+    #   in: path
+    #   name: personId
+    #   schema:
+    #     type: string
+    #     format: uuid
+    #   required: true
+    #   description: Numeric ID of the person to get (person_id).
+
+
+  requestBodies: {}
+    # SpecifyRole:
+    #   description: Provide a role found in the role enum.
+    #   required: true
+    #   content:
+    #     application/json:
+    #       schema:
+    #         type: object
+    #         properties:
+    #           role:
+    #             $ref: "#/components/schemas/Roles"
+
+    # DataResourcePermissons:
+    #   description: Provide a set of permissions from the data resource permissions enum.
+    #   required: true
+    #   content:
+    #     application/json:
+    #       schema:
+    #         type: object
+    #         properties:
+    #           permissions:
+    #             type: array
+    #             items:
+    #               $ref: "#/components/schemas/DataResourcePermissions"
+
+    # DataResourcePermisson:
+    #   description: Provide a set of permissions from the data resource permissions enum.
+    #   required: true
+    #   content:
+    #     application/json:
+    #       schema:
+    #         type: object
+    #         properties:
+    #           permission:
+    #             $ref: "#/components/schemas/DataResourcePermissions"
+
+  responses:
+    # personPermissions:
+    #   description: OK!
+    #   content:
+    #     application/json:
+    #       schema:
+    #         $ref: "#/components/schemas/AllpersonPermissions"
+    # DataResourceClaims:
+    #   description: OK!
+    #   content:
+    #     application/json:
+    #       schema:
+    #         type: object
+    #         properties:
+    #           response:
+    #             type: object
+    #             properties:
+    #               permissions:
+    #                 type: array
+    #                 items:
+    #                   $ref: "#/components/schemas/DataResourcePermissions"
+    #               role:
+    #                 type: string
+    #                 items:
+    #                   $ref: "#/components/schemas/Roles"
+
+    # DataResourcePermissions:
+    #   description: OK!
+    #   content:
+    #     application/json:
+    #       schema:
+    #         type: object
+    #         properties:
+    #           permissions:
+    #             $ref: "#/components/schemas/DataResourcePermissions"
+    # DataResourcePeople:
+    #   description: OK!
+    #   content:
+    #     application/json:
+    #       schema:
+    #         type: object
+    #         properties:
+    #           peopleId:
+    #             type: array
+    #             items:
+    #               type: string
+    #               format: uuid
+
+    Unauthorized:
+      description: Access token is missing or invalid
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Forbidden:
+      description: You do not have the permissions to perform this operation.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    # personNotFound:
+    #   description: person ID was not found.
+    #   content:
+    #     application/json:
+    #       schema:
+    #         $ref: "#/components/schemas/Error"
+    # InvalidRole:
+    #   description: Given role was not found in role enum.
+    #   content:
+    #     application/json:
+    #       schema:
+    #         $ref: "#/components/schemas/Error"
+    # InvalidPermission:
+    #   description: Given permission was not found in permission enum.
+    #   content:
+    #     application/json:
+    #       schema:
+    #         $ref: "#/components/schemas/Error"
+
+  schemas:
+    # AllpersonPermissions:
+    #   type: object
+    #   properties:
+    #     response:
+    #       type: object
+    #       properties:
+    #         userId:
+    #           type: string
+    #           format: uuid
+    #         brighthive-access-token:
+    #           type: string
+    #           format: uuid
+    #         brighthive-super-admin:
+    #           type: boolean
+    #         brighthive-org-role:
+    #           type: object
+    #           properties:
+    #             org-uuid:
+    #               $ref: "#/components/schemas/Roles"
+    #         brighthive-collaboration-role:
+    #           type: object
+    #           properties:
+    #             collab-uuid:
+    #               $ref: "#/components/schemas/Roles"
+    #         brighthive-data-resource-claims:
+    #           type: object
+    #           properties:
+    #             data-resource-uuid:
+    #               type: object
+    #               properties:
+    #                 role:
+    #                   $ref: "#/components/schemas/Roles"
+    #                 permissions:
+    #                   type: array
+    #                   items:
+    #                     $ref: "#/components/schemas/DataResourcePermissions"
+
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 400
+        message:
+          type: string
+          example: Error message
+      required:
+        - code
+        - message
+
+    # Roles:
+    #   type: string
+    #   enum:
+    #     - admin
+    #     - person
+    #     - third-party
+
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    # https://stackoverflow.com/questions/57920052/how-to-set-the-bearer-token-in-the-python-api-client-generated-by-swagger-codege
+    bearerAuthPythonWorkaround:
+      type: apiKey
+      in: header
+      name: Authorization
