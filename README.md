@@ -54,6 +54,20 @@ APP_ENV=test pipenv run pytest
 
 To give a machine to machine credentials admin rights, you must manually enable it. There are no endpoints. This was done because super admin credentials are dangerous. In the `oauth2_clients` table you will find a `grant_super_admin` column. Set this to `True`.
 
+## How to generate a JWT key pair
+
+```
+ssh-keygen -t rsa -b 4096 -m PEM -f jwtRS256.key
+# Don't add passphrase
+openssl rsa -in jwtRS256.key -pubout -outform PEM -out jwtRS256.key.pub
+cat jwtRS256.key
+cat jwtRS256.key.pub
+```
+
+- Taken from https://gist.github.com/ygotthilf/baa58da5c3dd1f69fae9
+
+---
+
 ### Visual Studio Code Configuration
 
 Most Brighthive engineers use [Visual Studio Code](https://code.visualstudio.com/) as their primary IDE. Below is a basic configuration that will work for this application.
