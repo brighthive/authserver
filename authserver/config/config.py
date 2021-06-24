@@ -64,7 +64,7 @@ class AbstractConfiguration(ABC):
         self.sendgrid_reset_template_id = os.getenv('SENDGRID_RESET_TEMPLATE_ID', 'recovery-id')
         self.default_app_url = os.getenv('DEFAULT_APP_URL', 'http://localhost:8001')
 
-        self.permission_service_url = os.getenv('BH_PERMISSIONS_SERVICE_URI', 'https://rixvnfq6r0.execute-api.us-west-2.amazonaws.com/devtest')
+        self.permission_service_url = os.getenv('BH_PERMISSIONS_SERVICE_URI', 'https://permissions.brighthive.io/devtest')
         signature_private_path = os.getenv('SIGNATURE_PRIVATE_PATH', None)
 
         if signature_private_path is None:
